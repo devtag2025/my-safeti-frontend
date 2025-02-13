@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import useAuthStore from "../../store/authStore";
+import UserIcon from "../../assets/svgs/UserIcon"; // ✅ Import UserIcon
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,8 +48,7 @@ const Navbar = () => {
                 onClick={toggleDropdown}
                 className="flex items-center space-x-2"
               >
-                <span className="text-gray-700">{user.name}</span>
-                <ChevronDown size={16} />
+                <UserIcon size={24} className="text-gray-700 cursor-pointer" />
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md overflow-hidden">
@@ -68,7 +68,6 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            // ✅ FIXED: This ensures "Login | Signup" only appears on large screens
             <div className="flex space-x-4">
               <Link to="/login" className="text-gray-700 hover:text-blue-500">
                 Login

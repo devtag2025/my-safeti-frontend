@@ -8,7 +8,7 @@ import Navbar from "./components/layout/Navbar";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-// import Dashboard from "./pages/Dashboard";
+import Report from "./pages/Report";
 
 const AppContent = () => {
   const location = useLocation();
@@ -18,12 +18,15 @@ const AppContent = () => {
   return (
     <>
       {shouldShowNavbar && <Navbar />}
-      <Routes>
-        <Route path="/" element={<Home />} />
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-      </Routes>
+      <div className="pt-16">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/report" element={<Report />} />
+        </Routes>
+      </div>
     </>
   );
 };

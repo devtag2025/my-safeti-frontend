@@ -1,1 +1,10 @@
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #FF6B6B;
+  --color-secondary: #E63946;
+}
+
+.bg-hero-gradient {
+  background-image: radial-gradient(circle, var(--color-primary), var(--color-secondary));
+}
