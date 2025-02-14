@@ -21,7 +21,7 @@ export const loginUser = async (credentials) => {
 
 // Signup API
 export const signupUser = async (userData) => {
-  const response = await API.post("/auth/register", userData);
+  const response = await API.post("/auth/register", {...userData, role:'user'});
   saveUserSession(response.data.user, response.data.token);
   return response.data.user;
 };
