@@ -14,9 +14,10 @@ const Navbar = () => {
 
   const navLinks = [
     { name: "Home", path: "/" },
-    ...(user?.role === "admin"
-      ? [{ name: "Dashboard", path: "/dashboard" }]
-      : []),
+    { name: "Dashboard", path: "/dashboard" },
+    // ...(user?.role === "admin"
+    //   ? [{ name: "Dashboard", path: "/dashboard" }]
+    //   : []),
   ];
 
   return (

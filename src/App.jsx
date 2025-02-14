@@ -9,6 +9,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Report from "./pages/Report";
+import UserDashboard from "./pages/Dashboard";
 
 const AppContent = () => {
   const location = useLocation();
@@ -21,7 +22,7 @@ const AppContent = () => {
       <div className="pt-16">
         <Routes>
           <Route path="/" element={<Home />} />
-          {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+          <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/report" element={<Report />} />
