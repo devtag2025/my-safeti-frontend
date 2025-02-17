@@ -1,10 +1,13 @@
 import ReportIcon from "../../assets/svgs/ReportIcon";
-import MagnifierIcon from "../../assets/svgs//MagnifierIcon";
-import RewardIcon from "../../assets/svgs//RewardIcon";
-import Card from "../common/card";
+import MagnifierIcon from "../../assets/svgs/MagnifierIcon";
+import RewardIcon from "../../assets/svgs/RewardIcon";
+import HIWCard from "../cards/hiwCard";
 import Button from "../buttons/primaryButton";
+import { useNavigate } from "react-router-dom";
 
 const HowItWorks = () => {
+  const navigate = useNavigate();
+
   const steps = [
     {
       icon: <ReportIcon size={40} color="#201B2B" />,
@@ -28,7 +31,7 @@ const HowItWorks = () => {
       <h2 className="text-2xl font-bold text-center mb-6">How It Works</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {steps.map((step, index) => (
-          <Card
+          <HIWCard
             key={index}
             icon={step.icon}
             title={step.title}
@@ -37,9 +40,7 @@ const HowItWorks = () => {
         ))}
       </div>
       <div className="text-center mt-6">
-        <Button>
-          Report Now
-        </Button>
+        <Button onClick={() => navigate("/report")}>Report Now</Button>
       </div>
     </section>
   );

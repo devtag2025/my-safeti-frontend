@@ -18,6 +18,9 @@ const useAuthStore = create((set) => ({
     logoutUser();
     set({ user: null });
   },
+
+  isAdmin: () => useAuthStore.getState().user?.role === "admin",
+  isClient: () => useAuthStore.getState().user?.role === "client",
 }));
 
 export default useAuthStore;

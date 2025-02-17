@@ -1,46 +1,91 @@
+import {
+  X,
+  Calendar,
+  MapPin,
+  FileText,
+  ClipboardList,
+  Car,
+  Info,
+  Tag,
+} from "lucide-react";
+
 const ReportModal = ({ report, isOpen, onClose }) => {
   if (!isOpen || !report) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-        <div className="flex justify-between items-center border-b pb-2">
-          <h3 className="text-xl font-bold">Report Details</h3>
+    <div
+      className="fixed inset-0 flex items-center justify-center z-50"
+      style={{ background: "rgba(0,0,0,0.5)" }}
+    >
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg mx-4 transform transition-all">
+        {/* Modal Header */}
+        <div className="flex justify-between items-center border-b pb-3">
+          <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <ClipboardList className="h-6 w-6 text-indigo-600" />
+            Report Details
+          </h3>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-800 text-2xl"
+            className="text-gray-600 hover:text-gray-900 transition"
           >
-            &times;
+            <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="mt-4 space-y-2">
-          <p>
-            <span className="font-semibold">Vehicle Registration:</span>{" "}
-            {report.vehicleRegistration}
-          </p>
-          <p>
-            <span className="font-semibold">Date:</span>{" "}
-            {new Date(report.date).toLocaleString()}
-          </p>
-          <p>
-            <span className="font-semibold">Location:</span> {report.location}
-          </p>
-          <p>
-            <span className="font-semibold">Incident Type:</span>{" "}
-            {report.incidentType}
-          </p>
-          <p>
-            <span className="font-semibold">Description:</span>{" "}
-            {report.description}
-          </p>
-          <p>
-            <span className="font-semibold">Status:</span> {report.status}
-          </p>
+
+        {/* Modal Content */}
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Car className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">
+              Vehicle Registration:
+            </span>
+            <span className="text-gray-900">{report.vehicleRegistration}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">Date:</span>
+            <span className="text-gray-900">
+              {new Date(report.date).toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <MapPin className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">Location:</span>
+            <span className="text-gray-900">{report.location}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Tag className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">Incident Type:</span>
+            <span className="text-gray-900">{report.incidentType}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">Description:</span>
+            <span className="text-gray-900">{report.description}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-gray-700">Status:</span>
+            <span
+              className={`px-2 py-1 rounded text-white text-sm ${
+                report.status === "pending" ? "bg-yellow-500" : "bg-green-500"
+              }`}
+            >
+              {report.status}
+            </span>
+          </div>
         </div>
+
+        {/* Modal Footer */}
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+            className="px-5 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-500 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
           >
             Close
           </button>

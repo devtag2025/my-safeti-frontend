@@ -1,4 +1,4 @@
-const Card = ({ icon, title, description }) => {
+const HIWCard = ({ icon, title, description }) => {
   return (
     <div className="flex flex-col items-center text-center p-4 rounded-lg shadow-lg">
       {icon}
@@ -8,4 +8,4 @@ const Card = ({ icon, title, description }) => {
   );
 };
 
-export default Card;
+export default HIWCard;

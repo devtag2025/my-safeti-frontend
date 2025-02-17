@@ -8,12 +8,13 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user, logout } = useAuthStore();
+  const homePath = user?.role ? `/${user.role}` : "/login";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const navLinks = [
-    { name: "Home", path: "/" },
+    { name: "Home", path: homePath },
     { name: "Dashboard", path: "/dashboard" },
     // ...(user?.role === "admin"
     //   ? [{ name: "Dashboard", path: "/dashboard" }]
@@ -24,7 +25,7 @@ const Navbar = () => {
     <nav className="bg-white shadow-md fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
-        <Link to="/" className="text-xl font-bold text-gray-800">
+        <Link to={homePath} className="text-xl font-bold text-gray-800">
           SafeStreet
         </Link>
 

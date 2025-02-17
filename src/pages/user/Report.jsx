@@ -1,5 +1,5 @@
 import React from "react";
-import IncidentReportForm from "../components/forms/reportForm";
+import IncidentReportForm from "../../components/forms/reportForm";
 
 const Report = () => {
   return (

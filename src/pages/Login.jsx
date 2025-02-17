@@ -18,12 +18,19 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       await login(data);
-      navigate("/dashboard");
+      const user = useAuthStore.getState().user;
+      if (user?.role === "admin") {
+        navigate("/admin");
+      } else if (user?.role === "client") {
+        navigate("/client");
+      } else {
+        navigate("/user");
+      }
     } catch (err) {
       setError("Invalid credentials");
     }
   };
-  
+
   return (
     <div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 bg-white">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">

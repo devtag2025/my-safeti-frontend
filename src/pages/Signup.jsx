@@ -5,26 +5,33 @@ import axios from "axios";
 import useAuthStore from "../store/authStore";
 
 const Signup = () => {
-   const { signup } = useAuthStore();
-   const navigate = useNavigate();
-   const [error, setError] = useState("");
+  const { signup } = useAuthStore();
+  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-   const {
-     register,
-     handleSubmit,
-     formState: { errors, isSubmitting },
-   } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm();
 
-   const onSubmit = async (data) => {
-     try {
-       await signup(data);
-       navigate("/dashboard"); // Redirect after signup
-     } catch (err) {
-       setError(
-         err.response?.data?.message || "Signup failed. Please try again."
-       );
-     }
-   };
+  const onSubmit = async (data) => {
+    try {
+      await signup(data);
+      const user = useAuthStore.getState().user;
+      if (user?.role === "admin") {
+        navigate("/admin");
+      } else if (user?.role === "client") {
+        navigate("/client");
+      } else {
+        navigate("/user");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Signup failed. Please try again."
+      );
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 bg-white">

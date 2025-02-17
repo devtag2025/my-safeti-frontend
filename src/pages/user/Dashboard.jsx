@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getUserReports } from "../api/reportService";
-import ReportModal from "../components/modals/reportModal";
+import { getUserReports } from "../../api/reportService";
+import ReportModal from "../../components/modals/reportModal";
 
 const UserDashboard = () => {
   const [reports, setReports] = useState([]);
