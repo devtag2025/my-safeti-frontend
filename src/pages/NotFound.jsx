@@ -3,8 +3,8 @@ import { AlertTriangle } from "lucide-react";
 import useAuthStore from "../store/authStore";
 
 const NotFound = () => {
-const user = useAuthStore((state) => state.user);
-const homePath = user?.role ? `/${user.role}` : "/login"; 
+  const user = useAuthStore((state) => state.user);
+  const homePath = user?.role ? `/${user.role}` : "/login";
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-900 text-white px-6">
       <div className="max-w-lg text-center">

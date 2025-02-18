@@ -2,23 +2,23 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import useAuthStore from "../../store/authStore";
-import UserIcon from "../../assets/svgs/UserIcon"; // ✅ Import UserIcon
+import UserIcon from "../../assets/svgs/UserIcon";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, logout } = useAuthStore();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  
   const homePath = user?.role ? `/${user.role}` : "/login";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
   const navLinks = [
-    { name: "Home", path: homePath },
-    { name: "Dashboard", path: "/dashboard" },
-    // ...(user?.role === "admin"
-    //   ? [{ name: "Dashboard", path: "/dashboard" }]
-    //   : []),
+    ...(user?.role === "user"
+      ? [{ name: "Dashboard", path: "/dashboard" }]
+      : []),
   ];
 
   return (

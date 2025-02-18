@@ -23,3 +23,14 @@ export const getUserReports = async () => {
     throw error.response?.data || error;
   }
 };
+
+export const getAllReports = async () => {
+  try {
+    const response = await API.get("/report/all");
+    return response.data.reports;
+  } catch (error) {
+    console.error("Error fetching reports:", error);
+    throw error.response?.data || error;
+  }
+};
+

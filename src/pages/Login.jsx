@@ -5,7 +5,7 @@ import axios from "axios";
 import useAuthStore from "../store/authStore";
 
 const Login = () => {
-  const { login } = useAuthStore();
+  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
@@ -19,15 +19,22 @@ const Login = () => {
     try {
       await login(data);
       const user = useAuthStore.getState().user;
+      console.log(user)
       if (user?.role === "admin") {
         navigate("/admin");
-      } else if (user?.role === "client") {
-        navigate("/client");
+      } else if (user.role === "client") {
+        if (user.approvalStatus === "pending") {
+          setError("Your account is pending approval.");
+        } else if (user.approvalStatus === "rejected") {
+          setError("Your account was rejected. Contact support.");
+        } else {
+          navigate("/client");
+        }
       } else {
         navigate("/user");
       }
     } catch (err) {
-      setError("Invalid credentials");
+      setError(err.message || "Error Signing in");
     }
   };
 

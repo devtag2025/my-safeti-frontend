@@ -11,9 +11,10 @@ import Signup from "./pages/Signup";
 import Report from "./pages/user/Report";
 import UserDashboard from "./pages/user/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import ClientRoute from "./routes/clientRoute";
-import AdminRoute from "./routes/adminRoute";
+import ClientDashboard from "./pages/client/dashboard";
+import AdminDashboard from "./pages/admin/dashboard";
 import NotFound from "./pages/NotFound";
+import RoleRedirect from "./routes/roleRedirect";
 
 const AppContent = () => {
   const location = useLocation();
@@ -25,24 +26,28 @@ const AppContent = () => {
       {shouldShowNavbar && <Navbar />}
       <div className="pt-16">
         <Routes>
+          {/* Role-Based Redirect */}
+          <Route path="/" element={<RoleRedirect />} />
+
+          {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
           {/* 🔒 Protected Routes */}
-          <Route element={<ProtectedRoute />}>
+          <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
             <Route path="/user" element={<Home />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/report" element={<Report />} />
           </Route>
 
-          {/* Admin Routes */}
-          <Route element={<AdminRoute />}>
-            {/* <Route path="/admin" element={<AdminDashboard />} /> */}
+          {/* Client Protected Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["client"]} />}>
+            <Route path="/client" element={<ClientDashboard />} />
           </Route>
 
-          {/* Client Routes */}
-          <Route element={<ClientRoute />}>
-            {/* <Route path="/client" element={<ClientDashboard />} /> */}
+          {/* Admin Protected Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
           </Route>
 
           {/* Catch-All 404 */}
