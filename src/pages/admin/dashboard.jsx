@@ -1,34 +1,33 @@
 import { useState, useEffect } from "react";
-import { fetchUsers, updateClientStatus } from "../../api/userService";
+import { fetchClients, updateClient } from "../../api/clientService";
 
 const AdminDashboard = () => {
-  const [users, setUsers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [filters, setFilters] = useState({ role: "", approvalStatus: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Load Users on Mount
   useEffect(() => {
-    const loadUsers = async () => {
+    const loadClients = async () => {
       try {
         setLoading(true);
-        const usersData = await fetchUsers();
-        setUsers(usersData);
+        const clientsData = await fetchClients();
+        set(clientsData);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    loadUsers();
+    loadClients();
   }, []);
 
   // ✅ Handle Client Approval/Rejection
   const handleUpdateStatus = async (userId, status) => {
     try {
-      await updateClientStatus(userId, status);
-      setUsers(
-        users.map((user) =>
+      await updateClient(userId, status);
+      setClients(
+        clients.map((user) =>
           user._id === userId ? { ...user, approvalStatus: status } : user
         )
       );
@@ -37,14 +36,17 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) return <div className="text-center mt-10">Loading users...</div>;
+  if (loading)
+    return <div className="text-center mt-10">Loading clients...</div>;
   if (error)
     return (
-      <div className="text-center mt-10 text-red-500">Failed to load users</div>
+      <div className="text-center mt-10 text-red-500">
+        Failed to load clients
+      </div>
     );
 
-  // ✅ Filter Users
-  const filteredUsers = users.filter(
+  // ✅ Filter clients
+  const filteredClients = clients.filter(
     (user) =>
       (!filters.role || user.role === filters.role) &&
       (filters.approvalStatus === "" ||
@@ -80,7 +82,7 @@ const AdminDashboard = () => {
         </select>
       </div>
 
-      {/* 📋 Users Table */}
+      {/* 📋 Clients Table */}
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-400 uppercase bg-gray-50 dark:bg-gray-700">
@@ -100,14 +102,14 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.length === 0 ? (
+            {filteredClients.length === 0 ? (
               <tr>
                 <td colSpan="4" className="p-6 text-center text-gray-500">
-                  No users found.
+                  No clients found.
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => (
+              filteredClients.map((user) => (
                 <tr
                   key={user._id}
                   className="border-b bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition"

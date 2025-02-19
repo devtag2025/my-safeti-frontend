@@ -15,6 +15,7 @@ import ClientDashboard from "./pages/client/dashboard";
 import AdminDashboard from "./pages/admin/dashboard";
 import NotFound from "./pages/NotFound";
 import RoleRedirect from "./routes/roleRedirect";
+import MediaRequests from "./pages/user/MediaRequests";
 
 const AppContent = () => {
   const location = useLocation();
@@ -36,6 +37,7 @@ const AppContent = () => {
           {/* 🔒 Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
             <Route path="/user" element={<Home />} />
+            <Route path="/media-requests" element={<MediaRequests />} />
             <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/report" element={<Report />} />
           </Route>

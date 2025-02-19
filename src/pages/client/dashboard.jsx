@@ -11,33 +11,54 @@ import {
   Cell,
 } from "recharts";
 import { getAllReports } from "../../api/reportService";
-// import Sidebar from "../../components/Sidebar";
+import {
+  requestMedia,
+  fetchClientRequests,
+} from "../../api/mediaRequestService";
 
 const ClientDashboard = () => {
   const [reports, setReports] = useState([]);
   const [filters, setFilters] = useState({ incidentType: "", status: "" });
+  const [requestedReports, setRequestedReports] = useState(new Set()); // Track requested reports
 
   useEffect(() => {
-    const fetchReports = async () => {
+    const fetchData = async () => {
       try {
-        const reports = await getAllReports();
+        const [reports, mediaRequests] = await Promise.all([
+          getAllReports(),
+          fetchClientRequests(),
+        ]);
+
         setReports(reports);
+
+        // Extract report IDs from media requests and store them in a set
+        const requestedIds = new Set(
+          mediaRequests.map((req) => req.report._id)
+        );
+        setRequestedReports(requestedIds);
       } catch (error) {
-        console.error("Error fetching reports:", error);
+        console.error("Error fetching reports or media requests:", error);
       }
     };
-
-    fetchReports();
+    fetchData();
   }, []);
 
-  // ✅ Filter Reports
+  const handleRequestMedia = async (reportId) => {
+    try {
+      await requestMedia(reportId);
+      setRequestedReports((prev) => new Set(prev).add(reportId));
+    } catch (error) {
+      console.error("Error requesting media:", error.message);
+      alert("Failed to request media. Please try again.");
+    }
+  };
+
   const filteredReports = reports.filter(
     (report) =>
       (!filters.incidentType || report.incidentType === filters.incidentType) &&
       (!filters.status || report.status === filters.status)
   );
 
-  // ✅ Data for Charts
   const incidentStats = reports.reduce((acc, report) => {
     acc[report.incidentType] = (acc[report.incidentType] || 0) + 1;
     return acc;
@@ -52,10 +73,6 @@ const ClientDashboard = () => {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* ✅ Sidebar */}
-      {/* <Sidebar /> */}
-
-      {/* ✅ Main Content */}
       <div className="flex-1 p-6 space-y-6">
         {/* 🔍 Filters */}
         <div className="bg-white p-4 shadow rounded-lg flex items-center justify-between">
@@ -89,10 +106,10 @@ const ClientDashboard = () => {
           </div>
         </div>
 
+        {/* 📋 Reports Table */}
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-          <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-            {/* Table Header */}
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+          <table className="w-full text-sm text-left text-gray-500 ">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Vehicle
@@ -113,12 +130,11 @@ const ClientDashboard = () => {
                   Media
                 </th>
                 <th scope="col" className="px-6 py-3 text-right">
-                  <span className="sr-only">Actions</span>
+                  Actions
                 </th>
               </tr>
             </thead>
 
-            {/* Table Body */}
             <tbody>
               {filteredReports.length === 0 ? (
                 <tr>
@@ -130,9 +146,9 @@ const ClientDashboard = () => {
                 filteredReports.map((report) => (
                   <tr
                     key={report._id}
-                    className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                    className="bg-white border-b border-gray-200 hover:bg-gray-50 transition"
                   >
-                    <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                    <td className="px-6 py-4 font-medium text-gray-900">
                       {report.vehicleRegistration}
                     </td>
                     <td className="px-6 py-4">
@@ -151,7 +167,6 @@ const ClientDashboard = () => {
                     >
                       {report.status}
                     </td>
-                    {/* ✅ Media Column */}
                     <td className="px-6 py-4">
                       {report.mediaFlag ? (
                         <span className="text-gray-500"> Media Available</span>
@@ -159,12 +174,18 @@ const ClientDashboard = () => {
                         <span className="text-gray-500">No Media</span>
                       )}
                     </td>
-                    {/* ✅ Actions */}
                     <td className="px-6 py-4 text-right">
-                      {report.mediaFlag && (
-                        <button className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
-                          Request Media
-                        </button>
+                      {report.mediaFlag &&
+                        !requestedReports.has(report._id) && (
+                          <button
+                            onClick={() => handleRequestMedia(report._id)}
+                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                          >
+                            Request Media
+                          </button>
+                        )}
+                      {report.mediaFlag && requestedReports.has(report._id) && (
+                        <span className="text-gray-500">Requested</span>
                       )}
                     </td>
                   </tr>
@@ -176,7 +197,6 @@ const ClientDashboard = () => {
 
         {/* 📊 Charts */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Bar Chart */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">
               Incidents Breakdown
@@ -191,7 +211,6 @@ const ClientDashboard = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Pie Chart */}
           <div className="bg-white p-6 rounded-lg shadow">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">
               Incident Distribution

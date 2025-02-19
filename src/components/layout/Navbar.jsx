@@ -9,7 +9,7 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  
+
   const homePath = user?.role ? `/${user.role}` : "/login";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -17,7 +17,10 @@ const Navbar = () => {
 
   const navLinks = [
     ...(user?.role === "user"
-      ? [{ name: "Dashboard", path: "/dashboard" }]
+      ? [
+          { name: "Dashboard", path: "/dashboard" },
+          { name: "Media Requests", path: "/media-requests" },
+        ]
       : []),
   ];
 
