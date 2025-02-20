@@ -16,7 +16,7 @@ import AdminDashboard from "./pages/admin/dashboard";
 import NotFound from "./pages/NotFound";
 import RoleRedirect from "./routes/roleRedirect";
 import MediaRequests from "./pages/user/MediaRequests";
-import ClientRequests from "./pages/admin/clientRequests";
+import AdminMediaReview from "./pages/admin/mediaReview";
 
 const AppContent = () => {
   const location = useLocation();
@@ -51,6 +51,7 @@ const AppContent = () => {
           {/* Admin Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/media-review" element={<AdminMediaReview />} />
           </Route>
 
           {/* Catch-All 404 */}

@@ -103,3 +103,15 @@ export const changeMediaStatus = async (requestId, status) => {
     );
   }
 };
+
+export const getAllUploadedMedia = async () => {
+  try {
+    const response = await API.get("/media-requests/uploaded");
+    console.log(response.data)
+    const data = await response.data;
+    return data;
+  } catch (error) {
+    console.error("Error fetching uploaded media:", error);
+    throw new Error("Failed to fetch uploaded media");
+  }
+};

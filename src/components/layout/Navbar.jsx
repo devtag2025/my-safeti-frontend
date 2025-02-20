@@ -22,6 +22,10 @@ const Navbar = () => {
           { name: "Media Requests", path: "/media-requests" },
         ]
       : []),
+
+    ...(user?.role === "admin"
+      ? [{ name: "Media Review", path: "/media-review" }]
+      : []),
   ];
 
   return (
