@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/admin/dashboard";
 import NotFound from "./pages/NotFound";
 import RoleRedirect from "./routes/roleRedirect";
 import MediaRequests from "./pages/user/MediaRequests";
+import ClientRequests from "./pages/admin/clientRequests";
 
 const AppContent = () => {
   const location = useLocation();

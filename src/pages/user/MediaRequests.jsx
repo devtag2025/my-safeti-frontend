@@ -6,37 +6,74 @@ const MediaRequests = () => {
   const { mediaRequests, fetchUserRequests, uploadMedia } =
     useMediaRequestStore();
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [file, setFile] = useState(null);
-  const [previewURL, setPreviewURL] = useState(null);
+  const [files, setFiles] = useState([]); // Track multiple files
   const [isUploading, setIsUploading] = useState(false);
+  const [fileErrors, setFileErrors] = useState([]); // To hold errors related to files
+
+  const SUPPORTED_FILE_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "video/mp4",
+    "video/mov",
+    "video/avi",
+    "image/webp",
+  ];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  const MAX_FILES = 10;
 
   useEffect(() => {
     fetchUserRequests();
   }, []);
 
   const handleFileChange = (e) => {
-    const uploadedFile = e.target.files[0];
-    if (!uploadedFile) return; // ✅ Prevent errors when canceling file selection
+    const selectedFiles = Array.from(e.target.files);
+    const errors = [];
 
-    setFile(uploadedFile);
+    // Validate the selected files
+    selectedFiles.forEach((file) => {
+      // Check if the file is larger than 5MB
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`${file.name} is too large. Max file size is 5MB.`);
+      }
 
-    // ✅ Generate a preview for image files
-    if (uploadedFile.type.startsWith("image/")) {
-      const objectURL = URL.createObjectURL(uploadedFile);
-      setPreviewURL(objectURL);
-    } else {
-      setPreviewURL(null);
+      // Check if the file type is supported
+      if (!SUPPORTED_FILE_TYPES.includes(file.type)) {
+        errors.push(`${file.name} has an unsupported file type.`);
+      }
+    });
+
+    // Check if the number of files exceeds 10
+    if (files.length + selectedFiles.length > MAX_FILES) {
+      errors.push(`You can upload a maximum of ${MAX_FILES} files.`);
     }
+
+    if (errors.length === 0) {
+      setFiles((prevFiles) => [...prevFiles, ...selectedFiles]); // Add valid files to the list
+    }
+
+    setFileErrors(errors); // Set errors if any
+  };
+
+  const handleRemoveFile = (index) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)); // Remove file from the list
   };
 
   const handleUpload = async () => {
-    if (!file || !selectedRequest) return;
+    if (!files.length || !selectedRequest) return;
+
     setIsUploading(true);
+    const formData = new FormData();
+
+    // Append each file to form data
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
     try {
-      await uploadMedia(selectedRequest._id, file);
+      await uploadMedia(selectedRequest._id, formData);
       setSelectedRequest(null);
-      setFile(null);
-      setPreviewURL(null); // ✅ Clear preview after upload
+      setFiles([]); // Reset file list
       fetchUserRequests();
     } catch (error) {
       console.error("Error uploading media:", error.message);
@@ -44,13 +81,6 @@ const MediaRequests = () => {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  // ✅ Reset Modal when Closing
-  const closeModal = () => {
-    setSelectedRequest(null);
-    setFile(null);
-    setPreviewURL(null);
   };
 
   return (
@@ -62,7 +92,7 @@ const MediaRequests = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mediaRequests
-            .filter((request) => request.status !== "approved")
+            .filter((request) => request.status !== "approved") // ✅ Hide approved requests
             .map((request) => (
               <div
                 key={request._id}
@@ -107,15 +137,10 @@ const MediaRequests = () => {
                   </p>
                 ) : (
                   <button
-                    onClick={() => {
-                      setSelectedRequest(request);
-                      setFile(null);
-                      setPreviewURL(null); // ✅ Reset file & preview when reopening modal
-                    }}
+                    onClick={() => setSelectedRequest(request)}
                     className="flex bg-gray-800 hover:bg-gray-700 text-white text-base px-3 py-2 outline-none rounded w-max cursor-pointer"
                   >
-                    <UploadIcon />
-                    Upload Media
+                    <UploadIcon /> Upload Media
                   </button>
                 )}
               </div>
@@ -134,44 +159,64 @@ const MediaRequests = () => {
               Upload Media
             </h3>
 
-            {/* ✅ Clickable upload area */}
+            {/* ✅ Clickable upload area (opens file explorer only inside modal) */}
             <div
-              onClick={() => document.getElementById("uploadFile").click()}
-              className="bg-white text-gray-500 font-semibold text-base rounded max-w-md h-52 flex flex-col items-center justify-center cursor-pointer border-2 border-gray-300 border-dashed mx-auto relative"
+              onClick={() => document.getElementById("uploadFiles").click()}
+              className="bg-white text-gray-500 font-semibold text-base rounded max-w-md h-52 flex flex-col items-center justify-center cursor-pointer border-2 border-gray-300 border-dashed mx-auto"
             >
-              {previewURL ? (
-                <img
-                  src={previewURL}
-                  alt="Preview"
-                  className="w-full h-full object-contain rounded-lg"
-                />
-              ) : (
-                <>
-                  <UploadIcon className="w-11 mb-2 fill-gray-500" />
-                  <p>Upload file</p>
-                  <p className="text-xs font-medium text-gray-400 mt-2">
-                    PNG, JPG, SVG, WEBP, and GIF are allowed.
-                  </p>
-                </>
-              )}
+              <UploadIcon className="w-11 mb-2 fill-gray-500" />
+              Upload files
               <input
                 type="file"
-                id="uploadFile"
+                id="uploadFiles"
                 className="hidden"
                 onChange={handleFileChange}
+                multiple
               />
+              <p className="text-xs font-medium text-gray-400 mt-2">
+                PNG, JPG, SVG, WEBP, GIF, MP4, MOV, and more are allowed.
+              </p>
             </div>
 
-            {/* ✅ Show selected file name */}
-            {file && (
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                Selected File: {file.name}
-              </p>
+            {/* ✅ Show selected files with the option to remove */}
+            {files.length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-700">
+                  Selected Files
+                </h4>
+                <ul className="space-y-2 mt-2">
+                  {files.map((file, index) => (
+                    <li
+                      key={index}
+                      className="flex justify-between items-center"
+                    >
+                      <span className="text-sm text-gray-600">{file.name}</span>
+                      <button
+                        onClick={() => handleRemoveFile(index)}
+                        className="text-red-600 text-xs hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Show error messages */}
+            {fileErrors.length > 0 && (
+              <div className="mt-4 text-sm text-red-600">
+                <ul>
+                  {fileErrors.map((error, idx) => (
+                    <li key={idx}>{error}</li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             <div className="flex justify-end space-x-2 mt-4">
               <button
-                onClick={closeModal}
+                onClick={() => setSelectedRequest(null)}
                 className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500"
               >
                 Cancel

@@ -60,13 +60,12 @@ export const requestMedia = async (reportId) => {
   }
 };
 
-export const uploadMedia = async (requestId, file) => {
+export const uploadMedia = async (requestId, files) => {
   try {
-    console.log(file);
     const formData = new FormData();
-    formData.append("file", file);
-
-    console.log(formData.get("file"));
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
 
     const response = await API.post(
       `/media-requests/upload/${requestId}`,

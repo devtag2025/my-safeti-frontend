@@ -14,6 +14,7 @@ export const fetchClients = async () => {
     const response = await API.get("/user/all");
     return response.data.filter((user) => user.role === "client");
   } catch (error) {
-    throw new Error("Failed to load clients");
+    console.log(error);
+    throw new Error("Failed to load clients: ", error.message);
   }
 };
