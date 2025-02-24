@@ -25,7 +25,7 @@ const ClientRequests = () => {
   // ✅ Handle Client Approval/Rejection
   const handleUpdateStatus = async (userId, status) => {
     try {
-      await updateClient(userId, status);
+      await updateClient(userId, { approvalStatus: status });
       setClients(
         clients.map((user) =>
           user._id === userId ? { ...user, approvalStatus: status } : user

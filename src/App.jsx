@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import RoleRedirect from "./routes/roleRedirect";
 import MediaRequests from "./pages/user/MediaRequests";
 import AdminMediaReview from "./pages/admin/mediaReview";
+import Advertisement from "./pages/admin/advertisment";
 
 const AppContent = () => {
   const location = useLocation();
@@ -35,7 +36,7 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* 🔒 Protected Routes */}
+          {/* 🔒User Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
             <Route path="/user" element={<Home />} />
             <Route path="/media-requests" element={<MediaRequests />} />
@@ -52,6 +53,7 @@ const AppContent = () => {
           <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/media-review" element={<AdminMediaReview />} />
+            <Route path="/ads" element={<Advertisement />} />
           </Route>
 
           {/* Catch-All 404 */}

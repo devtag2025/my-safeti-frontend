@@ -24,7 +24,10 @@ const Navbar = () => {
       : []),
 
     ...(user?.role === "admin"
-      ? [{ name: "Media Review", path: "/media-review" }]
+      ? [
+          { name: "Media Review", path: "/media-review" },
+          { name: "Manage Ads", path: "/ads" },
+        ]
       : []),
   ];
 

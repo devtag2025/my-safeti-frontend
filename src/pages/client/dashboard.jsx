@@ -15,6 +15,8 @@ import {
   requestMedia,
   fetchClientRequests,
 } from "../../api/mediaRequestService";
+import jsPDF from "jspdf";
+import autoTable from 'jspdf-autoTable'
 
 const ClientDashboard = () => {
   const [reports, setReports] = useState([]);
@@ -42,6 +44,50 @@ const ClientDashboard = () => {
     };
     fetchData();
   }, []);
+
+   const downloadReportAsPDF = (report) => {
+    const doc = new jsPDF();
+    
+    // 🏷️ Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("Incident Report", 105, 20, null, null, "center");
+    
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Report ID: ${report._id}`, 15, 35);
+    doc.text(`Date: ${new Date(report.date).toLocaleDateString()}`, 15, 45);
+
+    // 📝 Incident Details
+    autoTable(doc, {
+      startY: 55,
+      head: [["Field", "Details"]],
+      body: [
+        ["Vehicle", report.vehicleRegistration || "N/A"],
+        ["Location", report.location || "N/A"],
+        ["Incident Type", report.incidentType || "N/A"],
+        ["Status", report.status.toUpperCase()],
+      ],
+      theme: "grid",
+      styles: { fontSize: 10 },
+    });
+
+    // 📸 Media Availability
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Media Status", 15, doc.lastAutoTable.finalY + 15);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(
+      report.mediaFlag ? "Media Available" : "No Media Uploaded",
+      15,
+      doc.lastAutoTable.finalY + 25
+    );
+
+    // Save the PDF with a proper filename
+    doc.save(`Report_${report.vehicleRegistration || "Unknown"}.pdf`);
+  };
+
 
   const handleRequestMedia = async (reportId) => {
     try {
@@ -174,7 +220,7 @@ const ClientDashboard = () => {
                         <span className="text-gray-500">No Media</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-6 py-4 text-right align-center">
                       {report.mediaFlag &&
                         !requestedReports.has(report._id) && (
                           <button
@@ -185,8 +231,14 @@ const ClientDashboard = () => {
                           </button>
                         )}
                       {report.mediaFlag && requestedReports.has(report._id) && (
-                        <span className="text-gray-500">Requested</span>
+                        <span className="text-gray-500">Media Requested</span>
                       )}
+                     <button
+                        onClick={() => downloadReportAsPDF(report)}
+                        className="ml-1 px-2 py-1 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition"
+                      >
+                        Download Report
+                      </button>
                     </td>
                   </tr>
                 ))
