@@ -27,7 +27,7 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="py-10 w-[80%] mx-auto">
+    <section className="py-4 w-[80%] mx-auto">
       <h2 className="text-2xl font-bold text-center mb-6">How It Works</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {steps.map((step, index) => (

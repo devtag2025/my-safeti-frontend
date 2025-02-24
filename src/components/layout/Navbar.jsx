@@ -64,12 +64,6 @@ const Navbar = () => {
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md overflow-hidden">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  >
-                    Profile
-                  </Link>
                   <button
                     onClick={logout}
                     className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100"
