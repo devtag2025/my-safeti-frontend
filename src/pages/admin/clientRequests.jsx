@@ -55,7 +55,7 @@ const ClientRequests = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-bold text-gray-700 mb-6">Client Requests</h2>
+      {/* <h2 className="text-2xl font-bold text-gray-700 mb-6">Client Requests</h2> */}
 
       {/* 🔍 Filters */}
       <div className="flex space-x-3 mb-4">

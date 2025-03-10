@@ -12,7 +12,8 @@ export const updateClient = async (userId, updateData) => {
 export const fetchClients = async () => {
   try {
     const response = await API.get("/user/all");
-    return response.data.filter((user) => user.role === "client");
+    return response.data.filter((user) => user.role !== "admin");
+    // return response.data;
   } catch (error) {
     console.log(error);
     throw new Error("Failed to load clients: ", error.message);
