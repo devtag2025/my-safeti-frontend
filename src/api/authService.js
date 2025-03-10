@@ -35,7 +35,7 @@ export const loginUser = async (credentials) => {
 export const signupUser = async (userData) => {
   const response = await API.post("/auth/register", userData);
   saveUserSession(response.data.user, response.data.token);
-  return response.data.user;
+  return response.data;
 };
 
 // Logout (clear session)

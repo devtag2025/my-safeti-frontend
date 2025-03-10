@@ -19,7 +19,7 @@ const Login = () => {
     try {
       await login(data);
       const user = useAuthStore.getState().user;
-      console.log(user)
+      // console.log(user)
       if (user?.role === "admin") {
         navigate("/admin");
       } else if (user.role === "client") {

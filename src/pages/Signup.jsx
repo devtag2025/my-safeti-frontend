@@ -18,7 +18,7 @@ const Signup = () => {
 
   const onSubmit = async (data) => {
     try {
-      await signup(data);
+      const registered_user = await signup(data);
 
       if (user.role === "admin") {
         navigate("/admin");

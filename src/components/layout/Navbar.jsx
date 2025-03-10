@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown, LogOut } from "lucide-react";
 import useAuthStore from "../../store/authStore";
@@ -9,6 +9,17 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const login_user = JSON.parse(localStorage.getItem("user"));
+
+    if (login_user && login_user.email) {
+      const nameFromEmail = login_user.email.split("@")[0];
+      setUserName(nameFromEmail);
+    }
+  }, []);
 
   const homePath = user?.role ? `/${user.role}` : "/login";
 
@@ -35,8 +46,11 @@ const Navbar = () => {
     <nav className="bg-white shadow-md fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
-        <Link to={homePath} className="text-xl font-bold text-gray-800">
+        {/* <Link to={homePath} className="text-xl font-bold text-gray-800">
           SafeStreet
+        </Link> */}
+        <Link to={homePath} className="text-2xl font-bold text-indigo-600">
+          SafeStreet<span className="text-gray-800">.com.au</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -64,6 +78,9 @@ const Navbar = () => {
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md overflow-hidden">
+                  <h1 className="ml-4 font-medium capitalize">
+                    Hi, {userName || "User"}
+                  </h1>
                   <button
                     onClick={logout}
                     className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100"
@@ -105,12 +122,15 @@ const Navbar = () => {
             </Link>
           ))}
           {user ? (
-            <button
-              onClick={logout}
-              className="block mt-3 w-full text-left text-red-600 hover:text-red-800"
-            >
-              Logout
-            </button>
+            <div>
+              <h1 className="font-bold capitalize">Hi, {userName || "User"}</h1>
+              <button
+                onClick={logout}
+                className="mt-3 w-full text-left text-red-600 hover:text-red-800 flex items-center"
+              >
+                <LogOut size={16} className="mr-2" /> Logout
+              </button>
+            </div>
           ) : (
             <div className="mt-3 flex flex-col space-y-2">
               <Link to="/login" className="text-gray-700 hover:text-blue-500">
