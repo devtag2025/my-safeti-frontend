@@ -34,3 +34,45 @@ export const getAllReports = async () => {
   }
 };
 
+export const getUserReportStats = async () => {
+  try {
+    const response = await API.get("/report/stats");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching report stats:", error.response?.data?.message || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+export const filterUserReports = async (filters) => {
+  try {
+    const queryParams = new URLSearchParams(filters).toString(); // Convert filters into query params
+    const response = await API.get(`/report/filter?${queryParams}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching filtered reports:", error.response?.data?.message || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+
+export const updateReport = async (reportId, updateData) => {
+  try {
+    const response = await API.put(`/report/${reportId}`, updateData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating report:", error.response?.data?.message || error.message);
+    throw error.response?.data || error;
+  }
+};
+
+
+export const deleteReport = async (reportId) => {
+  try {
+    const response = await API.delete(`/report/${reportId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting report:", error.response?.data?.message || error.message);
+    throw error.response?.data || error;
+  }
+};

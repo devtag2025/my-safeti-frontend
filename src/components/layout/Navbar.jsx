@@ -29,16 +29,16 @@ const Navbar = () => {
   const navLinks = [
     ...(user?.role === "user"
       ? [
-          { name: "Dashboard", path: "/dashboard" },
-          { name: "Media Requests", path: "/media-requests" },
-        ]
+        { name: "Dashboard", path: "/dashboard" },
+        { name: "Media Requests", path: "/media-requests" },
+      ]
       : []),
 
     ...(user?.role === "admin"
       ? [
-          { name: "Media Review", path: "/media-review" },
-          { name: "Manage Ads", path: "/ads" },
-        ]
+        { name: "Media Review", path: "/media-review" },
+        { name: "Manage Ads", path: "/ads" },
+      ]
       : []),
   ];
 
