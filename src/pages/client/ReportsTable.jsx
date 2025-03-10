@@ -143,13 +143,12 @@ const ReportsTable = ({
 
                     {!compact && (
                       <td
-                        className={`px-6 py-4 ${
-                          report.status === "approved"
+                        className={`px-6 py-4 ${report.status === "approved"
                             ? "text-green-700"
                             : report.status === "rejected"
-                            ? "text-red-700"
-                            : "text-yellow-700"
-                        }`}
+                              ? "text-red-700"
+                              : "text-yellow-700"
+                          }`}
                       >
                         {report.status}
                       </td>
@@ -179,11 +178,10 @@ const ReportsTable = ({
                           <button
                             onClick={() => handleRequestMedia(report._id)}
                             disabled={currentRequestId === report._id}
-                            className={`px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition ${
-                              currentRequestId === report._id
+                            className={`px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition ${currentRequestId === report._id
                                 ? "opacity-50 cursor-not-allowed"
                                 : ""
-                            }`}
+                              }`}
                           >
                             {currentRequestId === report._id
                               ? "Requesting..."

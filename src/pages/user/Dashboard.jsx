@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { getUserReports, deleteReport } from "../../api/reportService";
+import { getUserReports, deleteReport, filterReports } from "../../api/reportService";
 import ReportModal from "../../components/modals/reportModal";
 import EditReportForm from "../../components/forms/EditReportForm";
 
 
 const UserDashboard = () => {
-  const [reports, setReports] = useState([]);
+  const [allReports, setAllReports] = useState([]); // Stores all reports (unfiltered)
+  const [reports, setReports] = useState([]); // Stores filtered reports
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -22,13 +23,15 @@ const UserDashboard = () => {
     setError(null);
     try {
       const data = await getUserReports();
-      setReports(data);
+      setAllReports(data); // Store all user reports
+      setReports(data); // Initially set filtered reports to all reports
     } catch (err) {
       setError(err.error || "Failed to fetch reports");
     } finally {
       setLoading(false);
     }
   };
+
 
   const openModal = (report) => {
     setSelectedReport(report);
@@ -71,9 +74,157 @@ const UserDashboard = () => {
     }
   };
 
+
+
+
+  // ✅ Filtering Logic (Applies Filters on Frontend)
+  const [filters, setFilters] = useState({
+    status: "",
+    incidentType: "",
+    mediaFlag: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+
+  const applyFilters = () => {
+    let filtered = [...allReports]; // Use unfiltered data as base
+
+    if (filters.status) {
+      filtered = filtered.filter((report) => report.status === filters.status);
+    }
+    if (filters.incidentType) {
+      filtered = filtered.filter((report) => report.incidentType === filters.incidentType);
+    }
+    if (filters.mediaFlag) {
+      const mediaBool = filters.mediaFlag === "true";
+      filtered = filtered.filter((report) => report.mediaFlag === mediaBool);
+    }
+    if (filters.startDate) {
+      filtered = filtered.filter((report) => new Date(report.date) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      filtered = filtered.filter((report) => new Date(report.date) <= new Date(filters.endDate));
+    }
+
+    setReports(filtered); // Update reports with filtered data
+  };
+
+
+  const resetFilters = () => {
+    setFilters({
+      status: "",
+      incidentType: "",
+      mediaFlag: "",
+      startDate: "",
+      endDate: "",
+    });
+    setReports(allReports); // Reset reports to original fetched list
+  };
+
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">User Dashboard</h1>
+
+      {/* filters */}
+      <div className="bg-white shadow-lg rounded-xl p-6 mb-8">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-4">Filter Reports</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Status</label>
+            <select
+              name="status"
+              value={filters.status}
+              onChange={handleFilterChange}
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Incident Type</label>
+            <select
+              name="incidentType"
+              value={filters.incidentType}
+              onChange={handleFilterChange}
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All</option>
+              <option value="Speeding">Speeding</option>
+              <option value="Running Red Light">Running Red Light</option>
+              <option value="Reckless Driving">Reckless Driving</option>
+              <option value="Tailgating">Tailgating</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Media File</label>
+            <select
+              name="mediaFlag"
+              value={filters.mediaFlag}
+              onChange={handleFilterChange}
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">Start Date</label>
+            <input
+              type="date"
+              name="startDate"
+              value={filters.startDate}
+              onChange={handleFilterChange}
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-1">End Date</label>
+            <input
+              type="date"
+              name="endDate"
+              value={filters.endDate}
+              onChange={handleFilterChange}
+              className="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-4 mt-6">
+          <button
+            onClick={applyFilters}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium transition duration-300 w-full md:w-auto"
+          >
+            Apply Filters
+          </button>
+
+          <button
+            onClick={resetFilters}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg font-medium transition duration-300 w-full md:w-auto"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+
+
+
       {loading && <p className="text-gray-600">Loading reports...</p>}
       {error && <p className="text-red-500">{error}</p>}
       {!loading && reports.length === 0 && (

@@ -19,18 +19,19 @@ import MediaRequests from "./pages/user/MediaRequests";
 import AdminMediaReview from "./pages/admin/mediaReview";
 import Advertisement from "./pages/admin/advertisment";
 import Homepage from "./pages/Home";
+
+import UserProfile from "./pages/UserProfile";
+
 import AdminDashboard from "./pages/admin/AdminDashboard";
+
 
 const AppContent = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/signup"];
+const isAdminRoute = location.pathname.startsWith("/admin");
+const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
+const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
 
-  // ✅ Hide the Navbar for all routes under /admin
-  const isAdminRoute = location.pathname.startsWith("/admin");
-  const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-
-  // ✅ Apply padding to all routes except /home and admin routes
-  const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
 
   return (
     <>
@@ -65,8 +66,14 @@ const AppContent = () => {
             <Route path="/ads" element={<Advertisement />} />
           </Route>
 
-          {/* Catch-All 404 */}
-          <Route path="*" element={<NotFound />} />
+{/* Unified User Profile Route */}
+<Route element={<ProtectedRoute allowedRoles={["user", "client", "admin"]} />}>
+  <Route path="/user-profile" element={<UserProfile />} />
+</Route>
+
+{/* Catch-All 404 */}
+<Route path="*" element={<NotFound />} />
+
         </Routes>
       </div>
     </>

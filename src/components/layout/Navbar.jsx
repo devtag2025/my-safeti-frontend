@@ -17,7 +17,8 @@ const Navbar = () => {
 
     if (login_user && login_user.email) {
       const nameFromEmail = login_user.email.split("@")[0];
-      setUserName(nameFromEmail);
+      const getUser = login_user.fullName;
+      setUserName(getUser);
     }
   }, []);
 
@@ -77,17 +78,26 @@ const Navbar = () => {
                 <UserIcon size={24} className="text-gray-700 cursor-pointer" />
               </button>
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-md rounded-md overflow-hidden">
-                  <h1 className="ml-4 font-medium capitalize">
-                    Hi, {userName || "User"}
-                  </h1>
+                <div className="absolute right-0 mt-2 w-48 bg-white  shadow-lg rounded-lg overflow-hidden border border-gray-200 ">
+                  <div className="p-4 bg-gray-100  text-gray-900  flex items-center gap-3">
+                    <h1 className="font-semibold capitalize">Hi, {userName || "User"}</h1>
+                  </div>
+
+                  <Link
+                    to="/user-profile"
+                    className="block px-4 py-2 text-gray-700  hover:bg-gray-100  transition"
+                  >
+                    Profile
+                  </Link>
+
                   <button
                     onClick={logout}
-                    className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100"
+                    className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100  transition"
                   >
                     <LogOut size={16} className="mr-2" /> Logout
                   </button>
                 </div>
+
               )}
             </div>
           ) : (
