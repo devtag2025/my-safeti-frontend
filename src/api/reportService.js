@@ -44,16 +44,18 @@ export const getUserReportStats = async () => {
   }
 };
 
-export const filterUserReports = async (filters) => {
+export const filterReports = async (filters) => {
   try {
-    const queryParams = new URLSearchParams(filters).toString(); // Convert filters into query params
+    const queryParams = new URLSearchParams(filters).toString();
     const response = await API.get(`/report/filter?${queryParams}`);
-    return response.data;
+    return response.data.reports;
   } catch (error) {
-    console.error("Error fetching filtered reports:", error.response?.data?.message || error.message);
+    console.error("Error filtering reports:", error.response?.data?.message || error.message);
     throw error.response?.data || error;
   }
 };
+
+
 
 
 export const updateReport = async (reportId, updateData) => {

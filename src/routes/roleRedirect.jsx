@@ -5,6 +5,7 @@ const RoleRedirect = () => {
   const user = useAuthStore((state) => state.user);
   const role = user?.role || "guest";
 
+
   const roleBasedRoutes = {
     user: "/home",
     client: "/client-dashboard",

@@ -20,12 +20,13 @@ import MediaRequests from "./pages/user/MediaRequests";
 import AdminMediaReview from "./pages/admin/mediaReview";
 import Advertisement from "./pages/admin/advertisment";
 import Homepage from "./pages/Home";
+import UserProfile from "./pages/UserProfile";
 
 const AppContent = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/signup"];
   const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname);
-  const shouldApplyPadding = location.pathname !== "/home"; 
+  const shouldApplyPadding = location.pathname !== "/home";
 
   return (
     <>
@@ -59,6 +60,11 @@ const AppContent = () => {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/media-review" element={<AdminMediaReview />} />
               <Route path="/ads" element={<Advertisement />} />
+            </Route>
+
+            {/* Unified User Profile Route */}
+            <Route element={<ProtectedRoute allowedRoles={["user", "client", "admin"]} />}>
+              <Route path="/user-profile" element={<UserProfile />} />
             </Route>
 
             {/* Catch-All 404 */}
