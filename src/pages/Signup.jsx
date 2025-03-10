@@ -21,6 +21,8 @@ const Signup = () => {
       console.log("Submitting Data:", data); // Debugging
       await signup(data);
 
+      const registered_user = await signup(data);
+
       // Retrieve user from Zustand store after signup
       const user = useAuthStore.getState().user;
       console.log("User after signup:", user);
