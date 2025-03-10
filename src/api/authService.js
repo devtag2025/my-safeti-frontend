@@ -33,10 +33,24 @@ export const loginUser = async (credentials) => {
 
 // Signup API
 export const signupUser = async (userData) => {
-  const response = await API.post("/auth/register", userData);
-  saveUserSession(response.data.user, response.data.token);
-  return response.data.user;
+  try {
+    console.log("Sending request with data:", userData);
+    const response = await API.post("/auth/register", userData);
+    console.log("Signup response:", response.data);
+
+    // Ensure response contains expected data
+    if (!response.data.user || !response.data.token) {
+      throw new Error("Invalid response from server");
+    }
+
+    saveUserSession(response.data.user, response.data.token);
+    return response.data.user;
+  } catch (error) {
+    console.error("Signup Error:", error.response?.data || error.message);
+    throw error;
+  }
 };
+
 
 // Logout (clear session)
 export const logoutUser = () => {

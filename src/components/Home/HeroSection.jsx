@@ -1,6 +1,21 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import useAuthStore from "../../store/authStore";
 
 const HeroSection = () => {
+  const user = useAuthStore((state) => state.user);
+  const fetchUser = useAuthStore((state) => state.fetchUser);
+
+  useEffect(() => {
+    console.log("Fetching user...");
+    fetchUser();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    console.log("User from Zustand:", user);
+    console.log("User from localStorage:", JSON.parse(localStorage.getItem("user")));
+  }, [user]);
+
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-7xl py-4 sm:px-6 sm:py-8 lg:px-8">
@@ -25,9 +40,17 @@ const HeroSection = () => {
             </defs>
           </svg>
           <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
-            <h2 className="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl">
-              Report Unsafe Driving. Make Streets Safer.
-            </h2>
+            {/* ✅ Display Greeting Message */}
+            {user ? (
+              <h2 className="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl">
+                Welcome, {user.fullName}! 🚀
+              </h2>
+            ) : (
+              <h2 className="text-3xl font-semibold tracking-tight text-balance text-white sm:text-4xl">
+                Report Unsafe Driving. Make Streets Safer.
+              </h2>
+            )}
+
             <p className="mt-6 text-lg text-pretty text-gray-300">
               Use SafeStreet.com.au to report reckless driving with just a few
               clicks. Your reports help insurance companies assess risks and

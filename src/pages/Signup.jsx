@@ -18,24 +18,31 @@ const Signup = () => {
 
   const onSubmit = async (data) => {
     try {
+      console.log("Submitting Data:", data); // Debugging
       await signup(data);
+
+      // Retrieve user from Zustand store after signup
+      const user = useAuthStore.getState().user;
+      console.log("User after signup:", user);
+
+      if (!user) {
+        setError("Signup failed. No user returned.");
+        return;
+      }
 
       if (user.role === "admin") {
         navigate("/admin");
       } else if (user.role === "client") {
-        setMessage(
-          "Your account has been created! Please wait for admin approval."
-        );
+        setMessage("Your account has been created! Please wait for admin approval.");
       } else {
         navigate("/user");
       }
     } catch (err) {
-      console.log(err);
-      setError(
-        err.response?.data?.message || "Signup failed. Please try again."
-      );
+      console.error("Signup Error:", err.response?.data || err.message);
+      setError(err.response?.data?.message || "Signup failed. Please try again.");
     }
   };
+
 
   return (
     <div className="flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8">
@@ -61,7 +68,7 @@ const Signup = () => {
               Full Name
             </label>
             <input
-              {...register("name", { required: "Full name is required" })}
+              {...register("fullName", { required: "Full name is required" })}
               type="text"
               autoComplete="name"
               className="mt-2 block w-full rounded-md border border-gray-300 p-2 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"

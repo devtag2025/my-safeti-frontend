@@ -8,6 +8,8 @@ import { useNavigate } from "react-router-dom";
 const HowItWorks = () => {
   const navigate = useNavigate();
 
+
+
   const steps = [
     {
       icon: <ReportIcon size={40} color="#201B2B" />,
@@ -28,7 +30,7 @@ const HowItWorks = () => {
 
   return (
     <section className="py-4 w-[80%] mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6">How It Works</h2>
+      <h1 className="text-3xl font-bold text-center mb-6">Activity</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {steps.map((step, index) => (
           <HIWCard
@@ -39,6 +41,7 @@ const HowItWorks = () => {
           />
         ))}
       </div>
+
       <div className="text-center mt-6">
         <Button onClick={() => navigate("/report")}>Report Now</Button>
       </div>

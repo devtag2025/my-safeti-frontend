@@ -7,10 +7,25 @@ import {
   Car,
   Info,
   Tag,
+  Edit,
+  Trash2,
 } from "lucide-react";
 
-const ReportModal = ({ report, isOpen, onClose }) => {
+const ReportModal = ({ report, isOpen, onClose, onEdit, onDelete }) => {
   if (!isOpen || !report) return null;
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "bg-yellow-500";
+      case "approved":
+        return "bg-green-500";
+      case "rejected":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
 
   return (
     <div
@@ -26,7 +41,7 @@ const ReportModal = ({ report, isOpen, onClose }) => {
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-900 transition"
+            className="text-gray-600 hover:text-gray-900 transition hover:cursor-pointer"
           >
             <X className="h-6 w-6" />
           </button>
@@ -72,23 +87,42 @@ const ReportModal = ({ report, isOpen, onClose }) => {
             <Info className="h-5 w-5 text-indigo-600" />
             <span className="font-semibold text-gray-700">Status:</span>
             <span
-              className={`px-2 py-1 rounded text-white text-sm ${
-                report.status === "pending" ? "bg-yellow-500" : "bg-green-500"
-              }`}
+              className={`px-2 py-1 rounded text-white text-sm ${getStatusColor(
+                report.status
+              )}`}
             >
-              {report.status}
+              {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
             </span>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="mt-6 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-5 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-500 transition focus:outline-none focus:ring-2 focus:ring-indigo-400"
-          >
-            Close
-          </button>
+        <div className="mt-6 flex justify-end space-x-3">
+          {report.status === "pending" ? (
+            <>
+              <button
+                onClick={() => onEdit(report)}
+                className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-500 transition flex items-center gap-2"
+              >
+                <Edit className="h-5 w-5" />
+                Edit
+              </button>
+              <button
+                onClick={() => onDelete(report._id)}
+                className="px-5 py-2 bg-red-600 text-white rounded-lg shadow hover:bg-red-500 transition flex items-center gap-2"
+              >
+                <Trash2 className="h-5 w-5" />
+                Delete
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onClose}
+              className="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-500 transition"
+            >
+              Close
+            </button>
+          )}
         </div>
       </div>
     </div>
