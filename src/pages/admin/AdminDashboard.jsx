@@ -129,8 +129,8 @@ const AdminDashboard = () => {
                   }
                 }}
                 className={`flex items-center px-4 py-3 text-sm rounded-md transition-colors w-full ${activeTab === item.id
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
                   }`}
               >
                 {item.icon}

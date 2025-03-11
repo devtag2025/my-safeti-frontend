@@ -32,3 +32,14 @@ export const updateUser = async (userData) => {
         throw error.response?.data || error;
     }
 };
+
+
+export const getUsersSignup = async () => {
+    try {
+        const response = await API.get("/user/new-signups");
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting new users:", error.response?.data?.message || error.message);
+        throw error.response?.data || error;
+    }
+}

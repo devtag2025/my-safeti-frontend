@@ -78,3 +78,14 @@ export const deleteReport = async (reportId) => {
     throw error.response?.data || error;
   }
 };
+
+
+export const getTotalReports = async () => {
+  try {
+    const response = await API.get("/report/total-reports");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getting all reports for admin:", error.response?.data?.message || error.message);
+    throw error.response?.data || error;
+  }
+}
