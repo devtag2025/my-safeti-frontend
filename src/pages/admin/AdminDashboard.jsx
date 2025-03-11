@@ -93,9 +93,8 @@ const AdminDashboard = () => {
     <div className="flex h-screen bg-gray-100">
       {/* Responsive Sidebar */}
       <div
-        className={`${
-          sidebarOpen ? "block" : "hidden"
-        } fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden`}
+        className={`${sidebarOpen ? "block" : "hidden"
+          } fixed inset-0 z-20 transition-opacity bg-black opacity-50 lg:hidden`}
         onClick={() => setSidebarOpen(false)}
       ></div>
 
@@ -127,11 +126,10 @@ const AdminDashboard = () => {
                     setSidebarOpen(false);
                   }
                 }}
-                className={`flex items-center px-4 py-3 text-sm rounded-md transition-colors w-full ${
-                  activeTab === item.id
-                    ? "bg-gray-700 text-white"
-                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                }`}
+                className={`flex items-center px-4 py-3 text-sm rounded-md transition-colors w-full ${activeTab === item.id
+                  ? "bg-gray-700 text-white"
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                  }`}
               >
                 {item.icon}
                 <span className="ml-3">{item.label}</span>

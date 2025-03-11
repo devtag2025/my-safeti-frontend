@@ -27,7 +27,7 @@ const UserManagement = () => {
         setIsLoading(false);
       }
     };
-    
+
     loadUsers();
   }, []);
 
@@ -35,7 +35,7 @@ const UserManagement = () => {
   const handleStatusChange = async (userId, newStatus) => {
     try {
       await updateClient(userId, { approvalStatus: newStatus });
-      setUsers(users.map(user => 
+      setUsers(users.map(user =>
         user._id === userId ? { ...user, approvalStatus: newStatus } : user
       ));
     } catch (err) {
@@ -53,24 +53,24 @@ const UserManagement = () => {
   const sendNotification = () => {
     // In a real implementation, you would send this notification to your backend
     console.log(`Sending notification to ${selectedUser.email}:`, notification);
-    
+
     // Close modal and reset form
     setIsNotificationModalOpen(false);
     setNotification({ subject: "", message: "" });
     setSelectedUser(null);
-    
+
     // Show success alert (in a real app, use a proper notification system)
     alert("Notification sent successfully!");
   };
 
   // Filter users based on search and filters
   const filteredUsers = users.filter(user => {
-    const matchesSearch = 
-      (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch =
+      (user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesRole = filterRole === "" || user.role === filterRole;
     const matchesStatus = filterStatus === "" || user.approvalStatus === filterStatus;
-    
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -103,7 +103,7 @@ const UserManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           {/* Filters */}
           <div className="flex flex-wrap gap-2">
             <select
@@ -115,7 +115,7 @@ const UserManagement = () => {
               <option value="user">User</option>
               <option value="client">Client</option>
             </select>
-            
+
             <select
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               value={filterStatus}
@@ -129,7 +129,7 @@ const UserManagement = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Users Table */}
       <div className="bg-white overflow-x-auto shadow rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
@@ -187,9 +187,9 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${user.approvalStatus === 'approved' ? 'bg-green-100 text-green-800' : 
-                        user.approvalStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                        'bg-red-100 text-red-800'}`}>
+                      ${user.approvalStatus === 'approved' ? 'bg-green-100 text-green-800' :
+                        user.approvalStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-red-100 text-red-800'}`}>
                       {user.approvalStatus}
                     </span>
                   </td>
@@ -199,25 +199,25 @@ const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       {/* Notification button */}
-                      <button 
+                      <button
                         onClick={() => openNotificationModal(user)}
                         className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 p-1 rounded-full"
                         title="Send notification"
                       >
                         <Bell className="w-5 h-5" />
                       </button>
-                      
+
                       {/* Status toggle buttons - for client approval process */}
                       {user.role === "client" && user.approvalStatus === "pending" && (
                         <>
-                          <button 
+                          <button
                             onClick={() => handleStatusChange(user._id, "approved")}
                             className="text-green-600 hover:text-green-900 bg-green-50 p-1 rounded-full"
                             title="Approve client"
                           >
                             <UserCheck className="w-5 h-5" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleStatusChange(user._id, "rejected")}
                             className="text-red-600 hover:text-red-900 bg-red-50 p-1 rounded-full"
                             title="Reject client"
@@ -226,11 +226,11 @@ const UserManagement = () => {
                           </button>
                         </>
                       )}
-                      
+
                       {/* Regular status management for other users */}
                       {(user.role !== "client" || user.approvalStatus !== "pending") && (
                         user.approvalStatus !== 'approved' ? (
-                          <button 
+                          <button
                             onClick={() => handleStatusChange(user._id, "approved")}
                             className="text-green-600 hover:text-green-900 bg-green-50 p-1 rounded-full"
                             title="Activate user"
@@ -238,7 +238,7 @@ const UserManagement = () => {
                             <UserCheck className="w-5 h-5" />
                           </button>
                         ) : (
-                          <button 
+                          <button
                             onClick={() => handleStatusChange(user._id, "rejected")}
                             className="text-red-600 hover:text-red-900 bg-red-50 p-1 rounded-full"
                             title="Suspend user"
@@ -255,16 +255,16 @@ const UserManagement = () => {
           </tbody>
         </table>
       </div>
-      
+
       {/* Notification Modal */}
       {isNotificationModalOpen && (
         <div className="fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             {/* Background overlay */}
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={() => setIsNotificationModalOpen(false)}></div>
-            
+
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            
+
             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
@@ -284,7 +284,7 @@ const UserManagement = () => {
                           className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                           placeholder="Notification subject"
                           value={notification.subject}
-                          onChange={(e) => setNotification({...notification, subject: e.target.value})}
+                          onChange={(e) => setNotification({ ...notification, subject: e.target.value })}
                         />
                       </div>
                       <div>
@@ -295,7 +295,7 @@ const UserManagement = () => {
                           className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
                           placeholder="Enter your message here"
                           value={notification.message}
-                          onChange={(e) => setNotification({...notification, message: e.target.value})}
+                          onChange={(e) => setNotification({ ...notification, message: e.target.value })}
                         ></textarea>
                       </div>
                     </div>
