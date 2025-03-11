@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   BarChart,
   PieChart,
@@ -25,7 +25,6 @@ import UserLogo from "../../assets/user.png";
 import useAuthStore from "../../store/authStore";
 import UserIcon from "../../assets/svgs/UserIcon";
 
-
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,7 +34,6 @@ const AdminDashboard = () => {
 
   const [userName, setUserName] = useState("");
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
-
 
   // Sidebar menu items
   const menuItems = [
@@ -59,11 +57,11 @@ const AdminDashboard = () => {
       label: "Advertisement",
       icon: <BarChart className="w-5 h-5" />,
     },
-    {
-      id: "revenue",
-      label: "Revenue Analytics",
-      icon: <DollarSign className="w-5 h-5" />,
-    },
+    // {
+    //   id: "revenue",
+    //   label: "Revenue Analytics",
+    //   icon: <DollarSign className="w-5 h-5" />,
+    // },
   ];
 
   // Render the active component based on selected tab

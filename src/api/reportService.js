@@ -27,6 +27,7 @@ export const getUserReports = async () => {
 export const getAllReports = async () => {
   try {
     const response = await API.get("/report/all");
+    // console.log(response.data.reports)
     return response.data.reports;
   } catch (error) {
     console.error("Error fetching reports:", error);
@@ -39,7 +40,10 @@ export const getUserReportStats = async () => {
     const response = await API.get("/report/stats");
     return response.data;
   } catch (error) {
-    console.error("Error fetching report stats:", error.response?.data?.message || error.message);
+    console.error(
+      "Error fetching report stats:",
+      error.response?.data?.message || error.message
+    );
     throw error.response?.data || error;
   }
 };
@@ -50,31 +54,43 @@ export const filterReports = async (filters) => {
     const response = await API.get(`/report/filter?${queryParams}`);
     return response.data.reports;
   } catch (error) {
-    console.error("Error filtering reports:", error.response?.data?.message || error.message);
+    console.error(
+      "Error filtering reports:",
+      error.response?.data?.message || error.message
+    );
     throw error.response?.data || error;
   }
 };
 
-
-
-
-export const updateReport = async (reportId, updateData) => {
+export const updateReport = async (reportId, userId, updateData) => {
   try {
-    const response = await API.put(`/report/${reportId}`, updateData);
+    // const response = await API.put(`/report/${reportId}`, updateData);
+    const response = await API.put(`/report/${reportId}`, updateData, {
+      params: {
+        reportId,
+        userId,
+      },
+    });
+
     return response.data;
   } catch (error) {
-    console.error("Error updating report:", error.response?.data?.message || error.message);
+    console.error(
+      "Error updating report:",
+      error.response?.data?.message || error.message
+    );
     throw error.response?.data || error;
   }
 };
-
 
 export const deleteReport = async (reportId) => {
   try {
     const response = await API.delete(`/report/${reportId}`);
     return response.data;
   } catch (error) {
-    console.error("Error deleting report:", error.response?.data?.message || error.message);
+    console.error(
+      "Error deleting report:",
+      error.response?.data?.message || error.message
+    );
     throw error.response?.data || error;
   }
 };

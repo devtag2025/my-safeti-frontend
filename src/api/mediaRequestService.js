@@ -18,6 +18,7 @@ export const fetchUserRequests = async () => {
 export const fetchClientRequests = async () => {
   try {
     const response = await API.get("/media-requests/client");
+    console.log('response',response.data)
     return response.data;
   } catch (error) {
     console.error(
