@@ -70,7 +70,7 @@ const Advertisement = () => {
             data-carousel="slide"
           >
             {/* Carousel Wrapper */}
-            <div className="relative h-64 overflow-hidden rounded-lg md:h-100">
+            <div className="relative overflow-hidden rounded-lg h-[600px]">
               {advertisements.map((ad, index) => (
                 <div
                   key={ad._id}
@@ -84,7 +84,7 @@ const Advertisement = () => {
                     <img
                       src={ad.mediaUrl}
                       alt={ad.title}
-                      className="block w-full h-full object-cover cursor-pointer rounded-lg"
+                      className="block w-full h-full object-fill cursor-pointer rounded-lg"
                       onError={(e) => {
                         e.target.src = "/api/placeholder/600/400";
                         e.target.alt = "Image not available";

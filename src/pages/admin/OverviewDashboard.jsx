@@ -142,7 +142,7 @@ const OverviewDashboard = () => {
         </div>
 
         {/* Monthly Revenue Trend Chart */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 hidden">
           <div className="bg-white rounded-lg shadow p-6 h-full">
             <h3 className="text-lg font-semibold mb-4">Monthly Revenue Trend</h3>
             <div className="flex items-end h-64 space-x-2 mt-8">

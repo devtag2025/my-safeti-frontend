@@ -146,11 +146,24 @@ const Advertisement = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {ads.map((ad) => (
           <div key={ad._id} className="p-4 bg-white shadow rounded-lg">
-            <h3 className="text-lg font-semibold">{ad.title}</h3>
-            <p className="text-sm text-gray-600">{ad.description}</p>
-            <p className="text-xs text-gray-500">
-              Expiry: {new Date(ad.expiryDate).toLocaleDateString()}
-            </p>
+            <div className="flex justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">{ad.title}</h3>
+              <p className="text-sm text-gray-600">{ad.description}</p>
+              <p className="text-xs text-gray-500">
+                Expiry: {new Date(ad.expiryDate).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="mt-2">
+              <button
+                onClick={() => deleteAd(ad._id).then(() => fetchAds())}
+                className="text-red-500 hover:text-red-700 mx-2"
+                title="Delete advertisement"
+              >
+                <Trash className="w-5 h-5" />
+              </button>
+            </div>
+            </div>
             {ad.mediaType === "image" ? (
               <img
                 src={ad.mediaUrl}
@@ -172,15 +185,6 @@ const Advertisement = () => {
                 Visit Ad Link
               </a>
             )}
-            <div className="flex justify-end mt-2">
-              <button
-                onClick={() => deleteAd(ad._id).then(() => fetchAds())}
-                className="text-red-500 hover:text-red-700 mx-2"
-                title="Delete advertisement"
-              >
-                <Trash className="w-5 h-5" />
-              </button>
-            </div>
           </div>
         ))}
       </div>
