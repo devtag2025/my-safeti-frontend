@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import useMediaRequestStore from "../../store/mediaRequestStore";
-import UploadIcon from "../../assets/svgs/uploadIcon";
+import UploadIcon from "../../assets/svgs/UploadIcon";
 
 const MediaRequests = () => {
   const { mediaRequests, fetchUserRequests, uploadMedia } =
