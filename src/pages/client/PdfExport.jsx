@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import autoTable from 'jspdf-autoTable';
+import autoTable from 'jspdf-autotable';
 
 const PDFExport = {
   downloadReportAsPDF: (report) => {
