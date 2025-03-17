@@ -21,8 +21,8 @@ import Homepage from "./pages/Home";
 
 import UserProfile from "./pages/UserProfile";
 
-import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const AppContent = () => {
   const location = useLocation();
