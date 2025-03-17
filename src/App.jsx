@@ -11,7 +11,6 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Report from "./pages/user/Report";
 import UserDashboard from "./pages/user/Dashboard";
-import ProtectedRoute from "./routes/ProtectedRoute";
 import ClientDashboard from "./pages/client/dashboard";
 import NotFound from "./pages/NotFound";
 import RoleRedirect from "./routes/roleRedirect";
@@ -23,15 +22,15 @@ import Homepage from "./pages/Home";
 import UserProfile from "./pages/UserProfile";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
-
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const AppContent = () => {
   const location = useLocation();
   const hideNavbarRoutes = ["/login", "/signup"];
-const isAdminRoute = location.pathname.startsWith("/admin");
-const shouldShowNavbar = !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
-
+  const isAdminRoute = location.pathname.startsWith("/admin");
+  const shouldShowNavbar =
+    !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
+  const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
 
   return (
     <>
@@ -66,14 +65,17 @@ const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
             <Route path="/ads" element={<Advertisement />} />
           </Route>
 
-{/* Unified User Profile Route */}
-<Route element={<ProtectedRoute allowedRoles={["user", "client", "admin"]} />}>
-  <Route path="/user-profile" element={<UserProfile />} />
-</Route>
+          {/* Unified User Profile Route */}
+          <Route
+            element={
+              <ProtectedRoute allowedRoles={["user", "client", "admin"]} />
+            }
+          >
+            <Route path="/user-profile" element={<UserProfile />} />
+          </Route>
 
-{/* Catch-All 404 */}
-<Route path="*" element={<NotFound />} />
-
+          {/* Catch-All 404 */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </>
