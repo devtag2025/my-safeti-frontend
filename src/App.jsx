@@ -21,7 +21,7 @@ import Homepage from "./pages/Home";
 
 import UserProfile from "./pages/UserProfile";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
+import ProtectedRoute from "./routes/protectedRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const AppContent = () => {
