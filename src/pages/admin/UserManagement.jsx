@@ -63,7 +63,7 @@ const UserManagement = () => {
   // Send notification
   const sendNotification = async () => {
     const response = await axios.post(
-      "http://localhost:3000/api/auth/emailSender",
+      "https://safe-street-backend.vercel.app/api/auth/emailSender",
       notification
     );
 
