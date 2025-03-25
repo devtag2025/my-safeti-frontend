@@ -215,7 +215,7 @@ const UserManagement = () => {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.name || "User"}
+                          {user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1)}
                         </div>
                         <div className="text-sm text-gray-500">
                           {user.email}

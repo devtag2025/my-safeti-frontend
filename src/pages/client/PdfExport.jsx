@@ -5,6 +5,9 @@ const PDFExport = {
   downloadReportAsPDF: (report) => {
     const doc = new jsPDF();
     
+    // Get the vehicle data from the first vehicle in the array
+    const vehicleData = report.vehicles && report.vehicles.length > 0 ? report.vehicles[0] : {};
+    
     // Title
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
@@ -15,34 +18,124 @@ const PDFExport = {
     doc.text(`Report ID: ${report._id}`, 15, 35);
     doc.text(`Date: ${new Date(report.date).toLocaleDateString()}`, 15, 45);
 
-    // Incident Details
+    // Reporter Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Reporter Information", 15, 60);
+    
     autoTable(doc, {
-      startY: 55,
+      startY: 65,
       head: [["Field", "Details"]],
       body: [
-        ["Vehicle Registration", report.vehicleRegistration || "N/A"],
-        ["Location", report.location || "N/A"],
-        ["Incident Type", report.incidentType || "N/A"],
-        ["Status", report.status.toUpperCase()],
-        ["Date Reported", new Date(report.date).toLocaleDateString()],
-        ["Time Reported", new Date(report.date).toLocaleTimeString()]
+        ["Name", report.name || "N/A"],
+        ["Email", report.email || "N/A"],
+        ["Phone", report.phone || "N/A"]
       ],
       theme: "grid",
       styles: { fontSize: 10 },
       headStyles: { fillColor: [79, 70, 229] }
     });
 
-    // Media Availability
-    doc.setFontSize(12);
+    // Incident Details
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Media Status", 15, doc.lastAutoTable.finalY + 15);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.text(
-      report.mediaFlag ? "Media Available" : "No Media Uploaded",
-      15,
-      doc.lastAutoTable.finalY + 25
-    );
+    doc.text("Incident Details", 15, doc.lastAutoTable.finalY + 15);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [["Field", "Details"]],
+      body: [
+        ["Incident Type", report.incidentType || "N/A"],
+        ["Vehicle Type", report.vehicleType || "N/A"],
+        ["Date Reported", new Date(report.date).toLocaleDateString()],
+        ["Time Reported", new Date(report.date).toLocaleTimeString()],
+        ["Status", report.status ? report.status.toUpperCase() : "PENDING"]
+      ],
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    // Location Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Location Information", 15, doc.lastAutoTable.finalY + 15);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [["Field", "Details"]],
+      body: [
+        ["Street", report.location || "N/A"],
+        ["Cross Street", report.crossStreet || "N/A"],
+        ["Suburb", report.suburb || "N/A"],
+        ["State", report.state || "N/A"]
+      ],
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    // Vehicle Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Vehicle Information", 15, doc.lastAutoTable.finalY + 15);
+    
+    // Prepare vehicle data rows based on first vehicle in array
+    const vehicleRows = [
+      ["Registration", vehicleData.registration || "N/A"],
+      ["Registration State", vehicleData.registrationState || "N/A"],
+      ["Make", vehicleData.make || "N/A"],
+      ["Model", vehicleData.model || "N/A"],
+      ["Body Type", vehicleData.bodyType || "N/A"],
+      ["Registration Visible", vehicleData.isRegistrationVisible || "N/A"]
+    ];
+    
+    // Only add identifying features if not empty
+    if (vehicleData.identifyingFeatures) {
+      vehicleRows.push(["Identifying Features", vehicleData.identifyingFeatures]);
+    }
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [["Field", "Details"]],
+      body: vehicleRows,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    // Dashcam Information
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Dashcam Information", 15, doc.lastAutoTable.finalY + 15);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 20,
+      head: [["Field", "Details"]],
+      body: [
+        ["Dashcam Footage Saved", report.hasDashcam ? "Yes" : "No"],
+        ["Audio Available", report.hasAudio ? "Yes" : "No"],
+        ["Can Provide Footage", report.canProvideFootage ? "Yes" : "No"],
+        ["Media Flag", report.mediaFlag ? "Yes" : "No"]
+      ],
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    // Description (if provided)
+    if (report.description) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Incident Description", 15, doc.lastAutoTable.finalY + 15);
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      
+      // Use a text box to handle long descriptions with word wrap
+      const splitDescription = doc.splitTextToSize(report.description, 180);
+      doc.text(splitDescription, 15, doc.lastAutoTable.finalY + 25);
+    }
 
     // Risk Assessment
     let riskScore = 0;
@@ -56,22 +149,47 @@ const PDFExport = {
     
     const baseScore = incidentWeights[report.incidentType] || 5;
     const mediaBonus = report.mediaFlag ? 2 : 0;
-    riskScore = Math.min(10, baseScore + mediaBonus);
+    const dashcamBonus = report.hasDashcam ? 1 : 0;
+    riskScore = Math.min(10, baseScore + mediaBonus + dashcamBonus);
 
-    doc.setFontSize(12);
+    // Add a page if we're near the bottom
+    if (doc.lastAutoTable && doc.lastAutoTable.finalY > 240) {
+      doc.addPage();
+    }
+
+    const riskY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 25 : 220;
+    
+    doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
-    doc.text("Risk Assessment", 15, doc.lastAutoTable.finalY + 40);
+    doc.text("Risk Assessment", 15, riskY);
     
     autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 50,
+      startY: riskY + 10,
       body: [
         ["Risk Score", `${riskScore.toFixed(1)} / 10`],
         ["Risk Level", riskScore >= 8 ? "High" : riskScore >= 6 ? "Medium" : "Low"],
-        ["Insurance Impact", riskScore >= 8 ? "Significant" : riskScore >= 6 ? "Moderate" : "Minimal"]
+        ["Safety Impact", riskScore >= 8 ? "Significant" : riskScore >= 6 ? "Moderate" : "Minimal"]
       ],
       theme: "plain",
       styles: { fontSize: 10 }
     });
+
+    // Metadata and timestamps
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    
+    // Add a page if we're near the bottom
+    if (doc.lastAutoTable && doc.lastAutoTable.finalY > 260) {
+      doc.addPage();
+    }
+    
+    const metaY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 240;
+    
+    doc.text(`Report submitted on: ${new Date(report.createdAt).toLocaleString()}`, 15, metaY);
+    if (report.updatedAt) {
+      doc.text(`Last updated on: ${new Date(report.updatedAt).toLocaleString()}`, 15, metaY + 5);
+    }
 
     // Footer
     const pageCount = doc.internal.getNumberOfPages();
@@ -97,8 +215,9 @@ const PDFExport = {
       );
     }
 
-    // Save the PDF with a proper filename
-    doc.save(`SafeStreet_Report_${report.vehicleRegistration || "Unknown"}.pdf`);
+    // Determine filename using vehicle registration if available
+    const vehicleReg = vehicleData.registration || "Unknown";
+    doc.save(`SafeStreet_Report_${vehicleReg}_${report._id.substring(0, 8)}.pdf`);
   },
   
   exportAnalytics: (reports, format = "pdf") => {
@@ -125,7 +244,8 @@ const PDFExport = {
     
     // Group by incident type
     const incidentCounts = reports.reduce((acc, report) => {
-      acc[report.incidentType] = (acc[report.incidentType] || 0) + 1;
+      const type = report.incidentType || "Unspecified";
+      acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {});
     
@@ -152,6 +272,34 @@ const PDFExport = {
       headStyles: { fillColor: [79, 70, 229] }
     });
     
+    // Vehicle Type Summary
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text("Vehicle Type Summary", 15, doc.lastAutoTable.finalY + 20);
+    
+    // Group by vehicle type
+    const vehicleTypeCounts = reports.reduce((acc, report) => {
+      const type = report.vehicleType || "Unspecified";
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Format for table
+    const vehicleTypeData = Object.keys(vehicleTypeCounts).map(type => [
+      type,
+      vehicleTypeCounts[type],
+      ((vehicleTypeCounts[type] / reports.length) * 100).toFixed(1) + "%"
+    ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 30,
+      head: [["Vehicle Type", "Count", "Percentage"]],
+      body: vehicleTypeData,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+    
     // High Risk Drivers
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
@@ -160,10 +308,15 @@ const PDFExport = {
     // Group by vehicle registration
     const driverReports = {};
     reports.forEach(report => {
-      if (!driverReports[report.vehicleRegistration]) {
-        driverReports[report.vehicleRegistration] = [];
+      if (report.vehicles && report.vehicles.length > 0) {
+        const registration = report.vehicles[0].registration;
+        if (registration) {
+          if (!driverReports[registration]) {
+            driverReports[registration] = [];
+          }
+          driverReports[registration].push(report);
+        }
       }
-      driverReports[report.vehicleRegistration].push(report);
     });
     
     // Calculate risk scores
@@ -183,10 +336,21 @@ const PDFExport = {
         return acc + (typeScores[report.incidentType] || 1);
       }, 0);
       
+      // Get vehicle info from the most recent report
+      const latestReport = driverData.sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      )[0];
+      
+      const vehicleInfo = latestReport.vehicles && latestReport.vehicles.length > 0 
+        ? latestReport.vehicles[0] 
+        : {};
+      
       const score = Math.min(10, (incidentTypeScores / incidents) * 2.5);
       
       return {
         registration,
+        make: vehicleInfo.make || "N/A",
+        model: vehicleInfo.model || "N/A",
         incidents,
         score,
         primaryType: getMostCommonType(driverData)
@@ -199,6 +363,7 @@ const PDFExport = {
       .slice(0, 10)
       .map(driver => [
         driver.registration,
+        `${driver.make} ${driver.model}`,
         driver.incidents,
         driver.primaryType,
         driver.score.toFixed(1) + " / 10",
@@ -207,8 +372,44 @@ const PDFExport = {
     
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 30,
-      head: [["Registration", "Incidents", "Primary Type", "Risk Score", "Risk Level"]],
+      head: [["Registration", "Vehicle", "Incidents", "Primary Type", "Risk Score", "Risk Level"]],
       body: topRiskDrivers,
+      theme: "grid",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [79, 70, 229] }
+    });
+
+    // Status Summary
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    
+    // Add a new page if we're running out of space
+    if (doc.lastAutoTable.finalY > 210) {
+      doc.addPage();
+      doc.text("Report Status Summary", 15, 20);
+      doc.lastAutoTable.finalY = 20;
+    } else {
+      doc.text("Report Status Summary", 15, doc.lastAutoTable.finalY + 20);
+    }
+    
+    // Group by status
+    const statusCounts = reports.reduce((acc, report) => {
+      const status = report.status || "pending";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+    
+    // Format for table
+    const statusData = Object.keys(statusCounts).map(status => [
+      status.charAt(0).toUpperCase() + status.slice(1),
+      statusCounts[status],
+      ((statusCounts[status] / reports.length) * 100).toFixed(1) + "%"
+    ]);
+    
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 30,
+      head: [["Status", "Count", "Percentage"]],
+      body: statusData,
       theme: "grid",
       styles: { fontSize: 10 },
       headStyles: { fillColor: [79, 70, 229] }

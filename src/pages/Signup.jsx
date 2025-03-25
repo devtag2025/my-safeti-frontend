@@ -18,10 +18,7 @@ const Signup = () => {
 
   const onSubmit = async (data) => {
     try {
-      console.log("Submitting Data:", data); // Debugging
       await signup(data);
-
-      const registered_user = await signup(data);
 
       // Retrieve user from Zustand store after signup
       const user = useAuthStore.getState().user;
@@ -83,12 +80,10 @@ const Signup = () => {
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Email address
+              Email/Phone No
             </label>
             <input
-              {...register("email", { required: "Email is required" })}
-              type="email"
-              autoComplete="email"
+              {...register("email", { required: "Email or Phone No is required" })}
               className="mt-2 block w-full rounded-md border border-gray-300 p-2 text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
             />
             {errors.email && (

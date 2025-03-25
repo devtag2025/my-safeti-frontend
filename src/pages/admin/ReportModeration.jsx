@@ -15,6 +15,7 @@ const ReportModeration = () => {
       try {
         setIsLoading(true);
         const reportsData = await getAllReports();
+        // console.log(reportsData);
         setReports(reportsData);
       } catch (error) {
         console.error("Error fetching reports:", error);
@@ -142,7 +143,7 @@ const ReportModeration = () => {
                         </p>
                         <p>
                           <span className="font-medium">Vehicle:</span>{" "}
-                          {report.vehicleRegistration}
+                          {report.vehicles[0].registration}
                         </p>
                         <p>
                           <span className="font-medium">Location:</span>{" "}
@@ -261,7 +262,7 @@ const ReportModeration = () => {
                         {report.incidentType}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {report.vehicleRegistration}
+                        {report.vehicles[0].registration}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -348,7 +349,7 @@ const ReportModeration = () => {
                       <div>
                         <p className="text-gray-500">Vehicle Registration</p>
                         <p className="font-medium">
-                          {selectedReport.vehicleRegistration}
+                          {selectedReport.vehicles[0].registration}
                         </p>
                       </div>
                       <div>

@@ -121,7 +121,6 @@ export const getAllUploadedMedia = async () => {
 export const getAllMediaStats = async () => {
   try {
     const response = await API.get("/media-requests/media-requests-stats");
-    console.log(response.data)
     const data = await response.data;
     return data;
   } catch (error) {

@@ -42,8 +42,6 @@ const ClientDashboard = () => {
         setReports(reportsData.filter(report => report.status === "approved"));
         setMediaRequests(mediaRequestsData);
 
-        // console.log(mediaRequestsData)
-
         // Extract report IDs from media requests and store them in a set
         // console.log(mediaRequests)
         const requestedIds = new Set(

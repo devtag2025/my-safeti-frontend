@@ -9,7 +9,7 @@ const ReportsTable = ({
   onRequestMedia,
   compact = false,
 }) => {
-  // console.log(reports)
+  console.log(reports)
   const [currentRequestId, setCurrentRequestId] = useState(null);
   // Create a local copy of requested reports combining props with local state
   const [localRequestedReports, setLocalRequestedReports] = useState(new Set());
@@ -51,7 +51,7 @@ const ReportsTable = ({
     };
 
     const baseScore = incidentWeights[report.incidentType] || 5;
-    const mediaBonus = report.mediaFlag ? 2 : 0;
+    const mediaBonus = report.hasDashcam ? 2 : 0;
 
     return Math.min(10, baseScore + mediaBonus);
   };
@@ -133,7 +133,7 @@ const ReportsTable = ({
                     className="bg-white border-b border-gray-200 hover:bg-gray-50 transition"
                   >
                     <td className="px-6 py-4 font-medium text-gray-900">
-                      {report.vehicleRegistration}
+                      {report.vehicles[0].registration}
                     </td>
                     <td className="px-6 py-4">
                       {new Date(report.date).toLocaleDateString()}
@@ -155,7 +155,7 @@ const ReportsTable = ({
                     )}
 
                     <td className="px-6 py-4">
-                      {report.mediaFlag ? (
+                      {report.hasDashcam ? (
                         <span className="text-gray-500">Available</span>
                       ) : (
                         <span className="text-gray-500">None</span>
@@ -174,7 +174,7 @@ const ReportsTable = ({
 
                     <td className="px-6 py-4 text-right whitespace-nowrap">
                       <div className="flex justify-end space-x-2">
-                        {report.mediaFlag && !isRequested && (
+                        {report.hasDashcam && !isRequested && (
                           <button
                             onClick={() => handleRequestMedia(report._id)}
                             disabled={currentRequestId === report._id}
@@ -189,7 +189,7 @@ const ReportsTable = ({
                           </button>
                         )}
 
-                        {report.mediaFlag && isRequested && (
+                        {report.hasDashcam && isRequested && (
                           <span className="px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded">
                             Requested
                           </span>

@@ -81,7 +81,7 @@ const OverviewDashboard = () => {
       positive: true,
     },
   };
-  console.log(changes);
+  // console.log(changes);
 
   if (loading) return <div className="p-6 text-center text-gray-600">Loading...</div>;
   if (error) return <div className="p-6 text-center text-red-500">Error: {error}</div>;
