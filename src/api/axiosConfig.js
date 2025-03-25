@@ -3,7 +3,7 @@ import useAuthStore from "../store/authStore";
 
 // Create Axios instance with base config
 const API = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://safe-street-backend-2mew.vercel.app/api",
   headers: {
     "Content-Type": "application/json",
   },
