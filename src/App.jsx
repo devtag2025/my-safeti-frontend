@@ -30,7 +30,9 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-  const shouldApplyPadding = location.pathname !== "/home" && !isAdminRoute;
+  const noPaddingRoutes = ["/login", "/signup", "/home"];
+  const shouldApplyPadding =
+    !noPaddingRoutes.includes(location.pathname) && !isAdminRoute;
 
   return (
     <>

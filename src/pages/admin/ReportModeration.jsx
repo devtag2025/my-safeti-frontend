@@ -1,13 +1,48 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, AlertCircle, Clock, Eye } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Clock,
+  Eye,
+  Car,
+  MapPin,
+  Calendar,
+  User,
+  Phone,
+  Mail,
+  FileText,
+  File,
+  AlertTriangle,
+  Info,
+  Search,
+  Filter,
+  X,
+  ChevronDown,
+  ChevronUp,
+  Download
+} from "lucide-react";
 import { getAllReports, updateReport } from "../../api/reportService";
+import * as XLSX from "xlsx";
 
 const ReportModeration = () => {
   const [reports, setReports] = useState([]);
+  const [filteredReports, setFilteredReports] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "",
+    incidentType: "",
+    dateFrom: "",
+    dateTo: "",
+    vehicleReg: "",
+    state: "",
+  });
 
   // Fetch reports from API
   useEffect(() => {
@@ -15,8 +50,8 @@ const ReportModeration = () => {
       try {
         setIsLoading(true);
         const reportsData = await getAllReports();
-        // console.log(reportsData);
         setReports(reportsData);
+        setFilteredReports(reportsData);
       } catch (error) {
         console.error("Error fetching reports:", error);
         setError("Failed to load reports. Please try again later.");
@@ -28,6 +63,75 @@ const ReportModeration = () => {
     fetchReports();
   }, []);
 
+  // Apply filters and search
+  useEffect(() => {
+    if (!reports.length) return;
+
+    let result = [...reports];
+
+    // Apply search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(
+        (report) =>
+          (report._id && report._id.toLowerCase().includes(term)) ||
+          (report.incidentType &&
+            report.incidentType.toLowerCase().includes(term)) ||
+          (report.location && report.location.toLowerCase().includes(term)) ||
+          (report.vehicles &&
+            report.vehicles.some(
+              (v) =>
+                v.registration && v.registration.toLowerCase().includes(term)
+            ))
+      );
+    }
+
+    // Apply filters
+    if (filters.status) {
+      result = result.filter((report) => report.status === filters.status);
+    }
+
+    if (filters.incidentType) {
+      result = result.filter(
+        (report) => report.incidentType === filters.incidentType
+      );
+    }
+
+    if (filters.dateFrom) {
+      const fromDate = new Date(filters.dateFrom);
+      result = result.filter(
+        (report) => new Date(report.createdAt) >= fromDate
+      );
+    }
+
+    if (filters.dateTo) {
+      const toDate = new Date(filters.dateTo);
+      // Set to end of day
+      toDate.setHours(23, 59, 59, 999);
+      result = result.filter((report) => new Date(report.createdAt) <= toDate);
+    }
+
+    if (filters.vehicleReg) {
+      result = result.filter(
+        (report) =>
+          report.vehicles &&
+          report.vehicles.some(
+            (v) =>
+              v.registration &&
+              v.registration
+                .toLowerCase()
+                .includes(filters.vehicleReg.toLowerCase())
+          )
+      );
+    }
+
+    if (filters.state) {
+      result = result.filter((report) => report.state === filters.state);
+    }
+
+    setFilteredReports(result);
+  }, [reports, searchTerm, filters]);
+
   // Handle report approval
   const handleApproveReport = async (reportId, userId) => {
     try {
@@ -37,11 +141,10 @@ const ReportModeration = () => {
       });
 
       // Update local state
-      setReports(
-        reports.map((report) =>
-          report._id === reportId ? { ...report, status: "approved" } : report
-        )
+      const updatedReports = reports.map((report) =>
+        report._id === reportId ? { ...report, status: "approved" } : report
       );
+      setReports(updatedReports);
     } catch (err) {
       console.error("Error approving report:", err);
     }
@@ -54,11 +157,10 @@ const ReportModeration = () => {
       });
 
       // Update local state
-      setReports(
-        reports.map((report) =>
-          report._id === reportId ? { ...report, status: "rejected" } : report
-        )
+      const updatedReports = reports.map((report) =>
+        report._id === reportId ? { ...report, status: "rejected" } : report
       );
+      setReports(updatedReports);
     } catch (err) {
       console.error("Error rejecting report:", err);
     }
@@ -68,6 +170,7 @@ const ReportModeration = () => {
   const openViewModal = (report) => {
     setSelectedReport(report);
     setIsModalOpen(true);
+    setActiveTab("details");
   };
 
   // Format date in a readable format
@@ -95,8 +198,358 @@ const ReportModeration = () => {
     return [];
   };
 
+  // Handle filter changes
+  const handleFilterChange = (key, value) => {
+    setFilters((prevFilters) => ({ ...prevFilters, [key]: value }));
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({
+      status: "",
+      incidentType: "",
+      dateFrom: "",
+      dateTo: "",
+      vehicleReg: "",
+      state: "",
+    });
+    setSearchTerm("");
+  };
+
+  // Get unique incident types from reports
+  const getIncidentTypes = () => {
+    const types = new Set();
+    reports.forEach((report) => {
+      if (report.incidentType) types.add(report.incidentType);
+    });
+    return Array.from(types);
+  };
+
+  // Get unique states from reports
+  const getStates = () => {
+    const states = new Set();
+    reports.forEach((report) => {
+      if (report.state) states.add(report.state);
+    });
+    return Array.from(states);
+  };
+
+  // Function to download report data as Excel
+  const downloadReportAsExcel = (report) => {
+    try {
+      // Create a structured data object for Excel
+      const reportData = [
+        // General Info
+        { Category: "Report ID", Value: report._id },
+        { Category: "Status", Value: report.status },
+        { Category: "Incident Type", Value: report.incidentType },
+        { Category: "Vehicle Type", Value: report.vehicleType },
+        { Category: "Date", Value: formatDate(report.date) },
+        { Category: "Created At", Value: formatDate(report.createdAt) },
+        { Category: "Updated At", Value: formatDate(report.updatedAt) },
+        { Category: "", Value: "" }, // Empty row as separator
+
+        // Location Info
+        { Category: "Location", Value: report.location },
+        { Category: "Cross Street", Value: report.crossStreet || "N/A" },
+        { Category: "Suburb", Value: report.suburb },
+        { Category: "State", Value: report.state },
+        { Category: "", Value: "" }, // Empty row as separator
+
+        // Reporter Info
+        { Category: "Reporter Name", Value: report.name },
+        { Category: "Reporter Email", Value: report.email },
+        { Category: "Reporter Phone", Value: report.phone },
+        { Category: "Reporter User ID", Value: report.userId || "N/A" },
+        { Category: "", Value: "" }, // Empty row as separator
+
+        // Evidence Info
+        { Category: "Has Dashcam", Value: report.hasDashcam ? "Yes" : "No" },
+        { Category: "Has Audio", Value: report.hasAudio ? "Yes" : "No" },
+        {
+          Category: "Can Provide Footage",
+          Value: report.canProvideFootage ? "Yes" : "No",
+        },
+        {
+          Category: "Terms Accepted",
+          Value: report.acceptTerms ? "Yes" : "No",
+        },
+        { Category: "", Value: "" }, // Empty row as separator
+
+        // Description
+        {
+          Category: "Description",
+          Value: report.description || "No description provided",
+        },
+      ];
+
+      // Add vehicle information
+      if (report.vehicles && report.vehicles.length > 0) {
+        reportData.push({ Category: "", Value: "" });
+        reportData.push({ Category: "VEHICLE DETAILS", Value: "" });
+
+        report.vehicles.forEach((vehicle, index) => {
+          reportData.push({
+            Category: `Vehicle ${index + 1} Registration`,
+            Value: vehicle.registration,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Reg State`,
+            Value: vehicle.registrationState,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Make`,
+            Value: vehicle.make,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Model`,
+            Value: vehicle.model,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Body Type`,
+            Value: vehicle.bodyType,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Visible on Dashcam`,
+            Value: vehicle.isRegistrationVisible,
+          });
+          reportData.push({
+            Category: `Vehicle ${index + 1} Features`,
+            Value: vehicle.identifyingFeatures || "N/A",
+          });
+
+          if (index < report.vehicles.length - 1) {
+            reportData.push({ Category: "", Value: "" });
+          }
+        });
+      }
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(reportData);
+
+      // Auto-size columns
+      const colWidths = reportData.reduce(
+        (width, row) => {
+          const categoryWidth = row.Category
+            ? row.Category.toString().length
+            : 0;
+          const valueWidth = row.Value ? row.Value.toString().length : 0;
+          return {
+            category: Math.max(width.category, categoryWidth),
+            value: Math.max(width.value, valueWidth),
+          };
+        },
+        { category: 10, value: 10 }
+      );
+
+      ws["!cols"] = [
+        { wch: colWidths.category + 2 },
+        { wch: colWidths.value + 2 },
+      ];
+
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Report Details");
+
+      // Generate filename
+      const fileName = `Report_${report._id.substring(
+        0,
+        8
+      )}_${report.incidentType.replace(/\s+/g, "_")}.xlsx`;
+
+      // Write and download file
+      XLSX.writeFile(wb, fileName);
+    } catch (error) {
+      console.error("Error downloading report:", error);
+      alert("Failed to download report data");
+    }
+  };
   return (
     <div className="p-6">
+      {/* Search and filter bar */}
+      <div className="mb-6 bg-white rounded-lg shadow p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              type="text"
+              placeholder="Search by ID, vehicle registration, incident type..."
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button
+            className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+          >
+            <Filter className="h-5 w-5 mr-2 text-gray-500" />
+            {isFilterOpen ? "Hide Filters" : "Show Filters"}
+            {isFilterOpen ? (
+              <ChevronUp className="h-4 w-4 ml-1" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-1" />
+            )}
+          </button>
+        </div>
+
+        {/* Advanced filters */}
+        {isFilterOpen && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="status"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Status
+                </label>
+                <select
+                  id="status"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filters.status}
+                  onChange={(e) => handleFilterChange("status", e.target.value)}
+                >
+                  <option value="">All</option>
+                  <option value="pending">Pending</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="incidentType"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Incident Type
+                </label>
+                <select
+                  id="incidentType"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filters.incidentType}
+                  onChange={(e) =>
+                    handleFilterChange("incidentType", e.target.value)
+                  }
+                >
+                  <option value="">All</option>
+                  {getIncidentTypes().map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="state"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  State
+                </label>
+                <select
+                  id="state"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filters.state}
+                  onChange={(e) => handleFilterChange("state", e.target.value)}
+                >
+                  <option value="">All</option>
+                  {getStates().map((state) => (
+                    <option key={state} value={state}>
+                      {state}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="vehicleReg"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Vehicle Registration
+                </label>
+                <input
+                  type="text"
+                  id="vehicleReg"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter registration"
+                  value={filters.vehicleReg}
+                  onChange={(e) =>
+                    handleFilterChange("vehicleReg", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="dateFrom"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  From Date
+                </label>
+                <input
+                  type="date"
+                  id="dateFrom"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filters.dateFrom}
+                  onChange={(e) =>
+                    handleFilterChange("dateFrom", e.target.value)
+                  }
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="dateTo"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  To Date
+                </label>
+                <input
+                  type="date"
+                  id="dateTo"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  value={filters.dateTo}
+                  onChange={(e) => handleFilterChange("dateTo", e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                className="mr-2 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onClick={clearFilters}
+              >
+                <X className="h-4 w-4 mr-1 mt-0.5" />
+                Clear Filters
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Filter results summary */}
+        {(searchTerm || Object.values(filters).some((val) => val !== "")) && (
+          <div className="mt-4 flex items-center justify-between bg-gray-50 rounded-md p-2">
+            <div className="text-sm text-gray-600">
+              <span className="font-medium">{filteredReports.length}</span>{" "}
+              report{filteredReports.length !== 1 && "s"} found
+            </div>
+            {/* {(searchTerm ||
+              Object.values(filters).some((val) => val !== "")) && (
+              <button
+                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
+                onClick={clearFilters}
+              >
+                <X className="h-3 w-3 mr-1" />
+                Clear all filters
+              </button>
+            )} */}
+          </div>
+        )}
+      </div>
+
       {/* Reports Queue */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
         <div className="p-4 border-b border-gray-200">
@@ -116,14 +569,15 @@ const ReportModeration = () => {
             <AlertCircle className="h-10 w-10 mx-auto mb-4" />
             <p>{error}</p>
           </div>
-        ) : reports.filter((r) => r.status === "pending").length === 0 ? (
+        ) : filteredReports.filter((r) => r.status === "pending").length ===
+          0 ? (
           <div className="p-8 text-center text-gray-500">
             <CheckCircle className="h-10 w-10 mx-auto mb-4 text-green-500" />
             <p>No pending reports to review.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {reports
+            {filteredReports
               .filter((report) => report.status === "pending")
               .map((report) => (
                 <div key={report._id} className="p-6 hover:bg-gray-50">
@@ -143,7 +597,9 @@ const ReportModeration = () => {
                         </p>
                         <p>
                           <span className="font-medium">Vehicle:</span>{" "}
-                          {report.vehicles[0].registration}
+                          {report.vehicles && report.vehicles[0]
+                            ? report.vehicles[0].registration
+                            : "N/A"}
                         </p>
                         <p>
                           <span className="font-medium">Location:</span>{" "}
@@ -202,7 +658,8 @@ const ReportModeration = () => {
             <Clock className="h-10 w-10 mx-auto mb-4 animate-pulse" />
             <p>Loading reports...</p>
           </div>
-        ) : reports.filter((r) => r.status !== "pending").length === 0 ? (
+        ) : filteredReports.filter((r) => r.status !== "pending").length ===
+          0 ? (
           <div className="p-8 text-center text-gray-500">
             <AlertCircle className="h-10 w-10 mx-auto mb-4 text-blue-500" />
             <p>No reports have been moderated yet.</p>
@@ -251,7 +708,7 @@ const ReportModeration = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {reports
+                {filteredReports
                   .filter((report) => report.status !== "pending")
                   .map((report) => (
                     <tr key={report._id}>
@@ -262,7 +719,9 @@ const ReportModeration = () => {
                         {report.incidentType}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {report.vehicles[0].registration}
+                        {report.vehicles && report.vehicles[0]
+                          ? report.vehicles[0].registration
+                          : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
@@ -280,12 +739,18 @@ const ReportModeration = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {formatDate(report.updatedAt)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 flex justify-center items-center">
                         <button
                           onClick={() => openViewModal(report)}
                           className="text-indigo-600 hover:text-indigo-900 cursor-pointer"
                         >
-                          View
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => downloadReportAsExcel(report)}
+                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer ml-2"
+                        >
+                          <Download className="h-3 w-3 mr-1" />
                         </button>
                       </td>
                     </tr>
@@ -296,7 +761,7 @@ const ReportModeration = () => {
         )}
       </div>
 
-      {/* Modal for viewing details */}
+      {/* Enhanced Modal for viewing details */}
       {isModalOpen && selectedReport && (
         <div
           className="fixed z-10 inset-0 overflow-y-auto"
@@ -319,85 +784,503 @@ const ReportModeration = () => {
               &#8203;
             </span>
 
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div>
-                  <h3
-                    className="text-lg leading-6 font-medium text-gray-900"
-                    id="modal-title"
-                  >
-                    Report Details
-                  </h3>
-                  <div className="mt-4 space-y-3">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500">Report ID</p>
-                        <p className="font-medium">{selectedReport._id}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Submitted By</p>
-                        <p className="font-medium">
-                          {getUserInfo(selectedReport.userId)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Incident Type</p>
-                        <p className="font-medium">
-                          {selectedReport.incidentType}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Vehicle Registration</p>
-                        <p className="font-medium">
-                          {selectedReport.vehicles[0].registration}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Location</p>
-                        <p className="font-medium">{selectedReport.location}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Submitted At</p>
-                        <p className="font-medium">
-                          {formatDate(selectedReport.createdAt)}
-                        </p>
-                      </div>
-                      {selectedReport.date && (
-                        <div>
-                          <p className="text-gray-500">Incident Date</p>
-                          <p className="font-medium">
-                            {formatDate(selectedReport.date)}
-                          </p>
+                  {/* <div className="flex justify-between items-center">
+                    <h3
+                      className="text-lg leading-6 font-bold text-gray-900 flex items-center"
+                      id="modal-title"
+                    >
+                      <FileText className="mr-2 h-5 w-5 text-gray-500" />
+                      Report Details
+                    </h3>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-xs font-medium 
+                      ${
+                        selectedReport.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : selectedReport.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {selectedReport.status.charAt(0).toUpperCase() +
+                        selectedReport.status.slice(1)}
+                    </span>
+                  </div> */}
+                  <div className="flex justify-between items-center">
+                    <h3
+                      className="text-lg leading-6 font-bold text-gray-900 flex items-center"
+                      id="modal-title"
+                    >
+                      <FileText className="mr-2 h-5 w-5 text-gray-500" />
+                      Report Details
+                    </h3>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => downloadReportAsExcel(selectedReport)}
+                        className="mr-2 inline-flex items-center px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded hover:bg-indigo-100"
+                      >
+                        <FileText className="h-3 w-3 mr-1" />
+                        Download Excel
+                      </button>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-xs font-medium 
+                          ${
+                            selectedReport.status === "approved"
+                              ? "bg-green-100 text-green-800"
+                              : selectedReport.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                      >
+                        {selectedReport.status.charAt(0).toUpperCase() +
+                          selectedReport.status.slice(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="mt-4 border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-6">
+                      <button
+                        className={`pb-4 px-1 ${
+                          activeTab === "details"
+                            ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
+                            : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                        onClick={() => setActiveTab("details")}
+                      >
+                        Details
+                      </button>
+                      <button
+                        className={`pb-4 px-1 ${
+                          activeTab === "reporter"
+                            ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
+                            : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                        onClick={() => setActiveTab("reporter")}
+                      >
+                        Reporter Info
+                      </button>
+                      <button
+                        className={`pb-4 px-1 ${
+                          activeTab === "vehicle"
+                            ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
+                            : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                        onClick={() => setActiveTab("vehicle")}
+                      >
+                        Vehicle
+                      </button>
+                      <button
+                        className={`pb-4 px-1 ${
+                          activeTab === "evidence"
+                            ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
+                            : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                        }`}
+                        onClick={() => setActiveTab("evidence")}
+                      >
+                        Evidence
+                      </button>
+                    </nav>
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="mt-4">
+                    {/* Details Tab */}
+                    {activeTab === "details" && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Info className="h-4 w-4 mr-1 text-gray-400" />
+                                Report ID
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport._id}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                                Submitted At
+                              </p>
+                              <p className="font-medium">
+                                {formatDate(selectedReport.createdAt)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <AlertTriangle className="h-4 w-4 mr-1 text-gray-400" />
+                                Incident Type
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.incidentType}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Car className="h-4 w-4 mr-1 text-gray-400" />
+                                Vehicle Type
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.vehicleType}
+                              </p>
+                            </div>
+                            {selectedReport.date && (
+                              <div>
+                                <p className="text-gray-500 flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1 text-gray-400" />
+                                  Incident Date
+                                </p>
+                                <p className="font-medium">
+                                  {formatDate(selectedReport.date)}
+                                </p>
+                              </div>
+                            )}
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Clock className="h-4 w-4 mr-1 text-gray-400" />
+                                Updated At
+                              </p>
+                              <p className="font-medium">
+                                {formatDate(selectedReport.updatedAt)}
+                              </p>
+                            </div>
+                          </div>
                         </div>
-                      )}
-                    </div>
 
-                    <div>
-                      <p className="text-gray-500">Description</p>
-                      <p className="font-medium mt-1">
-                        {selectedReport.description}
-                      </p>
-                    </div>
+                        <div className="space-y-3">
+                          <h4 className="font-medium text-gray-700 flex items-center">
+                            <MapPin className="h-4 w-4 mr-1 text-gray-500" />
+                            Location Details
+                          </h4>
+                          <div className="bg-gray-50 p-3 rounded-md">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-gray-500">Street Address</p>
+                                <p className="font-medium">
+                                  {selectedReport.location}
+                                </p>
+                              </div>
+                              {selectedReport.crossStreet && (
+                                <div>
+                                  <p className="text-gray-500">Cross Street</p>
+                                  <p className="font-medium">
+                                    {selectedReport.crossStreet}
+                                  </p>
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-gray-500">Suburb</p>
+                                <p className="font-medium">
+                                  {selectedReport.suburb}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">State</p>
+                                <p className="font-medium">
+                                  {selectedReport.state}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
 
-                    {selectedReport.mediaFlag && (
-                      <div>
-                        <p className="text-gray-500 mb-2">Media</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {getMediaUrls(selectedReport).map((url, index) => (
-                            <img
-                              key={index}
-                              src={url}
-                              alt={`Report media ${index + 1}`}
-                              className="rounded-md w-full h-auto"
-                            />
+                        {selectedReport.description && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-700 flex items-center">
+                              <FileText className="h-4 w-4 mr-1 text-gray-500" />
+                              Incident Description
+                            </h4>
+                            <div className="bg-gray-50 p-3 rounded-md">
+                              <p className="text-sm">
+                                {selectedReport.description ||
+                                  "No description provided."}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reporter Tab */}
+                    {activeTab === "reporter" && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          <h4 className="font-medium text-gray-700 flex items-center mb-3">
+                            <User className="h-4 w-4 mr-1 text-gray-500" />
+                            Reporter Information
+                          </h4>
+
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <User className="h-4 w-4 mr-1 text-gray-400" />
+                                Name
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.name}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Mail className="h-4 w-4 mr-1 text-gray-400" />
+                                Email
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.email}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Phone className="h-4 w-4 mr-1 text-gray-400" />
+                                Phone
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.phone}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500 flex items-center">
+                                <Info className="h-4 w-4 mr-1 text-gray-400" />
+                                User ID
+                              </p>
+                              <p className="font-medium">
+                                {selectedReport.userId || "N/A"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Vehicle Tab */}
+                    {activeTab === "vehicle" && (
+                      <div className="space-y-4">
+                        {selectedReport.vehicles &&
+                          selectedReport.vehicles.map((vehicle, index) => (
+                            <div
+                              key={vehicle._id || index}
+                              className="bg-gray-50 p-3 rounded-md"
+                            >
+                              <h4 className="font-medium text-gray-700 flex items-center mb-3">
+                                <Car className="h-4 w-4 mr-1 text-gray-500" />
+                                Vehicle {index + 1} Details
+                              </h4>
+
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <p className="text-gray-500">Registration</p>
+                                  <p className="font-medium text-indigo-600">
+                                    {vehicle.registration}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">
+                                    Registration State
+                                  </p>
+                                  <p className="font-medium">
+                                    {vehicle.registrationState}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Make</p>
+                                  <p className="font-medium">{vehicle.make}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Model</p>
+                                  <p className="font-medium">{vehicle.model}</p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">Body Type</p>
+                                  <p className="font-medium">
+                                    {vehicle.bodyType}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-500">
+                                    Reg. Visible on Dashcam
+                                  </p>
+                                  <p className="font-medium">
+                                    {vehicle.isRegistrationVisible}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {vehicle.identifyingFeatures && (
+                                <div className="mt-3">
+                                  <p className="text-gray-500">
+                                    Identifying Features
+                                  </p>
+                                  <p className="text-sm mt-1 bg-white p-2 rounded">
+                                    {vehicle.identifyingFeatures}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           ))}
+                      </div>
+                    )}
+
+                    {/* Evidence Tab */}
+                    {activeTab === "evidence" && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          <h4 className="font-medium text-gray-700 flex items-center mb-3">
+                            <File className="h-4 w-4 mr-1 text-gray-500" />
+                            Dashcam Evidence
+                          </h4>
+
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">
+                                Dashcam Footage Saved
+                              </p>
+                              <p className="font-medium flex items-center">
+                                {selectedReport.hasDashcam ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                                    Yes
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-1 text-red-500" />
+                                    No
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Audio Available</p>
+                              <p className="font-medium flex items-center">
+                                {selectedReport.hasAudio ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                                    Yes
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-1 text-red-500" />
+                                    No
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">
+                                Can Provide Footage
+                              </p>
+                              <p className="font-medium flex items-center">
+                                {selectedReport.canProvideFootage ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                                    Yes
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-1 text-red-500" />
+                                    No
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Terms Accepted</p>
+                              <p className="font-medium flex items-center">
+                                {selectedReport.acceptTerms ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                                    Yes
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-1 text-red-500" />
+                                    No
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Media Flag</p>
+                              <p className="font-medium flex items-center">
+                                {selectedReport.mediaFlag ? (
+                                  <>
+                                    <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
+                                    Yes
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="h-4 w-4 mr-1 text-red-500" />
+                                    No
+                                  </>
+                                )}
+                              </p>
+                            </div>
+                          </div>
                         </div>
+
+                        {selectedReport.mediaFlag && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-gray-700">
+                              Media Files
+                            </h4>
+                            <div className="grid grid-cols-2 gap-2">
+                              {getMediaUrls(selectedReport).map(
+                                (url, index) => (
+                                  <img
+                                    key={index}
+                                    src={url}
+                                    alt={`Report media ${index + 1}`}
+                                    className="rounded-md w-full h-auto"
+                                  />
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 </div>
               </div>
+
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                {selectedReport.status === "pending" && (
+                  <>
+                    <button
+                      type="button"
+                      className="ml-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:text-sm"
+                      onClick={() => {
+                        handleApproveReport(
+                          selectedReport._id,
+                          selectedReport.userId
+                        );
+                        setIsModalOpen(false);
+                      }}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-1" />
+                      Approve
+                    </button>
+                    <button
+                      type="button"
+                      className="ml-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm"
+                      onClick={() => {
+                        handleRejectReport(
+                          selectedReport._id,
+                          selectedReport.userId
+                        );
+                        setIsModalOpen(false);
+                      }}
+                    >
+                      <XCircle className="h-4 w-4 mr-1" />
+                      Reject
+                    </button>
+                  </>
+                )}
                 <button
                   type="button"
                   className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"

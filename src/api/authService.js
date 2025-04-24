@@ -15,6 +15,7 @@ const clearUserSession = () => {
 export const loginUser = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
   const user = response.data.user;
+  console.log(user)
 
   if (user.role === "client") {
     if (user.approvalStatus === "pending") {

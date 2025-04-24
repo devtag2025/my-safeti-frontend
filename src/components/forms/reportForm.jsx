@@ -3,12 +3,14 @@ import { MapPinIcon } from "lucide-react";
 import DownIcon from "../../assets/svgs/ChevronDown";
 import { createReport } from "../../api/reportService";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
+import useAuthStore from "../../store/authStore";
 
 export default function IncidentReportForm() {
   const [activeVehicle, setActiveVehicle] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const user = useAuthStore((state) => state.user);
 
   // Define form with react-hook-form
   const {
@@ -21,8 +23,8 @@ export default function IncidentReportForm() {
   } = useForm({
     defaultValues: {
       // Personal information
-      name: "",
-      email: "",
+      name: user.fullName,
+      email: user.email,
       phone: "",
 
       // Incident details
@@ -33,7 +35,7 @@ export default function IncidentReportForm() {
       crossStreet: "",
       suburb: "",
       state: "NSW",
-      incidentType: "Speeding",
+      incidentType: "Collision",
       vehicleType: "Car",
       description: "",
 
@@ -50,6 +52,7 @@ export default function IncidentReportForm() {
           registrationState: "NSW",
           make: "",
           model: "",
+          vehicleColour: "",
           bodyType: "Sedan",
           identifyingFeatures: "",
           isRegistrationVisible: "Unknown",
@@ -95,7 +98,7 @@ export default function IncidentReportForm() {
     setSuccess(false);
 
     try {
-      console.log("Submitting form...", data);
+      // console.log("Submitting form...", data);
       await createReport(data);
       setSuccess(true);
       // Reset form after successful submission
@@ -135,10 +138,12 @@ export default function IncidentReportForm() {
   const visibilityOptions = ["Yes", "No", "Unknown"];
 
   const incidentTypes = [
-    "Speeding",
-    "Running Red Light",
-    "Reckless Driving",
+    "Collision",
+    "Excessive Speed",
+    "Road Rage",
+    "Hoon Driving (Including burnouts, racing)",
     "Tailgating",
+    "Dangerous/Reckless Driving",
     "Other",
   ];
 
@@ -159,20 +164,6 @@ export default function IncidentReportForm() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="p-6 space-y-6">
-          {/* Error and Success Messages */}
-          {error && (
-            <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-md">
-              <strong>Error:</strong> {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="p-4 border border-green-200 bg-green-50 text-green-700 rounded-md">
-              <strong>Success!</strong> Your report has been submitted
-              successfully!
-            </div>
-          )}
-
           {/* Personal Information Section */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900 border-b pb-2">
@@ -208,12 +199,12 @@ export default function IncidentReportForm() {
                   className={`block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 border ${
                     errors.phone ? "border-red-500" : "border-gray-300"
                   } placeholder:text-gray-400 sm:text-sm`}
-                  {...register("phone", { 
+                  {...register("phone", {
                     required: "Phone number is required",
                     pattern: {
                       value: /^[0-9+ -]+$/,
-                      message: "Please enter a valid phone number"
-                    }
+                      message: "Please enter a valid phone number",
+                    },
                   })}
                 />
                 {errors.phone && (
@@ -270,7 +261,9 @@ export default function IncidentReportForm() {
                       <select
                         {...field}
                         className={`block w-full appearance-none rounded-md bg-white px-3 py-1.5 text-gray-900 border ${
-                          errors.incidentType ? "border-red-500" : "border-gray-300"
+                          errors.incidentType
+                            ? "border-red-500"
+                            : "border-gray-300"
                         } placeholder:text-gray-400 sm:text-sm`}
                       >
                         {incidentTypes.map((type) => (
@@ -303,7 +296,9 @@ export default function IncidentReportForm() {
                       <select
                         {...field}
                         className={`block w-full appearance-none rounded-md bg-white px-3 py-1.5 text-gray-900 border ${
-                          errors.vehicleType ? "border-red-500" : "border-gray-300"
+                          errors.vehicleType
+                            ? "border-red-500"
+                            : "border-gray-300"
                         } placeholder:text-gray-400 sm:text-sm`}
                       >
                         {vehicleTypes.map((type) => (
@@ -373,7 +368,9 @@ export default function IncidentReportForm() {
                     className={`block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 border ${
                       errors.location ? "border-red-500" : "border-gray-300"
                     } placeholder:text-gray-400 sm:text-sm`}
-                    {...register("location", { required: "Location is required" })}
+                    {...register("location", {
+                      required: "Location is required",
+                    })}
                   />
                 </div>
                 {errors.location && (
@@ -473,15 +470,17 @@ export default function IncidentReportForm() {
                     onClick={() => setActiveVehicle(index)}
                   >
                     Vehicle {index + 1}
-                    {watch(`vehicles.${index}.registration`) && 
+                    {watch(`vehicles.${index}.registration`) &&
                       ` - ${watch(`vehicles.${index}.registration`)}`}
                   </button>
                 ))}
               </nav>
             </div>
 
-            {/* Active Vehicle Form */}
-            <div className="bg-white p-4 border border-gray-200 rounded-md">
+            <div
+              key={fields[activeVehicle]?.id}
+              className="bg-white p-4 border border-gray-200 rounded-md"
+            >
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-900">
@@ -594,7 +593,7 @@ export default function IncidentReportForm() {
                   </div>
                 </div>
 
-                <div className="sm:col-span-2 space-y-2">
+                <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-900">
                     Vehicle Identifying Features
                   </label>
@@ -602,7 +601,21 @@ export default function IncidentReportForm() {
                     placeholder="E.g., Sign writing, damage, accessories"
                     rows={2}
                     className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 border border-gray-300 placeholder:text-gray-400 sm:text-sm"
-                    {...register(`vehicles.${activeVehicle}.identifyingFeatures`)}
+                    {...register(
+                      `vehicles.${activeVehicle}.identifyingFeatures`
+                    )}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-900">
+                    Vehicle Colour
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="E.g., Orange, Green etc"
+                    rows={2}
+                    className="block w-full rounded-md bg-white px-3 py-4 text-gray-900 border border-gray-300 placeholder:text-gray-400 sm:text-sm"
+                    {...register(`vehicles.${activeVehicle}.vehicleColour`)}
                   />
                 </div>
               </div>
@@ -628,11 +641,13 @@ export default function IncidentReportForm() {
             </h3>
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">
-                Please provide as much detail as possible about the incident
+                Please provide as much detail as possible to describe the
+                incident captured.
               </label>
               <p className="text-sm text-gray-500">
-                The more information provided, the easier it will be to match a
-                vehicle with an incident.
+                By providing accurate information on the circumstances of the
+                incident, you will increase the likelihood of a successful match
+                to a request to obtain the footage.
               </p>
               <textarea
                 placeholder="Describe what happened in detail..."
@@ -723,7 +738,7 @@ export default function IncidentReportForm() {
                     errors.acceptTerms ? "border-red-500" : ""
                   }`}
                   {...register("acceptTerms", {
-                    required: "You must accept the terms and conditions"
+                    required: "You must accept the terms and conditions",
                   })}
                 />
                 <label
@@ -764,6 +779,19 @@ export default function IncidentReportForm() {
           >
             {loading ? "Submitting..." : "Submit Report"}
           </button>
+          {/* Error and Success Messages */}
+          {error && (
+            <div className="p-4 border border-red-200 bg-red-50 text-red-700 rounded-md">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-4 border border-green-200 bg-green-50 text-green-700 rounded-md">
+              <strong>Success!</strong> Your report has been submitted
+              successfully!
+            </div>
+          )}
         </div>
       </form>
     </div>
