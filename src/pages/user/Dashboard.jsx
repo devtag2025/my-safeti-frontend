@@ -525,7 +525,7 @@ const UserDashboard = () => {
                         <div className="space-y-1">
                           <p className="text-sm text-gray-500">Report ID</p>
                           <p className="font-medium text-xs text-gray-600">
-                            {selectedReport._id}
+                            {selectedReport.customId}
                           </p>
                         </div>
                       </div>

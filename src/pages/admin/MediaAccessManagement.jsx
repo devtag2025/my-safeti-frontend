@@ -1,0 +1,510 @@
+import { useState, useEffect } from "react";
+import { Search, Download, Check, X, Eye, Film } from "lucide-react";
+import axios from "axios";
+import API from "../../api/axiosConfig";
+
+const MediaAccessManagement = () => {
+  const [mediaRequests, setMediaRequests] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+
+  // Fetch media requests from the API
+  useEffect(() => {
+    const fetchMediaRequests = async () => {
+      try {
+        setIsLoading(true);
+
+        const response = await API.get("/media-requests/getAllMediaRequests");
+
+        setMediaRequests(response.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    console.log(`${API}`);
+
+    fetchMediaRequests();
+  }, []);
+
+  // Handle request status change
+  const handleStatusChange = async (requestId, newStatus) => {
+    try {
+      await API.patch(`/media-requests/${requestId}/status`, {
+        status: newStatus,
+      });
+
+      setMediaRequests(
+        mediaRequests.map((request) =>
+          request._id === requestId
+            ? { ...request, status: newStatus }
+            : request
+        )
+      );
+    } catch (err) {
+      console.error(`Error updating request status to ${newStatus}:`, err);
+    }
+  };
+
+  // Open view request details modal
+  const openViewModal = (request) => {
+    setSelectedRequest(request);
+    setIsViewModalOpen(true);
+  };
+
+  // Filter requests based on search and filters
+  const filteredRequests = mediaRequests.filter((request) => {
+    const matchesSearch =
+      (request.report?.customId?.toString() || "").includes(
+        searchTerm.toLowerCase()
+      ) ||
+      (request.requestedBy?.email || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (request.inquiryText || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      filterStatus === "" || request.status === filterStatus;
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="text-center mt-10 text-red-500">
+          Failed to load media requests: {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+          Media Access Management
+        </h1>
+        <p className="text-gray-600">
+          Review and manage client requests for footage access
+        </p>
+      </div>
+
+      {/* Search and Filters */}
+      <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+          {/* Search Bar */}
+          <div className="relative w-full md:w-1/3">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+              <Search className="w-5 h-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
+              placeholder="Search requests..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex flex-wrap gap-2">
+            <select
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Media Requests Table */}
+      <div className="bg-white overflow-x-auto shadow rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Report ID
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Vehicle
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Incident Type
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Status
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Date Requested
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {isLoading ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="px-6 py-4 text-center text-sm text-gray-500"
+                >
+                  Loading media requests...
+                </td>
+              </tr>
+            ) : filteredRequests.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="px-6 py-4 text-center text-sm text-gray-500"
+                >
+                  No media requests found matching your criteria.
+                </td>
+              </tr>
+            ) : (
+              filteredRequests.map((request) => (
+                <tr key={request._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center">
+                        <Film className="h-6 w-6 text-indigo-500" />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {request.report?.customId || "N/A"}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {request.report?.vehicles?.[0]?.registration || "N/A"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {request.report?.vehicles?.[0]?.make}{" "}
+                      {request.report?.vehicles?.[0]?.model}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {request.report?.incidentType || "N/A"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        request.status === "approved"
+                          ? "bg-green-100 text-green-800"
+                          : request.status === "pending"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {request.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(request.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end space-x-2">
+                      {/* View details button */}
+                      <button
+                        onClick={() => openViewModal(request)}
+                        className="text-indigo-600 hover:text-indigo-900 bg-indigo-50 p-1 rounded-full"
+                        title="View request details"
+                      >
+                        <Eye className="w-5 h-5" />
+                      </button>
+
+                      {/* Status toggle buttons */}
+                      {request.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(request._id, "approved")
+                            }
+                            className="text-green-600 hover:text-green-900 bg-green-50 p-1 rounded-full"
+                            title="Approve request"
+                          >
+                            <Check className="w-5 h-5" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(request._id, "rejected")
+                            }
+                            className="text-red-600 hover:text-red-900 bg-red-50 p-1 rounded-full"
+                            title="Reject request"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+
+                      {request.status === "approved" && (
+                        <button
+                          onClick={() =>
+                            handleStatusChange(request._id, "rejected")
+                          }
+                          className="text-red-600 hover:text-red-900 bg-red-50 p-1 rounded-full"
+                          title="Reject request"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      )}
+
+                      {request.status === "rejected" && (
+                        <>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(request._id, "approved")
+                            }
+                            className="text-green-600 hover:text-green-900 bg-green-50 p-1 rounded-full"
+                            title="Approve request"
+                          >
+                            <Check className="w-5 h-5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* View Request Modal */}
+      {isViewModalOpen && selectedRequest && (
+        <div className="fixed z-30 inset-0 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity"
+              aria-hidden="true"
+              onClick={() => setIsViewModalOpen(false)}
+            ></div>
+
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200">
+              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h3
+                  className="text-lg leading-6 font-medium text-gray-900"
+                  id="modal-title"
+                >
+                  Media Request Details
+                </h3>
+                <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+                  onClick={() => setIsViewModalOpen(false)}
+                >
+                  <span className="sr-only">Close</span>
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">
+                      Report Information
+                    </h4>
+                    <div className="mt-2 bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Report ID:</span>{" "}
+                        {selectedRequest.report?.customId || "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Incident Type:</span>{" "}
+                        {selectedRequest.report?.incidentType || "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Location:</span>{" "}
+                        {selectedRequest.report?.location || "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Date:</span>{" "}
+                        {selectedRequest.report?.date
+                          ? new Date(
+                              selectedRequest.report.date
+                            ).toLocaleDateString()
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">
+                      Vehicle Information
+                    </h4>
+                    <div className="mt-2 bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Registration:</span>{" "}
+                        {selectedRequest.report?.vehicles?.[0]?.registration ||
+                          "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Make/Model:</span>{" "}
+                        {`${
+                          selectedRequest.report?.vehicles?.[0]?.make || ""
+                        } ${
+                          selectedRequest.report?.vehicles?.[0]?.model || ""
+                        }`.trim() || "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Color:</span>{" "}
+                        {selectedRequest.report?.vehicles?.[0]?.vehicleColour ||
+                          "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">
+                          Identifying Features:
+                        </span>{" "}
+                        {selectedRequest.report?.vehicles?.[0]
+                          ?.identifyingFeatures || "None"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">
+                      Request Details
+                    </h4>
+                    <div className="mt-2 bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Status:</span>{" "}
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            selectedRequest.status === "approved"
+                              ? "bg-green-100 text-green-800"
+                              : selectedRequest.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {selectedRequest.status}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-900">
+                        <span className="font-medium">Request Date:</span>{" "}
+                        {new Date(selectedRequest.createdAt).toLocaleString()}
+                      </p>
+                      <div className="mt-2">
+                        <span className="font-medium">Inquiry Text:</span>
+                        <p className="mt-1 text-sm text-gray-800 whitespace-pre-wrap">
+                          {selectedRequest.inquiryText ||
+                            "No additional information provided."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">
+                      Report Description
+                    </h4>
+                    <div className="mt-2 bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm text-gray-900 whitespace-pre-wrap">
+                        {selectedRequest.report?.description ||
+                          "No description provided."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                {selectedRequest.status === "pending" && (
+                  <>
+                    <button
+                      type="button"
+                      className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                      onClick={() => {
+                        handleStatusChange(selectedRequest._id, "approved");
+                        setIsViewModalOpen(false);
+                      }}
+                    >
+                      Approve Request
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                      onClick={() => {
+                        handleStatusChange(selectedRequest._id, "rejected");
+                        setIsViewModalOpen(false);
+                      }}
+                    >
+                      Reject Request
+                    </button>
+                  </>
+                )}
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => setIsViewModalOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MediaAccessManagement;

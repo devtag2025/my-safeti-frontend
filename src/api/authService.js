@@ -10,12 +10,12 @@ const saveUserSession = (user, token) => {
 const clearUserSession = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  localStorage.removeItem("role");
 };
 
 export const loginUser = async (credentials) => {
   const response = await API.post("/auth/login", credentials);
   const user = response.data.user;
-  console.log(user)
 
   if (user.role === "client") {
     if (user.approvalStatus === "pending") {
@@ -35,9 +35,7 @@ export const loginUser = async (credentials) => {
 // Signup API
 export const signupUser = async (userData) => {
   try {
-    console.log("Sending request with data:", userData);
     const response = await API.post("/auth/register", userData);
-    console.log("Signup response:", response.data);
 
     // Ensure response contains expected data
     if (!response.data.user || !response.data.token) {
@@ -56,4 +54,5 @@ export const signupUser = async (userData) => {
 // Logout (clear session)
 export const logoutUser = () => {
   clearUserSession();
+  console.log("in logout")
 };

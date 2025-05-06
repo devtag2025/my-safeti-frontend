@@ -18,7 +18,7 @@ export const fetchUserRequests = async () => {
 export const fetchClientRequests = async () => {
   try {
     const response = await API.get("/media-requests/client");
-    console.log('response',response.data)
+    // console.log("response", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -46,9 +46,30 @@ export const fetchPendingUploads = async () => {
   }
 };
 
-export const requestMedia = async (reportId) => {
+// export const requestMedia = async (reportId) => {
+//   try {
+//     const response = await API.post("/media-requests/request", { reportId });
+//     return response.data;
+//   } catch (error) {
+//     console.error(
+//       "Error requesting media:",
+//       error.response?.data || error.message
+//     );
+//     throw new Error(
+//       error.response?.data?.message || "Failed to request media."
+//     );
+//   }
+// };
+
+export const requestMedia = async (reportId, { inquiryText } = {}) => {
   try {
-    const response = await API.post("/media-requests/request", { reportId });
+    const payload = { reportId };
+
+    if (inquiryText && inquiryText.trim() !== "") {
+      payload.inquiryText = inquiryText;
+    }
+
+    const response = await API.post("/media-requests/request", payload);
     return response.data;
   } catch (error) {
     console.error(
@@ -108,7 +129,7 @@ export const changeMediaStatus = async (requestId, status) => {
 export const getAllUploadedMedia = async () => {
   try {
     const response = await API.get("/media-requests/uploaded");
-    console.log(response.data)
+    // console.log(response.data);
     const data = await response.data;
     return data;
   } catch (error) {
@@ -116,7 +137,6 @@ export const getAllUploadedMedia = async () => {
     throw new Error("Failed to fetch uploaded media");
   }
 };
-
 
 export const getAllMediaStats = async () => {
   try {

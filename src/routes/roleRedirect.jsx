@@ -7,9 +7,9 @@ const RoleRedirect = () => {
 
 
   const roleBasedRoutes = {
-    user: "/home",
-    client: "/client-dashboard",
-    admin: "/admin-dashboard",
+    user: "/user",
+    client: "/client",
+    admin: "/admin",
   };
 
   return user ? (

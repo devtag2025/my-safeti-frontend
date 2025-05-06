@@ -12,6 +12,7 @@ import {
   Menu,
   LogOut,
   X,
+  Video,
 } from "lucide-react";
 
 // Import submodules
@@ -21,6 +22,7 @@ import UserManagement from "./UserManagement";
 import ReportModeration from "./ReportModeration";
 import useAuthStore from "../../store/authStore";
 import UserIcon from "../../assets/svgs/UserIcon";
+import MediaAccessManagement from "./MediaAccessManagement";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -50,6 +52,11 @@ const AdminDashboard = () => {
       icon: <FileText className="w-5 h-5" />,
     },
     {
+      id: "media",
+      label: "Media Access Management",
+      icon: <Video className="w-5 h-5" />,
+    },
+    {
       id: "ads",
       label: "Advertisement",
       icon: <BarChart className="w-5 h-5" />,
@@ -72,6 +79,8 @@ const AdminDashboard = () => {
         return <ReportModeration />;
       case "ads":
         return <Advertisement />;
+      case "media":
+        return <MediaAccessManagement />;
       case "revenue":
         return <RevenueDashboard />;
       default:
