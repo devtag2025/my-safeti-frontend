@@ -156,13 +156,14 @@ const MediaRequests = () => {
     switch (status) {
       case "pending":
         return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1"
-          >
-            <Clock className="h-3 w-3" />
-            Pending
-          </Badge>
+          // <Badge
+          //   variant="outline"
+          //   className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1"
+          // >
+          //   <Clock className="h-3 w-3" />
+          //   Pending
+          // </Badge>
+          <div></div>
         );
       case "uploaded":
         return (
@@ -248,7 +249,7 @@ const MediaRequests = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mediaRequests
-            .filter((request) => request.status === "approved")
+            // .filter((request) => request.status === "approved")
             .map((request) => (
               <Card
                 key={request._id}
@@ -278,10 +279,10 @@ const MediaRequests = () => {
                         <User className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
                         <div>
                           <p className="text-gray-500">Requested By</p>
-                          <p className="font-medium text-gray-900">
-                            {request.requestedBy.fullName || "Unknown"}
+                          <p className="font-medium text-gray-900 capitalize">
+                            {request.requestedBy[0].fullName || "Unknown"}
                             <span className="font-normal text-gray-500 ml-1">
-                              ({request.requestedBy.role})
+                              ({request.requestedBy[0].role})
                             </span>
                           </p>
                           <p className="text-xs text-gray-500">
@@ -312,11 +313,20 @@ const MediaRequests = () => {
                 </CardContent>
 
                 <CardFooter className="p-4 flex">
-                  {request.status === "uploaded" ? (
-                    <div className="w-full bg-blue-50 text-blue-700 rounded-md p-3 text-sm flex items-center">
+                  {request.status === "approved" ? (
+                    <div className="w-full bg-green-50 text-green-700 rounded-md p-3 text-sm flex items-center">
                       <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <span>Media submitted successfully</span>
+                      <span>Media submitted & approved successfully</span>
                     </div>
+                  ) : request.mediaUrls && request.mediaUrls.length > 0 ? (
+                    <Button
+                      className="w-full"
+                      onClick={() => handleOpenDialog(request)}
+                      variant="outline"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Replace Uploaded Media
+                    </Button>
                   ) : (
                     <Button
                       className="w-full"
@@ -362,10 +372,10 @@ const MediaRequests = () => {
                   <User className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
                   <div>
                     <p className="text-gray-500">Requested By</p>
-                    <p className="font-medium text-gray-900">
-                      {selectedRequest.requestedBy.fullName || "Unknown"}
+                    <p className="font-medium text-gray-900 capitalize">
+                      {selectedRequest.requestedBy[0].fullName || "Unknown"}
                       <span className="font-normal text-gray-500 ml-1">
-                        ({selectedRequest.requestedBy.role})
+                        ({selectedRequest.requestedBy[0].role})
                       </span>
                     </p>
                     <p className="text-xs text-gray-500">

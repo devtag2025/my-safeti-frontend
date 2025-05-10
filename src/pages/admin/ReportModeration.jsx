@@ -141,12 +141,12 @@ const ReportModeration = () => {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter((report) => {
         const reportFields = [
-          report.customId?.toString().toLowerCase(),
+          report.customId?.toString(),
           report.incidentType?.toLowerCase(),
           report.location?.toLowerCase(),
           report.suburb?.toLowerCase(),
           report.state?.toLowerCase(),
-          report.userId.customId?.toLowerCase(),
+          report.userId.customId.toString(),
           report.vehicleType?.toLowerCase(),
           report.description?.toLowerCase(),
           report.date
@@ -165,7 +165,7 @@ const ReportModeration = () => {
 
         const allFields = [...reportFields, ...vehicleFields];
 
-        return allFields.some((field) => field?.includes(term));
+        return allFields.some((field) => field.includes(term));
       });
     }
 
@@ -1408,7 +1408,7 @@ const ReportModeration = () => {
                   .map((report) => (
                     <tr key={report._id}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
-                        {report._id}
+                        {report.customId}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                         {report.incidentType}

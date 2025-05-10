@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Search, Download, Check, X, Eye, Film } from "lucide-react";
+import { Search, Download, Check, X, Eye, Film, Camera } from "lucide-react";
 import axios from "axios";
 import API from "../../api/axiosConfig";
 
@@ -11,6 +11,14 @@ const MediaAccessManagement = () => {
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+
+  // Add this function to handle opening the media viewer
+  const openMediaViewer = (mediaUrl) => {
+    setSelectedMedia(mediaUrl);
+    setIsMediaModalOpen(true);
+  };
 
   // Fetch media requests from the API
   useEffect(() => {
@@ -90,15 +98,6 @@ const MediaAccessManagement = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-          Media Access Management
-        </h1>
-        <p className="text-gray-600">
-          Review and manage client requests for footage access
-        </p>
-      </div>
-
       {/* Search and Filters */}
       <div className="bg-white p-4 rounded-lg shadow mb-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
@@ -250,8 +249,22 @@ const MediaAccessManagement = () => {
                         <Eye className="w-5 h-5" />
                       </button>
 
+                      {request.status === "uploaded" &&
+                        request.mediaUrls &&
+                        request.mediaUrls.length > 0 && (
+                          <button
+                            onClick={() =>
+                              openMediaViewer(request.mediaUrls[0])
+                            }
+                            className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded-full"
+                            title="View media"
+                          >
+                            <Camera className="w-5 h-5" />
+                          </button>
+                        )}
+
                       {/* Status toggle buttons */}
-                      {request.status === "pending" && (
+                      {request.status === "uploaded" && (
                         <>
                           <button
                             onClick={() =>
@@ -307,6 +320,98 @@ const MediaAccessManagement = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Media Viewer Modal */}
+      {isMediaModalOpen && selectedMedia && (
+        <div className="fixed z-40 inset-0 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity"
+              aria-hidden="true"
+              onClick={() => setIsMediaModalOpen(false)}
+            ></div>
+
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full border border-gray-200">
+              <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                <h3
+                  className="text-lg leading-6 font-medium text-gray-900"
+                  id="modal-title"
+                >
+                  Media Viewer
+                </h3>
+                <button
+                  type="button"
+                  className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full p-1"
+                  onClick={() => setIsMediaModalOpen(false)}
+                >
+                  <span className="sr-only">Close</span>
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div
+                className="bg-gray-900 flex justify-center items-center p-2"
+                style={{ minHeight: "400px" }}
+              >
+                {selectedMedia.toLowerCase().endsWith(".mp4") ||
+                selectedMedia.toLowerCase().endsWith(".mov") ||
+                selectedMedia.toLowerCase().endsWith(".avi") ? (
+                  <video controls className="max-h-[70vh] max-w-full" autoPlay>
+                    <source src={selectedMedia} />
+                    Your browser does not support the video tag.
+                  </video>
+                ) : (
+                  <img
+                    src={selectedMedia}
+                    alt="Uploaded evidence"
+                    className="max-h-[70vh] max-w-full object-contain"
+                  />
+                )}
+              </div>
+
+              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <a
+                  href={selectedMedia}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Media
+                </a>
+                <button
+                  type="button"
+                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  onClick={() => setIsMediaModalOpen(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Request Modal */}
       {isViewModalOpen && selectedRequest && (

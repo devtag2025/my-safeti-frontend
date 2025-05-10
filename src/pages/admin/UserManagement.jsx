@@ -76,15 +76,20 @@ const UserManagement = () => {
     alert("Notification sent successfully!");
   };
 
-  // Filter users based on search and filters
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.customId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.phone?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.approvalStatus?.toLowerCase().includes(searchTerm.toLowerCase());
+      
     const matchesRole = filterRole === "" || user.role === filterRole;
     const matchesStatus =
       filterStatus === "" || user.approvalStatus === filterStatus;
-
+  
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -145,6 +150,7 @@ const UserManagement = () => {
       </div>
 
       {/* Users Table */}
+      {/* Users Table */}
       <div className="bg-white overflow-x-auto shadow rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -153,7 +159,31 @@ const UserManagement = () => {
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
+                User ID
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 User
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Full Name
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                Phone
+              </th>
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
+                State
               </th>
               <th
                 scope="col"
@@ -185,7 +215,7 @@ const UserManagement = () => {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="9"
                   className="px-6 py-4 text-center text-sm text-gray-500"
                 >
                   Loading users...
@@ -194,7 +224,7 @@ const UserManagement = () => {
             ) : filteredUsers.length === 0 ? (
               <tr>
                 <td
-                  colSpan="5"
+                  colSpan="9"
                   className="px-6 py-4 text-center text-sm text-gray-500"
                 >
                   No users found matching your criteria.
@@ -203,25 +233,38 @@ const UserManagement = () => {
             ) : (
               filteredUsers.map((user) => (
                 <tr key={user._id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.customId || user._id}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         {/* User avatar placeholder */}
                         <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
-                          {user.name
-                            ? user.name.charAt(0).toUpperCase()
-                            : user.email.charAt(0).toUpperCase()} 
+                          {user.fullName
+                            ? user.fullName.charAt(0).toUpperCase()
+                            : user.email.charAt(0).toUpperCase()}
                         </div>
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1)}
+                          {user.email.split("@")[0].charAt(0).toUpperCase() +
+                            user.email.split("@")[0].slice(1)}
                         </div>
                         <div className="text-sm text-gray-500">
                           {user.email}
                         </div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.fullName || "-"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.phone || "-"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {user.state || "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900 capitalize">
@@ -231,13 +274,13 @@ const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${
-                        user.approvalStatus === "approved"
-                          ? "bg-green-100 text-green-800"
-                          : user.approvalStatus === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
+                ${
+                  user.approvalStatus === "approved"
+                    ? "bg-green-100 text-green-800"
+                    : user.approvalStatus === "pending"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-red-100 text-red-800"
+                }`}
                     >
                       {user.approvalStatus}
                     </span>

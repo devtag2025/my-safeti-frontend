@@ -51,7 +51,7 @@ const HeroSection = () => {
               <Button
                 asChild
                 size="lg"
-                className="bg-white text-indigo-600 hover:bg-gray-100 rounded-full px-8"
+                className="bg-white text-indigo-600 hover:bg-gray-200 text-xl font-sans font-semibold rounded-full px-8"
               >
                 <Link to="/report">Report Now</Link>
               </Button>
