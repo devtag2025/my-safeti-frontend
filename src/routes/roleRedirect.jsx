@@ -15,7 +15,7 @@ const RoleRedirect = () => {
   return user ? (
     <Navigate to={roleBasedRoutes[role] || "/login"} />
   ) : (
-    <Navigate to="/login" />
+    <Navigate to="/home" />
   );
 };
 

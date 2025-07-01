@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 import useAuthStore from "../store/authStore";
 import BackgroundImage from "../../public/images/bg.png";
-
-// Import shadcn components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,18 +21,34 @@ import { AlertCircle } from "lucide-react";
 const Login = () => {
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
+  const recaptchaRef = useRef(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  // const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+    if (error && error.includes("captcha")) {
+      setError("");
+    }
+  };
+
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
   };
 
   const handleSubmit = async (e) => {
@@ -50,10 +65,19 @@ const Login = () => {
       return;
     }
 
+    if (!captchaToken) {
+      setError("Please complete the captcha verification");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      await login(formData);
+      await login({
+        ...formData,
+        captchaToken,
+      });
+
       const user = useAuthStore.getState().user;
 
       if (user?.role === "admin") {
@@ -77,27 +101,35 @@ const Login = () => {
       }
     } catch (err) {
       setError(err.message || "Error signing in");
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
+      setCaptchaToken(null);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <div
-        className="fixed inset-0"
-        style={{
-          backgroundImage: `url(${BackgroundImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/30" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      {/* Logo Section */}
+      <div className="mb-8">
+        <div className="relative h-24 w-64 mx-auto overflow-hidden">
+          <img
+            src={BackgroundImage}
+            alt="Company Logo"
+            className="absolute inset-0 w-full h-auto"
+            style={{
+              transform: "scale(1.5)",
+              transformOrigin: "center center",
+              filter: "none",
+            }}
+          />
+        </div>
       </div>
 
       {/* Login Card */}
-      <Card className="w-[70vh] md:w-full max-w-md mx-auto relative z-10 bg-white/90 backdrop-blur-sm shadow-xl">
+      <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             Sign in
@@ -126,6 +158,7 @@ const Login = () => {
                 placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isSubmitting}
               />
             </div>
 
@@ -140,6 +173,18 @@ const Login = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={handleCaptchaChange}
+                onExpired={handleCaptchaExpired}
+                theme="light"
               />
             </div>
 

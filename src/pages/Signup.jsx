@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 import useAuthStore from "../store/authStore";
 import BackgroundImage from "../../public/images/bg.png";
 
@@ -29,9 +30,14 @@ import { AlertCircle, CheckCircle2 } from "lucide-react";
 const Signup = () => {
   const signup = useAuthStore((state) => state.signup);
   const navigate = useNavigate();
+  const recaptchaRef = useRef(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState(null);
 
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  // const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
+  
   const {
     register,
     handleSubmit,
@@ -52,11 +58,30 @@ const Signup = () => {
     setValue("state", value);
   };
 
-  const onSubmit = async (data) => {
-    try {
-      await signup(data);
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+    if (error && error.includes("captcha")) {
+      setError("");
+    }
+  };
 
-      // Retrieve user from Zustand store after signup
+  const handleCaptchaExpired = () => {
+    setCaptchaToken(null);
+  };
+
+  const onSubmit = async (data) => {
+    // Captcha validation
+    if (!captchaToken) {
+      setError("Please complete the captcha verification");
+      return;
+    }
+
+    try {
+      await signup({
+        ...data,
+        captchaToken,
+      });
+
       const user = useAuthStore.getState().user;
 
       if (!user) {
@@ -69,26 +94,34 @@ const Signup = () => {
       setError(
         err.response?.data?.message || "Signup failed. Please try again."
       );
+      // Reset captcha on error
+      if (recaptchaRef.current) {
+        recaptchaRef.current.reset();
+      }
+      setCaptchaToken(null);
     }
   };
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center overflow-hidden">
-      {/* Background Image */}
-      <div
-        className="fixed inset-0"
-        style={{
-          backgroundImage: `url(${BackgroundImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
-      >
-        <div className="absolute inset-0 bg-black/30" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      {/* Logo Section */}
+      <div className="mb-6">
+        <div className="relative h-24 w-64 mx-auto overflow-hidden">
+          <img
+            src={BackgroundImage}
+            alt="Company Logo"
+            className="absolute inset-0 w-full h-auto"
+            style={{
+              transform: "scale(1.5)",
+              transformOrigin: "center center",
+              filter: "none",
+            }}
+          />
+        </div>
       </div>
 
       {/* Signup Card */}
-      <Card className="w-[70vh] md:w-full max-w-md mx-auto relative z-10 bg-white/90 backdrop-blur-sm shadow-xl max-h-[95vh] overflow-y-auto">
+      <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
         <CardHeader className="space-y-1 py-4">
           <CardTitle className="text-xl font-bold text-center">
             Create Your Account
@@ -138,10 +171,11 @@ const Signup = () => {
                 })}
                 placeholder="Full name"
                 className="h-9"
+                disabled={isSubmitting}
               />
-              {errors.firstName && (
+              {errors.fullName && (
                 <p className="text-xs text-red-600">
-                  {errors.firstName.message}
+                  {errors.fullName.message}
                 </p>
               )}
             </div>
@@ -163,6 +197,7 @@ const Signup = () => {
                 })}
                 placeholder="name@example.com"
                 className="h-9"
+                disabled={isSubmitting}
               />
               {errors.email && (
                 <p className="text-xs text-red-600">{errors.email.message}</p>
@@ -182,6 +217,7 @@ const Signup = () => {
                 })}
                 placeholder="0400 000 000"
                 className="h-9"
+                disabled={isSubmitting}
               />
               {errors.phone && (
                 <p className="text-xs text-red-600">{errors.phone.message}</p>
@@ -205,6 +241,7 @@ const Signup = () => {
                 })}
                 placeholder="••••••••"
                 className="h-9"
+                disabled={isSubmitting}
               />
               {errors.password && (
                 <p className="text-xs text-red-600">
@@ -212,14 +249,19 @@ const Signup = () => {
                 </p>
               )}
             </div>
-            {/* Two columns for state and password */}
+
+            {/* Two columns for state and role */}
             <div className="grid grid-cols-2 gap-3">
               {/* State Selection */}
               <div className="space-y-1">
                 <Label htmlFor="state" className="text-sm">
                   State
                 </Label>
-                <Select onValueChange={handleStateChange} value={selectedState}>
+                <Select
+                  onValueChange={handleStateChange}
+                  value={selectedState}
+                  disabled={isSubmitting}
+                >
                   <SelectTrigger id="state" className="h-9">
                     <SelectValue placeholder="Select state" />
                   </SelectTrigger>
@@ -245,12 +287,17 @@ const Signup = () => {
                   <p className="text-xs text-red-600">{errors.state.message}</p>
                 )}
               </div>
+
               {/* Role Selection */}
               <div className="space-y-1">
                 <Label htmlFor="role" className="text-sm">
                   Select Role
                 </Label>
-                <Select onValueChange={handleRoleChange} value={selectedRole}>
+                <Select
+                  onValueChange={handleRoleChange}
+                  value={selectedRole}
+                  disabled={isSubmitting}
+                >
                   <SelectTrigger id="role" className="h-9">
                     <SelectValue placeholder="Select Role" />
                   </SelectTrigger>
@@ -268,6 +315,17 @@ const Signup = () => {
                   <p className="text-xs text-red-600">{errors.role.message}</p>
                 )}
               </div>
+            </div>
+
+            {/* reCAPTCHA */}
+            <div className="flex justify-center pt-2">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={RECAPTCHA_SITE_KEY}
+                onChange={handleCaptchaChange}
+                onExpired={handleCaptchaExpired}
+                theme="light"
+              />
             </div>
 
             {/* Submit Button */}

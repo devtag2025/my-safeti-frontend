@@ -32,7 +32,6 @@ const ReportsStats = () => {
         const fetchStats = async () => {
             try {
                 const data = await getUserReportStats();
-                console.log(data);
                 setStats(data);
             } catch (err) {
                 setError(err.message);

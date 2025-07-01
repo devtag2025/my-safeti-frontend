@@ -4,39 +4,42 @@ import { getCurrentUser } from "../api/userService";
 
 const useAuthStore = create((set) => ({
   user: JSON.parse(localStorage.getItem("user")) || null,
+  loading: true, 
 
   fetchUser: async () => {
     try {
       const user = await getCurrentUser();
-      set({ user });
+      set({ user, loading: false });
       localStorage.setItem("user", JSON.stringify(user));
     } catch (error) {
       console.error("Error fetching user:", error);
-      set({ user: null });
+      set({ user: null, loading: false });
       localStorage.removeItem("user");
     }
   },
 
   login: async (credentials) => {
     const user = await loginUser(credentials);
-    set({ user });
-    localStorage.setItem("user", JSON.stringify(user)); // ✅ Store in localStorage
+    set({ user, loading: false });
+    localStorage.setItem("user", JSON.stringify(user));
   },
 
   signup: async (userData) => {
     const user = await signupUser(userData);
-    set({ user });
-    localStorage.setItem("user", JSON.stringify(user)); // ✅ Store in localStorage
+    set({ user, loading: false });
+    localStorage.setItem("user", JSON.stringify(user));
   },
 
   logout: () => {
     logoutUser();
     set({ user: null });
-    localStorage.removeItem("user"); // ✅ Clear user from localStorage
+    localStorage.removeItem("user");
+    
   },
 
   isAdmin: () => useAuthStore.getState().user?.role === "admin",
   isClient: () => useAuthStore.getState().user?.role === "client",
 }));
+
 
 export default useAuthStore;

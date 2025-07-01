@@ -23,10 +23,13 @@ import UserProfile from "./pages/UserProfile";
 
 import ProtectedRoute from "./routes/protectedRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import OurPartner from "./pages/OurPartner";
+import IncidentHeatMap from "./pages/IncidentHeatMap";
+import ScrollToTop from "./components/layout/ScrollToTop";
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/login", "/signup"];
+  const hideNavbarRoutes = ["/", "/login", "/signup", "/home", "/our-partners", "/incident-heatMap"];
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
@@ -46,6 +49,8 @@ const AppContent = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/home" element={<Homepage />} />
+          <Route path="/our-partners" element={<OurPartner />} />
+          <Route path="/incident-heatMap" element={<IncidentHeatMap />} />
 
           {/* 🔒User Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
@@ -85,6 +90,7 @@ const AppContent = () => {
 };
 const App = () => (
   <Router>
+    <ScrollToTop />
     <AppContent />
   </Router>
 );

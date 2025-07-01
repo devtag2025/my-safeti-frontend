@@ -54,5 +54,4 @@ export const signupUser = async (userData) => {
 // Logout (clear session)
 export const logoutUser = () => {
   clearUserSession();
-  console.log("in logout")
 };

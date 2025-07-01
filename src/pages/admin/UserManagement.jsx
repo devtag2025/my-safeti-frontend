@@ -62,10 +62,11 @@ const UserManagement = () => {
 
   // Send notification
   const sendNotification = async () => {
-    const response = await axios.post(
-      "https://safe-street-backend.vercel.app/api/auth/emailSender",
-      notification
-    );
+    await API.post("/auth/emailSender", {
+      email: notification.email,
+      subject: notification.subject,
+      message: notification.message,
+    });
 
     // Close modal and reset form
     setIsNotificationModalOpen(false);
@@ -78,18 +79,21 @@ const UserManagement = () => {
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
-      user.customId?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.customId
+        ?.toString()
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.phone?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.state?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.approvalStatus?.toLowerCase().includes(searchTerm.toLowerCase());
-      
+
     const matchesRole = filterRole === "" || user.role === filterRole;
     const matchesStatus =
       filterStatus === "" || user.approvalStatus === filterStatus;
-  
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 

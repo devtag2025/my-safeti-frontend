@@ -54,6 +54,7 @@ const ReportModeration = () => {
   const [commentText, setCommentText] = useState("");
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [commentReport, setCommentReport] = useState(null);
+  const [originalEmailBody, setOriginalEmailBody] = useState("");
 
   const openCommentModal = (report) => {
     setCommentReport(report);
@@ -78,6 +79,15 @@ const ReportModeration = () => {
           actionType.slice(1).replace("_", " ")
         );
     }
+  };
+
+  const sendEmailAndRequestMediaByAdmin = async (template) => {
+    await API.post("/media-requests/sendEmailAndRequestMediaByAdmin", {
+      email: template.email,
+      subject: template.subject,
+      message: template.message,
+      reportId: template.reportId,
+    });
   };
 
   const handleAddComment = async (reportId, comment) => {
@@ -960,12 +970,10 @@ const ReportModeration = () => {
   };
 
   const generateEmailTemplate = (report) => {
+    const reportId = report._id;
     const subject = `Request for Dashcam Footage: Incident ${report.customId}`;
 
-    const template = `
-  To: ${report.email}
-  Subject: ${subject}
-  
+    const rawBody = `
   Dear ${report.name},
   
   Thank you for submitting your incident report (ID: ${
@@ -997,21 +1005,22 @@ const ReportModeration = () => {
   Best regards,
   The Incident Reporting Team
     `;
+    setOriginalEmailBody(rawBody);
 
     return {
       email: report.email,
       subject,
-      body: template,
+      message: rawBody,
+      reportId,
     };
   };
 
   const openEmailTemplate = (template) => {
-    // No need to regenerate the template, just use what's passed in
     const mailtoLink = `mailto:${encodeURIComponent(
       template.email
     )}?subject=${encodeURIComponent(
       template.subject
-    )}&body=${encodeURIComponent(template.body)}`;
+    )}&body=${encodeURIComponent(template.message)}`;
 
     window.location.href = mailtoLink;
   };
@@ -1021,7 +1030,7 @@ const ReportModeration = () => {
     const emailContent = `To: ${template.email}
   Subject: ${template.subject}
   
-  ${template.body}`;
+  ${template.message}`;
 
     navigator.clipboard
       .writeText(emailContent)
@@ -1611,7 +1620,7 @@ const ReportModeration = () => {
                     <div className="mb-4">
                       <p className="text-sm text-gray-700 font-medium">Body:</p>
                       <div className="mt-2 bg-gray-50 p-3 rounded-md whitespace-pre-wrap text-sm">
-                        {emailTemplate.body}
+                        {emailTemplate.message}
                       </div>
                     </div>
 
@@ -1624,14 +1633,15 @@ const ReportModeration = () => {
                         className="mt-1 w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                         placeholder="Paste OneDrive link here"
                         onChange={(e) => {
-                          const updatedTemplate = {
-                            ...emailTemplate,
-                            body: emailTemplate.body.replace(
-                              "[ONEDRIVE_LINK]",
-                              e.target.value
-                            ),
-                          };
-                          setEmailTemplate(updatedTemplate);
+                          const newLink = e.target.value;
+                          const updatedBody = originalEmailBody.replace(
+                            "[ONEDRIVE_LINK]",
+                            newLink
+                          );
+                          setEmailTemplate((prev) => ({
+                            ...prev,
+                            message: updatedBody,
+                          }));
                         }}
                       />
                     </div>
@@ -1642,15 +1652,17 @@ const ReportModeration = () => {
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="ml-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:text-sm"
-                  onClick={() => openEmailTemplate({ ...emailTemplate })}
+                  className="ml-3 inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:text-sm"
+                  onClick={() =>
+                    sendEmailAndRequestMediaByAdmin({ ...emailTemplate })
+                  }
                 >
                   <Mail className="h-4 w-4 mr-1" />
-                  Open in Email Client
+                  Send Email
                 </button>
                 <button
                   type="button"
-                  className="ml-3 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm"
+                  className="ml-3 inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm"
                   onClick={() =>
                     copyEmailTemplateToClipboard({ ...emailTemplate })
                   }

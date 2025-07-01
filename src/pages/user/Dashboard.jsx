@@ -795,14 +795,19 @@ const UserDashboard = () => {
                 </TabsContent>
               </Tabs>
 
-              <div className="flex justify-between">
+              <div>
                 {selectedReport && selectedReport.status === "rejected" && (
-                  <div className="flex flex-col items-start space-y-2">
-                    <p className="text-sm text-gray-600 max-w-md">
+                  <>
+                    <p className="text-sm text-gray-600 mb-2">
                       This report was rejected due to insufficient or incorrect
                       information. You may update the report to provide
                       additional details and resubmit it for review.
                     </p>
+                  </>
+                )}
+
+                <div className="flex justify-between items-center">
+                  {selectedReport?.status === "rejected" && (
                     <Button
                       variant="outline"
                       className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
@@ -814,9 +819,8 @@ const UserDashboard = () => {
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Report
                     </Button>
-                  </div>
-                )}
-                <div>
+                  )}
+
                   <Button onClick={() => setIsModalOpen(false)}>Close</Button>
                 </div>
               </div>

@@ -42,9 +42,9 @@ const HeroSection = () => {
 
             <p className="mt-6 text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
               Use SafeStreet.com.au to report dangerous, reckless or unsafe
-              driving captured on your dashcam with just a few clicks. Your
-              reports help contribute to improved road safety outcomes for all
-              road users across Australia.
+              driving you have witnessed with just a few clicks. Your reports
+              help contribute to improved road safety outcomes for all road
+              users across Australia.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6 lg:justify-start">
@@ -60,11 +60,16 @@ const HeroSection = () => {
 
           <div className="hidden lg:block mt-16 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">
             <div className="relative h-80 overflow-hidden rounded-2xl">
-              <img
-                src="/images/hero.jpg"
-                alt="Road safety reporting"
-                className="h-full w-full object-cover object-center shadow-2xl"
-              />
+              <video
+                src="/images/homePageVideo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="rounded-lg shadow-xl w-full h-full object-cover"
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
         </div>
