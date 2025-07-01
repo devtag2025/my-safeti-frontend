@@ -59,7 +59,7 @@ const HomeNavbar = () => {
           <Link 
             to="/" 
           >
-            <img src="../../public/images/bg.png" className='h-28' alt="" />
+            <img src="/images/bg.png" className='h-28' alt="" />
           </Link>
 
           {/* Desktop Navigation */}

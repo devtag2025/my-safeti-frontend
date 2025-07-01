@@ -118,6 +118,7 @@ const Login = () => {
           <img
             src={BackgroundImage}
             alt="Company Logo"
+            onClick={() => navigate("/home")}
             className="absolute inset-0 w-full h-auto"
             style={{
               transform: "scale(1.5)",

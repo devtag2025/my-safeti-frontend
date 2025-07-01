@@ -85,7 +85,7 @@ const Navbar = () => {
           SafeStreet<span className="text-gray-800">.com.au</span>
         </Link> */}
         <Link to={homePath}>
-          <img src="../../public/images/bg.png" className="h-20" alt="" />
+          <img src="/images/bg.png" className="h-20" alt="" />
         </Link>
 
         {/* Desktop Navigation */}

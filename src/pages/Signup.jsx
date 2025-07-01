@@ -109,6 +109,7 @@ const Signup = () => {
         <div className="relative h-24 w-64 mx-auto overflow-hidden">
           <img
             src={BackgroundImage}
+            onClick={() => navigate("/home")}
             alt="Company Logo"
             className="absolute inset-0 w-full h-auto"
             style={{
