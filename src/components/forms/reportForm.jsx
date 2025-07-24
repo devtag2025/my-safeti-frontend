@@ -144,6 +144,7 @@ export default function IncidentReportForm() {
     "Hoon Driving (Including burnouts, racing)",
     "Tailgating",
     "Dangerous/Reckless Driving",
+    "Request For Information",
     "Other",
   ];
 

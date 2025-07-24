@@ -1,11 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import HeroVideo from "../../public/images/homePageVideo.mp4";
 import HomeNavbar from "../components/layout/HomeNavbar";
 import RoadSafetyHome from "../components/Home/RoadSafetyHome";
+import axios from "axios";
 
 const Homepage = () => {
   const [activeQuestion, setActiveQuestion] = useState(0);
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/report/statsForHome"
+        );
+        setStats(response.data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   const toggleQuestion = (index) => {
     setActiveQuestion(activeQuestion === index ? null : index);
@@ -23,9 +40,9 @@ const Homepage = () => {
                 <h1 className="text-4xl md:text-5xl font-bold leading-tight mb-6">
                   Report unsafe driving and make Australian roads safer
                 </h1>
-                <p className="text-xl mb-8 text-indigo-100">
+                <p className="text-xl mb-8 text-indigo-100 md:mr-4">
                   SafeStreet empowers everyday Australians to report at-risk
-                  driving behaviors and contribute to safer roads for everyone.
+                  driving behaviours and contribute to safer roads for everyone.
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
                   <Link
@@ -67,7 +84,7 @@ const Homepage = () => {
                 How SafeStreet Works
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Our platform enables you to report dangerous driving behaviors
+                Our platform enables you to report dangerous driving behaviours
                 in just a few simple steps.
               </p>
             </div>
@@ -79,8 +96,9 @@ const Homepage = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Observe Incident</h3>
                 <p className="text-gray-600">
-                  Witness unsafe driving behavior or an at-risk situation on
-                  Australian roads.
+                  Witness unsafe driving behaviour or an at-risk situation on
+                  Australian roads, and optionally capture it with dashcam
+                  footage.
                 </p>
               </div>
 
@@ -101,7 +119,7 @@ const Homepage = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-3">Data Analysis</h3>
                 <p className="text-gray-600">
-                  Reports are verified and analyzed to identify patterns and
+                  Reports are verified and analysed to identify patterns and
                   high-risk drivers.
                 </p>
               </div>
@@ -252,7 +270,7 @@ const Homepage = () => {
                       <span className="font-medium">
                         Enhanced risk assessment
                       </span>{" "}
-                      - Access real-world driver behavior data.
+                      - Access real-world driver behaviour data.
                     </span>
                   </li>
                   <li className="flex items-start">
@@ -271,8 +289,8 @@ const Homepage = () => {
                       ></path>
                     </svg>
                     <span>
-                      <span className="font-medium">Optimized premiums</span> -
-                      Adjust pricing based on actual driving behaviors.
+                      <span className="font-medium">Optimised premiums</span> -
+                      Adjust pricing based on actual driving behaviours.
                     </span>
                   </li>
                   <li className="flex items-start">
@@ -294,7 +312,7 @@ const Homepage = () => {
                       <span className="font-medium">
                         Comprehensive analytics
                       </span>{" "}
-                      - Detailed reports and visualizations.
+                      - Detailed reports and visualisations.
                     </span>
                   </li>
                   <li className="flex items-start">
@@ -313,8 +331,11 @@ const Homepage = () => {
                       ></path>
                     </svg>
                     <span>
-                      <span className="font-medium">Media evidence</span> -
-                      Access to verified incident media for $139 AUD.
+                      <span className="font-medium">
+                        Streamlined claims processing
+                      </span>{" "}
+                      – Quickly evaluate reports to support fair and efficient
+                      claims decisions.
                     </span>
                   </li>
                 </ul>
@@ -324,268 +345,50 @@ const Homepage = () => {
         </section>
 
         {/* Statistics Section */}
-        <section className="py-20 bg-indigo-900 text-white">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Making Australian Roads Safer
-              </h2>
-              <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
-                Our platform is driving meaningful change for road safety in
-                Australia.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-4xl md:text-5xl font-bold mb-2">
-                  10,000+
-                </div>
-                <div className="text-indigo-200">Reports Submitted</div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold mb-2">
-                  2,500+
-                </div>
-                <div className="text-indigo-200">
-                  High-Risk Drivers Identified
-                </div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold mb-2">15+</div>
-                <div className="text-indigo-200">Insurance Partners</div>
-              </div>
-              <div>
-                <div className="text-4xl md:text-5xl font-bold mb-2">8%</div>
-                <div className="text-indigo-200">Road Incident Reduction</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Testimonials */}
-        <section className="py-20">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                What People Are Saying
-              </h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Hear from our users and insurance partners about the impact of
-                SafeStreet.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-indigo-600 font-bold">JS</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">John Smith</h4>
-                    <p className="text-gray-500 text-sm">Sydney, NSW</p>
-                  </div>
-                </div>
-                <p className="text-gray-600 italic">
-                  "I witnessed a driver weaving dangerously through traffic and
-                  was able to report it through SafeStreet. The process was
-                  incredibly easy, and I felt like I was really making a
-                  difference."
+        {stats && (
+          <section className="py-20 bg-indigo-900 text-white">
+            <div className="container mx-auto px-6">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Making Australian Roads Safer
+                </h2>
+                <p className="text-xl text-indigo-200 max-w-2xl mx-auto">
+                  Our platform is driving meaningful change for road safety in
+                  Australia.
                 </p>
-                <div className="flex text-yellow-400 mt-4">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-indigo-600 font-bold">MJ</span>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {stats.totalReports.toLocaleString()}
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Mark Johnson</h4>
-                    <p className="text-gray-500 text-sm">Insurance Partner</p>
+                  <div className="text-indigo-200">Reports Submitted</div>
+                </div>
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {stats.highRiskDrivers.toLocaleString()}
+                  </div>
+                  <div className="text-indigo-200">
+                    High-Risk Drivers Identified
                   </div>
                 </div>
-                <p className="text-gray-600 italic">
-                  "The data provided by SafeStreet has transformed our risk
-                  assessment process. We're now able to set premiums based on
-                  actual driver behavior rather than just demographics and
-                  claims history."
-                </p>
-                <div className="flex text-yellow-400 mt-4">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                <div className="flex items-center mb-4">
-                  <div className="bg-indigo-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
-                    <span className="text-indigo-600 font-bold">SW</span>
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {stats.insurancePartners}+
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Sarah Wilson</h4>
-                    <p className="text-gray-500 text-sm">Melbourne, VIC</p>
-                  </div>
+                  <div className="text-indigo-200">Insurance Partners</div>
                 </div>
-                <p className="text-gray-600 italic">
-                  "I reported a driver who ran a red light, and the process was
-                  so straightforward. I even received a reward when my dashcam
-                  footage was approved. It feels good to contribute to safer
-                  roads."
-                </p>
-                <div className="flex text-yellow-400 mt-4">
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                  </svg>
+                <div>
+                  <div className="text-4xl md:text-5xl font-bold mb-2">
+                    {stats.incidentReduction}%
+                  </div>
+                  <div className="text-indigo-200">Road Incident Reduction</div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        {/* <section className="py-16 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              Ready to make Australian roads safer?
-            </h2>
-            <p className="text-xl mb-8 text-indigo-100 max-w-2xl mx-auto">
-              Join thousands of Australians who are already contributing to
-              safer roads. Sign up today or report an incident.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
-              <Link
-                to="/report"
-                className="bg-white text-indigo-700 hover:bg-indigo-50 px-8 py-3 rounded-md font-semibold shadow-md transition"
-              >
-                Report an Incident
-              </Link>
-              <Link
-                to="/signup"
-                className="bg-transparent hover:bg-indigo-600 border-2 border-white px-8 py-3 rounded-md font-semibold transition"
-              >
-                Create an Account
-              </Link>
-            </div>
-          </div>
-        </section> */}
+          </section>
+        )}
 
         {/* FAQ Section */}
         <section className="py-20 bg-gray-50">
@@ -648,7 +451,7 @@ const Homepage = () => {
                       contain accurate and complete information. Reports with
                       submitted media undergo an additional review to verify the
                       incident. We also use pattern recognition algorithms to
-                      identify consistent behaviors across multiple reports for
+                      identify consistent behaviours across multiple reports for
                       the same vehicle registration.
                     </p>
                   </div>
@@ -807,7 +610,7 @@ const Homepage = () => {
                   <div className="mt-3 text-gray-600">
                     <p>
                       SafeStreet is designed for reporting unsafe driving
-                      behaviors such as speeding, running red lights, reckless
+                      behaviours such as speeding, running red lights, reckless
                       driving, tailgating, and other dangerous actions. For
                       emergencies or serious traffic incidents, always contact
                       emergency services (000) first. Our platform is not
@@ -864,7 +667,7 @@ const Homepage = () => {
                       Insurance companies can sign up for client accounts
                       through our website. After verification, they gain access
                       to our client portal where they can search for specific
-                      vehicle registrations, view report histories, analyze risk
+                      vehicle registrations, view report histories, analyse risk
                       patterns, and request access to media evidence. Different
                       subscription levels are available based on data access
                       needs.

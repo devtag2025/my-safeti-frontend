@@ -26,10 +26,18 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import OurPartner from "./pages/OurPartner";
 import IncidentHeatMap from "./pages/IncidentHeatMap";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import { ToastContainer } from "react-toastify";
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarRoutes = ["/", "/login", "/signup", "/home", "/our-partners", "/incident-heatMap"];
+  const hideNavbarRoutes = [
+    "/",
+    "/login",
+    "/signup",
+    "/home",
+    "/our-partners",
+    "/incident-heatMap",
+  ];
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
@@ -92,6 +100,7 @@ const App = () => (
   <Router>
     <ScrollToTop />
     <AppContent />
+    <ToastContainer position="top-right" autoClose={3000} />
   </Router>
 );
 

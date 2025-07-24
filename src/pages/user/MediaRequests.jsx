@@ -110,17 +110,15 @@ const MediaRequests = () => {
     setUploadProgress(0);
     const formData = new FormData();
 
-    // Append each file to form data
     files.forEach((file) => {
       formData.append("files", file);
     });
 
     try {
-      // Simulate upload progress for better UX
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           const next = prev + Math.random() * 10;
-          return next > 90 ? 90 : next; // Cap at 90% until actual completion
+          return next > 90 ? 90 : next; 
         });
       }, 300);
 

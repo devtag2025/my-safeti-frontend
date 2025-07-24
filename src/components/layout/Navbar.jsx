@@ -9,6 +9,8 @@ import {
   User,
   FileText,
   Settings,
+  LayoutDashboard,
+  Camera,
 } from "lucide-react";
 import useAuthStore from "../../store/authStore";
 import UserIcon from "../../assets/svgs/UserIcon";
@@ -53,11 +55,20 @@ const Navbar = () => {
   const navLinks = [
     ...(user?.role === "user"
       ? [
-          { name: "Dashboard", path: "/dashboard", icon: <Home size={16} /> },
+          {
+            name: "Home",
+            path: "/home",
+            icon: <Home size={16} />,
+          },
+          {
+            name: "Dashboard",
+            path: "/dashboard",
+            icon: <LayoutDashboard size={16} />,
+          },
           {
             name: "Media Requests",
             path: "/media-requests",
-            icon: <FileText size={16} />,
+            icon: <Camera size={16} />, 
           },
         ]
       : []),

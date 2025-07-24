@@ -30,6 +30,7 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import axios from "axios";
 import API from "../../api/axiosConfig";
+import { toast } from "react-toastify";
 
 const ReportModeration = () => {
   const [reports, setReports] = useState([]);
@@ -55,6 +56,7 @@ const ReportModeration = () => {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [commentReport, setCommentReport] = useState(null);
   const [originalEmailBody, setOriginalEmailBody] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const openCommentModal = (report) => {
     setCommentReport(report);
@@ -82,12 +84,23 @@ const ReportModeration = () => {
   };
 
   const sendEmailAndRequestMediaByAdmin = async (template) => {
-    await API.post("/media-requests/sendEmailAndRequestMediaByAdmin", {
-      email: template.email,
-      subject: template.subject,
-      message: template.message,
-      reportId: template.reportId,
-    });
+    setIsSendingEmail(true);
+    try {
+      await API.post("/media-requests/sendEmailAndRequestMediaByAdmin", {
+        email: template.email,
+        subject: template.subject,
+        message: template.message,
+        reportId: template.reportId,
+      });
+
+      toast.success("Media request submitted successfully!");
+      setIsEmailModalOpen(false);
+    } catch (error) {
+      console.error("Error sending email request:", error);
+      toast.error("Failed to submit media request.");
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const handleAddComment = async (reportId, comment) => {
@@ -969,48 +982,107 @@ const ReportModeration = () => {
     }
   };
 
+  // const generateEmailTemplate = (report) => {
+  //   const reportId = report._id;
+  //   const subject = `Request for Dashcam Footage: Incident ${report.customId}`;
+
+  //   const rawBody = `
+  // Dear ${report.name},
+
+  // Thank you for submitting your incident report (ID: ${report.customId}) regarding a ${report.incidentType.toLowerCase()} incident that occurred on ${formatDate(report.date)}.
+
+  // A formal request for dashcam relevant to the incident you reported has been submitted.
+
+  // The next step is for you to provide the dashcam footage to us via the below OneDrive link.
+
+  // Please upload the full unedited footage of the incident. Once the footage is submitted, SafeStreet AU will review the footage to confirm it matches the incident reported. The footage will then be provided to the requestor.
+
+  // Once the quality control process is completed, a payment will be processed to your nominated bank account.
+
+  // If you have any questions, please contact us via email at admin@safestreet.com.au.
+
+  // As you indicated that you have dashcam footage available, we would greatly appreciate if you could provide this evidence to help us process your report. Please upload your footage to the following secure OneDrive link:
+
+  // [ONEDRIVE_LINK]
+
+  // Important information to include with your upload:
+  // - Your Report ID: ${report.customId}
+  // - Date of Incident: ${formatDate(report.date)}
+  // - Location: ${report.location}, ${report.suburb}, ${report.state}
+  // - Vehicle Registration: ${
+  //     report.vehicles && report.vehicles.length > 0
+  //       ? report.vehicles[0].registration
+  //       : "N/A"
+  //   }
+
+  // If you have any questions or need assistance with uploading your footage, please don't hesitate to contact our support team on admin@safestreet.com.au.
+
+  // Thank you again.
+
+  // Best regards,
+  // The Incident Reporting Team
+  // `;
+
+  //   setOriginalEmailBody(rawBody);
+
+  //   return {
+  //     email: report.email,
+  //     subject,
+  //     message: rawBody,
+  //     reportId,
+  //   };
+  // };
+
   const generateEmailTemplate = (report) => {
     const reportId = report._id;
     const subject = `Request for Dashcam Footage: Incident ${report.customId}`;
 
-    const rawBody = `
-  Dear ${report.name},
-  
-  Thank you for submitting your incident report (ID: ${
-    report.customId
-  }) regarding a ${report.incidentType.toLowerCase()} incident that occurred on ${formatDate(
-      report.date
-    )}.
-  
-  As you indicated that you have dashcam footage available, we would greatly appreciate if you could provide this evidence to help us process your report. Please upload your footage to the following secure OneDrive link:
-  
-  [ONEDRIVE_LINK]
-  
-  Important information to include with your upload:
-  - Your Report ID: ${report.customId}
-  - Date of Incident: ${formatDate(report.date)}
-  - Location: ${report.location}, ${report.suburb}, ${report.state}
-  - Vehicle Registration: ${
-    report.vehicles && report.vehicles.length > 0
-      ? report.vehicles[0].registration
-      : "N/A"
-  }
-  
-  Please ensure the footage clearly shows the incident described in your report. If possible, include a timestamp or other identifying information to help us verify the date and time.
-  
-  If you have any questions or need assistance with uploading your footage, please don't hesitate to reply to this email or contact our support team.
-  
-  Thank you for your cooperation.
-  
-  Best regards,
-  The Incident Reporting Team
-    `;
-    setOriginalEmailBody(rawBody);
+    const formattedDate = formatDate(report.date);
+    const registration =
+      report.vehicles && report.vehicles.length > 0
+        ? report.vehicles[0].registration
+        : "N/A";
+
+    const htmlBody = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; font-size: 15px; color: #333;">
+      <p>Dear ${report.name},</p>
+
+      <p>Thank you for submitting your incident report (ID: <strong>${
+        report.customId
+      }</strong>) regarding a <strong>${report.incidentType.toLowerCase()}</strong> incident that occurred on <strong>${formattedDate}</strong>.</p>
+
+      <p>A formal request for dashcam footage relevant to the incident you reported has been submitted.</p>
+
+      <p>The next step is for you to provide the dashcam footage to us via the following secure OneDrive link:</p>
+
+      <p><strong>[ONEDRIVE_LINK]</strong></p>
+
+      <p>Please upload the <strong>full unedited footage</strong> of the incident. Once the footage is submitted, SafeStreet AU will review it to confirm it matches the incident reported. The footage will then be provided to the requestor.</p>
+
+      <p>Once the quality control process is completed, a payment will be processed to your nominated bank account.</p>
+
+      <p>If you have any questions, please contact us at <a href="mailto:admin@safestreet.com.au">admin@safestreet.com.au</a>.</p>
+
+      <p>Important information to include with your upload:</p>
+      <ul>
+        <li><strong>Report ID:</strong> ${report.customId}</li>
+        <li><strong>Date of Incident:</strong> ${formattedDate}</li>
+        <li><strong>Location:</strong> ${report.location}, ${report.suburb}, ${
+      report.state
+    }</li>
+        <li><strong>Vehicle Registration:</strong> ${registration}</li>
+      </ul>
+
+      <p>Thank you again.<br/>Best regards,<br/><strong>The Incident Reporting Team</strong></p>
+    </div>
+  `;
+
+    setOriginalEmailBody(htmlBody);
 
     return {
       email: report.email,
       subject,
-      message: rawBody,
+      message: htmlBody,
       reportId,
     };
   };
@@ -1619,9 +1691,12 @@ const ReportModeration = () => {
 
                     <div className="mb-4">
                       <p className="text-sm text-gray-700 font-medium">Body:</p>
-                      <div className="mt-2 bg-gray-50 p-3 rounded-md whitespace-pre-wrap text-sm">
-                        {emailTemplate.message}
-                      </div>
+                      <div
+                        className="mt-2 bg-white border border-gray-300 p-4 rounded-md text-sm prose max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: emailTemplate.message,
+                        }}
+                      ></div>
                     </div>
 
                     <div className="mb-4">
@@ -1652,14 +1727,20 @@ const ReportModeration = () => {
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                 <button
                   type="button"
-                  className="ml-3 inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none sm:text-sm"
+                  disabled={isSendingEmail}
+                  className={`ml-3 inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:text-sm ${
+                    isSendingEmail
+                      ? "bg-indigo-300 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700"
+                  }`}
                   onClick={() =>
                     sendEmailAndRequestMediaByAdmin({ ...emailTemplate })
                   }
                 >
                   <Mail className="h-4 w-4 mr-1" />
-                  Send Email
+                  {isSendingEmail ? "Sending..." : "Send Email"}
                 </button>
+
                 <button
                   type="button"
                   className="ml-3 inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm"
@@ -1813,16 +1894,18 @@ const ReportModeration = () => {
                       >
                         Evidence
                       </button>
-                      <button
-                        className={`pb-4 px-1 ${
-                          activeTab === "comments"
-                            ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
-                            : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                        }`}
-                        onClick={() => setActiveTab("comments")}
-                      >
-                        Admin Comments
-                      </button>
+                      {selectedReport?.adminComments && (
+                        <button
+                          className={`pb-4 px-1 ${
+                            activeTab === "comments"
+                              ? "border-b-2 border-indigo-500 text-indigo-600 font-medium"
+                              : "text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                          }`}
+                          onClick={() => setActiveTab("comments")}
+                        >
+                          Admin Comments
+                        </button>
+                      )}
                     </nav>
                   </div>
 

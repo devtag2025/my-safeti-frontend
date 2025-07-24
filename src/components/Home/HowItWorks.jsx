@@ -16,7 +16,7 @@ const HowItWorks = () => {
     {
       icon: <BarChart4 size={30} className="text-amber-500" />,
       title: "Data Analysis",
-      description: "Our system analyzes patterns and shares anonymized risk data with insurance companies.",
+      description: "Our system analyses patterns and shares anonymized risk data with insurance companies.",
       color: "bg-amber-50 border-amber-100",
     },
     {

@@ -42,9 +42,9 @@ const HomeNavbar = () => {
   };
 
   const navLinks = [
-    { path: '/', label: 'Home' },
-    { path: '/our-partners', label: 'Our Partners' },
+    { path: '/home', label: 'Home' },
     { path: '/incident-heatMap', label: 'Incident HeatMap' },
+    { path: '/our-partners', label: 'Our Partners' },
   ];
 
   return (

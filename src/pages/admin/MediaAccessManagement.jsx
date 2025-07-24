@@ -1,7 +1,28 @@
 import { useState, useEffect } from "react";
-import { Search, Download, Check, X, Eye, Film, Camera } from "lucide-react";
+import {
+  Search,
+  Download,
+  Check,
+  X,
+  Eye,
+  Film,
+  Camera,
+  Upload,
+  Plus,
+} from "lucide-react";
 import axios from "axios";
 import API from "../../api/axiosConfig";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { uploadMedia } from "../../api/mediaRequestService";
 
 const MediaAccessManagement = () => {
   const [mediaRequests, setMediaRequests] = useState([]);
@@ -13,6 +34,13 @@ const MediaAccessManagement = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectedUploadRequest, setSelectedUploadRequest] = useState(null);
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const MAX_FILES = 5;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
   // Add this function to handle opening the media viewer
   const openMediaViewer = (mediaUrl) => {
@@ -35,9 +63,6 @@ const MediaAccessManagement = () => {
         setIsLoading(false);
       }
     };
-
-    console.log(`${API}`);
-
     fetchMediaRequests();
   }, []);
 
@@ -64,6 +89,103 @@ const MediaAccessManagement = () => {
   const openViewModal = (request) => {
     setSelectedRequest(request);
     setIsViewModalOpen(true);
+  };
+
+  const openUploadModal = (request) => {
+    setSelectedUploadRequest(request);
+    setIsUploadModalOpen(true);
+    setUploadFiles([]);
+    setUploadProgress(0);
+  };
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+
+    // Validate file count
+    if (files.length > MAX_FILES) {
+      alert(`You can only upload up to ${MAX_FILES} files at once.`);
+      return;
+    }
+
+    // Validate file sizes and types
+    const validFiles = files.filter((file) => {
+      if (file.size > MAX_FILE_SIZE) {
+        alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+        return false;
+      }
+
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+        "video/mp4",
+        "video/mov",
+        "video/avi",
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert(`File ${file.name} is not a supported format.`);
+        return false;
+      }
+
+      return true;
+    });
+
+    setUploadFiles(validFiles);
+  };
+
+  const handleUploadMedia = async () => {
+    if (!uploadFiles.length || !selectedUploadRequest) return;
+
+    setIsUploading(true);
+    setUploadProgress(0);
+    const formData = new FormData();
+
+    uploadFiles.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    try {
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          const next = prev + Math.random() * 10;
+          return next > 90 ? 90 : next;
+        });
+      }, 300);
+
+      await uploadMedia(selectedUploadRequest._id, formData);
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      setMediaRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request._id === selectedUploadRequest._id
+            ? {
+                ...request,
+                status: "uploaded",
+              }
+            : request
+        )
+      );
+
+      setTimeout(() => {
+        setIsUploadModalOpen(false);
+        setSelectedUploadRequest(null);
+        setUploadFiles([]); 
+        setUploadProgress(0);
+        alert("Media uploaded successfully!");
+      }, 1000);
+    } catch (error) {
+      console.error("Error uploading media:", error.message);
+      alert("Failed to upload media. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  const removeFile = (indexToRemove) => {
+    setUploadFiles(uploadFiles.filter((_, index) => index !== indexToRemove));
   };
 
   // Filter requests based on search and filters
@@ -312,6 +434,13 @@ const MediaAccessManagement = () => {
                           </button>
                         </>
                       )}
+                      <button
+                        onClick={() => openUploadModal(request)}
+                        className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded-full"
+                        title="Upload media"
+                      >
+                        <Upload className="w-5 h-5" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -607,6 +736,115 @@ const MediaAccessManagement = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {isUploadModalOpen && selectedUploadRequest && (
+        <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Upload Media</DialogTitle>
+              <DialogDescription>
+                Upload evidence media for Report ID:{" "}
+                {selectedUploadRequest.report?.customId}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {!isUploading ? (
+                <div
+                  onClick={() => document.getElementById("uploadFiles").click()}
+                  className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm font-medium text-gray-700">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Images (JPG, PNG, GIF, WEBP) or videos (MP4, MOV, AVI)
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Up to {MAX_FILES} files, max 10MB each
+                  </p>
+                  <input
+                    type="file"
+                    id="uploadFiles"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    multiple
+                    accept="image/jpeg,image/png,image/gif,video/mp4,video/mov,video/avi,image/webp"
+                  />
+                </div>
+              ) : (
+                <div className="p-6 space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Uploading files...
+                    </p>
+                    <Progress value={uploadProgress} className="h-2 w-full" />
+                    <p className="text-xs text-gray-500 mt-2">
+                      {Math.round(uploadProgress)}% complete
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Display selected files */}
+              {uploadFiles.length > 0 && !isUploading && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">
+                    Selected Files:
+                  </h4>
+                  {uploadFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                    >
+                      <div className="flex items-center space-x-2">
+                        {file.type.startsWith("image/") ? (
+                          <Camera className="w-4 h-4 text-blue-500" />
+                        ) : (
+                          <Film className="w-4 h-4 text-green-500" />
+                        )}
+                        <span className="text-sm text-gray-700 truncate max-w-40">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ({(file.size / 1024 / 1024).toFixed(1)} MB)
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsUploadModalOpen(false);
+                  setUploadFiles([]);
+                  setSelectedUploadRequest(null);
+                }}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUploadMedia}
+                disabled={uploadFiles.length === 0 || isUploading}
+              >
+                {isUploading ? "Uploading..." : "Upload Media"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

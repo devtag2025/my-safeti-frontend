@@ -58,19 +58,17 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="hidden lg:block mt-16 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">
-            <div className="relative h-80 overflow-hidden rounded-2xl">
-              <video
-                src="/images/homePageVideo.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="rounded-lg shadow-xl w-full h-full object-cover"
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
+          <div className="relative aspect-video overflow-hidden mt-8 lg:mt-0 rounded-2xl shadow-xl w-full max-w-xl mx-auto">
+            <video
+              src="/images/homePageVideo.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </Card>

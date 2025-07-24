@@ -93,7 +93,8 @@ const RoadSafetyPanel = () => {
                 inevitable on our roads.
               </p>
               <a
-                href="/home"
+                href="https://www.tac.vic.gov.au/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold text-sm uppercase tracking-wide pt-2"
               >

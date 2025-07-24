@@ -2,7 +2,28 @@ import axios from "axios";
 import React, { useState, useEffect, useRef } from "react";
 import GoogleMapReact from "google-map-react";
 import HomeNavbar from "../components/layout/HomeNavbar";
-import { Calendar, Clock, Car, MapPin, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Calendar,
+  Clock,
+  Car,
+  MapPin,
+  X,
+  Filter,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 // Custom Marker Component
 const IncidentMarker = ({ incident, color, onClick }) => {
@@ -44,12 +65,19 @@ const IncidentMarker = ({ incident, color, onClick }) => {
 };
 
 // Info Window Component
-const InfoWindow = ({ incident, color, onClose, addressString }) => {
+const InfoWindow = ({
+  incident,
+  color,
+  onClose,
+  addressString,
+  onAddWitnessInfo,
+}) => {
   const date = new Date(incident.date).toLocaleDateString("en-AU");
   const time = new Date(incident.date).toLocaleTimeString("en-AU", {
     hour: "2-digit",
     minute: "2-digit",
   });
+  const isRFI = incident.incidentType === "Request For Information";
 
   return (
     <div
@@ -72,7 +100,7 @@ const InfoWindow = ({ incident, color, onClose, addressString }) => {
       {/* Header */}
       <div
         style={{
-          backgroundColor: color,
+          backgroundColor: isRFI ? "black" : color,
           padding: "16px 20px",
           position: "relative",
         }}
@@ -198,7 +226,163 @@ const InfoWindow = ({ incident, color, onClose, addressString }) => {
             </p>
           </div>
         )}
+
+        {/* Add Witness Info Button - Only show for RFI (white dots) */}
+        {isRFI && (
+          <div style={{ marginTop: "16px" }}>
+            <button
+              onClick={onAddWitnessInfo}
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                backgroundColor: "#3b82f6",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                transition: "background-color 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#2563eb")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b82f6")}
+            >
+              <Eye size={16} />
+              Add Witness Information
+            </button>
+          </div>
+        )}
       </div>
+    </div>
+  );
+};
+
+// Filter Component
+const IncidentFilter = ({ activeFilters, onFilterChange, incidentCounts }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const incidentColors = {
+    Collision: "#DC2626",
+    "Excessive Speed": "#EA580C",
+    "Road Rage": "#C2410C",
+    "Hoon Driving (Including burnouts, racing)": "#7C2D12",
+    Tailgating: "#1D4ED8",
+    "Dangerous/Reckless Driving": "#7C3AED",
+    "Request For Information": "#FFFFFF",
+    Other: "#6B7280",
+  };
+
+  const handleFilterToggle = (incidentType) => {
+    const newFilters = activeFilters.includes(incidentType)
+      ? activeFilters.filter((f) => f !== incidentType)
+      : [...activeFilters, incidentType];
+    onFilterChange(newFilters);
+  };
+
+  const handleSelectAll = () => {
+    onFilterChange(Object.keys(incidentColors));
+  };
+
+  const handleSelectNone = () => {
+    onFilterChange([]);
+  };
+
+  const totalCount = Object.values(incidentCounts).reduce(
+    (sum, count) => sum + count,
+    0
+  );
+  const activeCount = Object.keys(incidentCounts)
+    .filter((key) => activeFilters.includes(key))
+    .reduce((sum, key) => sum + incidentCounts[key], 0);
+
+  return (
+    <div className="bg-white rounded-xl shadow-lg border border-gray-200 mb-6">
+      <div className="p-4 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Filter size={20} className="text-blue-600" />
+              <h3 className="text-lg font-semibold text-gray-900">
+                Filter Incidents
+              </h3>
+            </div>
+            <div className="text-sm text-gray-500">
+              Showing {activeCount} of {totalCount} incidents
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSelectAll}
+              className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors font-medium"
+            >
+              Show All
+            </button>
+            <button
+              onClick={handleSelectNone}
+              className="text-xs px-3 py-1 bg-gray-50 text-gray-600 rounded-full hover:bg-gray-100 transition-colors font-medium"
+            >
+              Hide All
+            </button>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-2 hover:bg-gray-50 rounded-lg transition-colors"
+            >
+              {isExpanded ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="p-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {Object.entries(incidentColors).map(([incidentType, color]) => {
+              const isActive = activeFilters.includes(incidentType);
+              const count = incidentCounts[incidentType] || 0;
+
+              return (
+                <button
+                  key={incidentType}
+                  onClick={() => handleFilterToggle(incidentType)}
+                  className={`
+                    flex items-center gap-3 p-3 rounded-lg border-2 transition-all duration-200 text-left
+                    ${
+                      isActive
+                        ? "border-gray-300 bg-white shadow-sm"
+                        : "border-gray-100 bg-gray-50 opacity-50 hover:opacity-75"
+                    }
+                  `}
+                >
+                  <div
+                    className="w-4 h-4 rounded-full border-2 border-white shadow-sm flex-shrink-0"
+                    style={{ backgroundColor: color }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-gray-900 truncate">
+                      {incidentType}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {count} incident{count !== 1 ? "s" : ""}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    {isActive ? (
+                      <Eye size={16} className="text-green-500" />
+                    ) : (
+                      <EyeOff size={16} className="text-gray-400" />
+                    )}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -210,6 +394,12 @@ const IncidentHeatMap = () => {
   const [geocodedIncidents, setGeocodedIncidents] = useState([]);
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [mapsApi, setMapsApi] = useState(null);
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [incidentCounts, setIncidentCounts] = useState({});
+  const [witnessDialogOpen, setWitnessDialogOpen] = useState(false);
+  const [witnessInfo, setWitnessInfo] = useState("");
+  const [witnessEmail, setWitnessEmail] = useState("");
+  const [submittingWitness, setSubmittingWitness] = useState(false);
 
   const incidentColors = {
     Collision: "#DC2626",
@@ -218,6 +408,7 @@ const IncidentHeatMap = () => {
     "Hoon Driving (Including burnouts, racing)": "#7C2D12",
     Tailgating: "#1D4ED8",
     "Dangerous/Reckless Driving": "#7C3AED",
+    "Request For Information": "#FFFFFF",
     Other: "#6B7280",
   };
 
@@ -294,9 +485,20 @@ const IncidentHeatMap = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "https://api.safestreet.com.au/api/report/reportsForHeatMap"
+        "http://localhost:3000/api/report/reportsForHeatMap"
       );
       setIncidents(response.data);
+
+      // Calculate incident counts and set initial filters
+      const counts = {};
+      response.data.forEach((incident) => {
+        const type = incident.incidentType;
+        counts[type] = (counts[type] || 0) + 1;
+      });
+      setIncidentCounts(counts);
+
+      // Initially show all incident types
+      setActiveFilters(Object.keys(incidentColors));
     } catch (err) {
       setError("Failed to load incident data");
       console.error("Error fetching incidents:", err);
@@ -305,6 +507,32 @@ const IncidentHeatMap = () => {
     }
   };
 
+  const handleWitnessSubmit = async () => {
+    if (!witnessInfo.trim() || !selectedIncident) return;
+
+    try {
+      setSubmittingWitness(true);
+      await axios.post(
+        `http://localhost:3000/api/report/witness/${selectedIncident._id}`,
+        {
+          info: witnessInfo.trim(),
+          contactEmail: witnessEmail.trim() || null,
+        }
+      );
+
+      setWitnessDialogOpen(false);
+      setWitnessInfo("");
+      setWitnessEmail("");
+      alert(
+        "Thank you! Your witness information has been submitted anonymously."
+      );
+    } catch (error) {
+      console.error("Error submitting witness info:", error);
+      alert("Failed to submit witness information. Please try again.");
+    } finally {
+      setSubmittingWitness(false);
+    }
+  };
   // Handle Google Maps API loaded
   const handleApiLoaded = ({ map, maps }) => {
     setMapsApi({ map, maps });
@@ -350,6 +578,22 @@ const IncidentHeatMap = () => {
   const handleCloseInfoWindow = () => {
     setSelectedIncident(null);
   };
+
+  const handleFilterChange = (newFilters) => {
+    setActiveFilters(newFilters);
+    // Close info window if selected incident is no longer visible
+    if (
+      selectedIncident &&
+      !newFilters.includes(selectedIncident.incidentType)
+    ) {
+      setSelectedIncident(null);
+    }
+  };
+
+  // Filter incidents based on active filters
+  const filteredIncidents = geocodedIncidents.filter((incident) =>
+    activeFilters.includes(incident.incidentType)
+  );
 
   if (loading) {
     return (
@@ -407,9 +651,17 @@ const IncidentHeatMap = () => {
           </div>
         </div>
 
-        {/* Map Section */}
+        {/* Filter and Map Section */}
         <div className="container mx-auto px-6 py-8">
           <div className="max-w-6xl mx-auto">
+            {/* Filter Component */}
+            <IncidentFilter
+              activeFilters={activeFilters}
+              onFilterChange={handleFilterChange}
+              incidentCounts={incidentCounts}
+            />
+
+            {/* Map */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="p-6 border-b bg-gray-50">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
@@ -422,7 +674,7 @@ const IncidentHeatMap = () => {
                     </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {geocodedIncidents.length} incidents plotted
+                    {filteredIncidents.length} incidents plotted
                   </div>
                 </div>
               </div>
@@ -439,7 +691,7 @@ const IncidentHeatMap = () => {
                     yesIWantToUseGoogleMapApiInternals
                     onGoogleApiLoaded={handleApiLoaded}
                   >
-                    {geocodedIncidents.map((incident, index) => (
+                    {filteredIncidents.map((incident, index) => (
                       <IncidentMarker
                         key={index}
                         lat={incident.lat}
@@ -459,8 +711,75 @@ const IncidentHeatMap = () => {
                         color={selectedIncident.color}
                         addressString={selectedIncident.addressString}
                         onClose={handleCloseInfoWindow}
+                        onAddWitnessInfo={() => setWitnessDialogOpen(true)}
                       />
                     )}
+                    <Dialog
+                      open={witnessDialogOpen}
+                      onOpenChange={setWitnessDialogOpen}
+                    >
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add Witness Information</DialogTitle>
+                          <DialogDescription>
+                            Share what you witnessed about this incident. Your
+                            information will be submitted anonymously.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="witness-info">
+                              What did you see?
+                            </Label>
+                            <Textarea
+                              id="witness-info"
+                              placeholder="e.g., Red SUV, partial plate 7XK, backed into a black sedan at around 3:15pm..."
+                              value={witnessInfo}
+                              onChange={(e) => setWitnessInfo(e.target.value)}
+                              rows={4}
+                              className="mt-2"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="witness-email">
+                              Contact Email (Optional)
+                            </Label>
+                            <Input
+                              id="witness-email"
+                              type="email"
+                              placeholder="your.email@example.com"
+                              value={witnessEmail}
+                              onChange={(e) => setWitnessEmail(e.target.value)}
+                              className="mt-2"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Only provide if you're willing to be contacted for
+                              follow-up questions
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setWitnessDialogOpen(false);
+                              setWitnessInfo("");
+                              setWitnessEmail(""); 
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleWitnessSubmit}
+                            disabled={!witnessInfo.trim() || submittingWitness}
+                          >
+                            {submittingWitness
+                              ? "Submitting..."
+                              : "Submit Anonymously"}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </GoogleMapReact>
                 </div>
               </div>
@@ -473,9 +792,10 @@ const IncidentHeatMap = () => {
           <div className="container mx-auto px-6 py-6">
             <div className="max-w-6xl mx-auto text-center">
               <p className="text-gray-600">
-                💡 <strong>How to use:</strong> Click on any colored marker to
-                view incident details. Zoom in to explore specific neighborhoods
-                and zoom out for broader regional patterns.
+                💡 <strong>How to use:</strong> Use the filter controls above to
+                show/hide specific incident types. Click on any colored marker
+                to view detailed information. Zoom in to explore specific
+                neighborhoods and zoom out for broader regional patterns.
               </p>
             </div>
           </div>
