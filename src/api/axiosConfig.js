@@ -3,8 +3,8 @@ import useAuthStore from "../store/authStore";
 
 // Create Axios instance with base config
 const API = axios.create({
-  // baseURL: "https://api.safestreet.com.au/api",
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://api.safestreet.com.au/api",
+  // baseURL: "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -13,6 +13,10 @@ const API = axios.create({
 // Request Interceptor: Attach Token
 API.interceptors.request.use(
   (config) => {
+    if (config.skipAuth) {
+      return config;
+    }
+     
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

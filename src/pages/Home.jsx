@@ -4,6 +4,7 @@ import HeroVideo from "../../public/images/homePageVideo.mp4";
 import HomeNavbar from "../components/layout/HomeNavbar";
 import RoadSafetyHome from "../components/Home/RoadSafetyHome";
 import axios from "axios";
+import API from "../api/axiosConfig";
 
 const Homepage = () => {
   const [activeQuestion, setActiveQuestion] = useState(0);
@@ -12,9 +13,7 @@ const Homepage = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/report/statsForHome"
-        );
+        const response = await API.get("/report/statsForHome", { skipAuth: true });
         setStats(response.data);
       } catch (error) {
         console.error("Error fetching stats:", error);

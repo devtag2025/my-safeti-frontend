@@ -24,6 +24,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
+import API from "../api/axiosConfig";
 
 // Custom Marker Component
 const IncidentMarker = ({ incident, color, onClick }) => {
@@ -484,9 +485,10 @@ const IncidentHeatMap = () => {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:3000/api/report/reportsForHeatMap"
-      );
+      const response = await API.get("/report/reportsForHeatMap", {
+        skipAuth: true,
+      });
+
       setIncidents(response.data);
 
       // Calculate incident counts and set initial filters
@@ -512,11 +514,14 @@ const IncidentHeatMap = () => {
 
     try {
       setSubmittingWitness(true);
-      await axios.post(
-        `http://localhost:3000/api/report/witness/${selectedIncident._id}`,
+      await API.post(
+        `/report/witness/${selectedIncident._id}`,
         {
           info: witnessInfo.trim(),
           contactEmail: witnessEmail.trim() || null,
+        },
+        {
+          skipAuth: true, 
         }
       );
 
@@ -764,7 +769,7 @@ const IncidentHeatMap = () => {
                             onClick={() => {
                               setWitnessDialogOpen(false);
                               setWitnessInfo("");
-                              setWitnessEmail(""); 
+                              setWitnessEmail("");
                             }}
                           >
                             Cancel
