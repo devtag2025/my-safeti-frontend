@@ -7,12 +7,6 @@ import TimeBasedTrends from "./TimeBasedTrends";
 const DataAnalytics = ({ reports }) => {
   const [timeframe, setTimeframe] = useState("monthly");
   const [exportFormat, setExportFormat] = useState("pdf");
-
-  const handleExport = () => {
-    // In a real app, this would generate and download the selected report format
-    alert(`Exporting analytics in ${exportFormat.toUpperCase()} format`);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header section with controls */}
@@ -25,12 +19,6 @@ const DataAnalytics = ({ reports }) => {
             <p className="text-gray-500 mt-1">
               Gain insights into driver behavior and trends
             </p>
-          </div>
-
-          <div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer" onClick={handleExport}>
-              Export As PDF
-            </button>
           </div>
         </div>
       </div>

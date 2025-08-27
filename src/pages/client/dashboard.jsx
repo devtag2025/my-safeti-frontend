@@ -28,7 +28,6 @@ const ClientDashboard = () => {
     activeSearches: 0,
     highRiskDrivers: 0,
   });
-  const [recentActivity, setRecentActivity] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,39 +38,28 @@ const ClientDashboard = () => {
           fetchClientRequests(),
         ]);
 
-        setReports(reportsData.filter(report => report.status === "approved"));
+        // Filter approved reports only
+        const approvedReports = reportsData.filter(report => report.status === "approved");
+        setReports(approvedReports);
         setMediaRequests(mediaRequestsData);
 
-        // Extract report IDs from media requests and store them in a set
-        // console.log(mediaRequests)
+        // Extract report IDs from media requests
         const requestedIds = new Set(
           mediaRequestsData.map((req) => req.report._id)
         );
         setRequestedReports(requestedIds);
 
-        // Mock client stats (would come from API in production)
+        // Calculate client stats
         setClientStats({
           totalReportsAccessed: mediaRequestsData.length,
-          creditBalance: 500, // Example value
-          activeSearches: 3, // Example value
-          highRiskDrivers: reportsData.filter(
+          creditBalance: 500,
+          activeSearches: 3,
+          highRiskDrivers: approvedReports.filter(
             (r) =>
-              r.status === "approved" &&
-              (r.incidentType === "Reckless Driving" ||
-                r.incidentType === "Speeding")
+              r.incidentType === "Dangerous/Reckless Driving" ||
+              r.incidentType === "Excessive Speed"
           ).length,
         });
-
-        // Mock recent activity (would come from API in production)
-        setRecentActivity(
-          mediaRequestsData.slice(0, 5).map((req) => ({
-            id: req._id,
-            action: "Media requested",
-            reportId: req.report._id,
-            vehicle: req.report.vehicleRegistration,
-            timestamp: new Date(req.createdAt || Date.now()).toISOString(),
-          }))
-        );
 
         setLoading(false);
       } catch (error) {
@@ -83,34 +71,47 @@ const ClientDashboard = () => {
     fetchData();
   }, []);
 
-  // Function to handle filter changes
   const handleFilterChange = (newFilters) => {
     setFilters({ ...filters, ...newFilters });
   };
 
-  // Apply filters to reports
+  // Fixed filtering with correct field names
   const filteredReports = reports.filter((report) => {
+    // Vehicle registration filter - check vehicles array
     const matchesVehicle =
       !filters.vehicleRegistration ||
-      report.vehicleRegistration
-        .toLowerCase()
-        .includes(filters.vehicleRegistration.toLowerCase());
+      report.vehicles?.some(vehicle => 
+        vehicle.registration?.toLowerCase().includes(filters.vehicleRegistration.toLowerCase())
+      );
 
+    // Date range filter
     const matchesDateRange =
       (!filters.startDate ||
         new Date(report.date) >= new Date(filters.startDate)) &&
-      (!filters.endDate || new Date(report.date) <= new Date(filters.endDate));
+      (!filters.endDate || 
+        new Date(report.date) <= new Date(filters.endDate));
 
+    // Location filter - check multiple location fields
     const matchesLocation =
       !filters.location ||
-      report.location.toLowerCase().includes(filters.location.toLowerCase());
+      report.location?.toLowerCase().includes(filters.location.toLowerCase()) ||
+      report.suburb?.toLowerCase().includes(filters.location.toLowerCase()) ||
+      report.state?.toLowerCase().includes(filters.location.toLowerCase());
 
+    // Incident type filter
     const matchesIncidentType =
-      !filters.incidentType || report.incidentType === filters.incidentType;
+      !filters.incidentType || 
+      report.incidentType === filters.incidentType;
 
-    const matchesStatus = !filters.status || report.status === filters.status;
+    // Status filter
+    const matchesStatus = 
+      !filters.status || 
+      report.status === filters.status;
 
-    const matchesMedia = !filters.hasMedia || report.mediaFlag === true;
+    // Media filter - check hasDashcam field
+    const matchesMedia = 
+      !filters.hasMedia || 
+      report.hasDashcam === true;
 
     return (
       matchesVehicle &&
@@ -121,6 +122,10 @@ const ClientDashboard = () => {
       matchesMedia
     );
   });
+
+  const handleMediaRequest = (reportId) => {
+    setRequestedReports(prev => new Set([...prev, reportId]));
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -172,7 +177,7 @@ const ClientDashboard = () => {
         </div>
       </div>
 
-      {/* Dashboard content based on active tab */}
+      {/* Dashboard content */}
       <div className="flex-1 container mx-auto px-6 py-6 overflow-auto">
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -183,13 +188,12 @@ const ClientDashboard = () => {
             {activeTab === "overview" && (
               <div className="space-y-6">
                 <WelcomeBanner />
-                <div className="">
-                  <ReportsTable
-                    reports={filteredReports.slice(0, 5)}
-                    requestedReports={requestedReports}
-                    compact={true}
-                  />
-                </div>
+                <ReportsTable
+                  reports={filteredReports.slice(0, 5)}
+                  requestedReports={requestedReports}
+                  onRequestMedia={handleMediaRequest}
+                  compact={true}
+                />
               </div>
             )}
 
@@ -202,16 +206,19 @@ const ClientDashboard = () => {
                 <ReportsTable
                   reports={filteredReports}
                   requestedReports={requestedReports}
+                  onRequestMedia={handleMediaRequest}
                 />
               </div>
             )}
 
-            {activeTab === "analytics" && <DataAnalytics reports={reports} />}
+            {activeTab === "analytics" && (
+              <DataAnalytics reports={filteredReports} />
+            )}
 
             {activeTab === "media" && (
               <MediaAccessManagement
                 mediaRequests={mediaRequests}
-                reports={reports.filter((r) => r.mediaFlag)}
+                reports={reports.filter((r) => r.hasDashcam)}
               />
             )}
           </>

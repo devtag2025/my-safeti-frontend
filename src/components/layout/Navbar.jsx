@@ -88,13 +88,6 @@ const Navbar = () => {
   return (
     <nav className="bg-white fixed w-full z-50">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
-        {/* Logo */}
-        {/* <Link
-          to={homePath}
-          className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent flex items-center"
-        >
-          SafeStreet<span className="text-gray-800">.com.au</span>
-        </Link> */}
         <Link to={homePath}>
           <img src="/images/bg.png" className="h-20" alt="" />
         </Link>

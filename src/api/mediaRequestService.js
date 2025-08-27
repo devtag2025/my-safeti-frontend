@@ -18,7 +18,6 @@ export const fetchUserRequests = async () => {
 export const fetchClientRequests = async () => {
   try {
     const response = await API.get("/media-requests/client");
-    // console.log("response", response.data);
     return response.data;
   } catch (error) {
     console.error(
@@ -45,21 +44,6 @@ export const fetchPendingUploads = async () => {
     );
   }
 };
-
-// export const requestMedia = async (reportId) => {
-//   try {
-//     const response = await API.post("/media-requests/request", { reportId });
-//     return response.data;
-//   } catch (error) {
-//     console.error(
-//       "Error requesting media:",
-//       error.response?.data || error.message
-//     );
-//     throw new Error(
-//       error.response?.data?.message || "Failed to request media."
-//     );
-//   }
-// };
 
 export const requestMedia = async (reportId, { inquiryText } = {}) => {
   try {
