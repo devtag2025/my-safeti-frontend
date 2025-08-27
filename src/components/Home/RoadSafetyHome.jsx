@@ -1,6 +1,4 @@
-import React from "react";
-
-const RoadSafetyPanel = () => {
+const RoadSafetyPanel = ({ deathStats }) => {
   return (
     <div className="relative h-[500px] overflow-hidden font-sans">
       <div className="flex h-full relative">
@@ -20,25 +18,16 @@ const RoadSafetyPanel = () => {
           >
             <div className="absolute inset-0 bg-black bg-opacity-50" />
             <div className="relative z-10 flex flex-col justify-center items-center h-full px-10">
-              <div className="mb-10">
-                <h4 className="text-white text-[15px] font-medium mb-2">
-                  Lives lost in 2025 to date
-                </h4>
-                <div className="flex items-end">
-                  <span className="text-white text-[72px] leading-none font-bold mr-3">
-                    143
+              {deathStats?.stats?.slice(0,2).map((s, i) => (
+                <div key={i} className="mb-10 text-center">
+                  <h4 className="text-white text-[15px] font-medium mb-2">
+                    {s.subtitle}
+                  </h4>
+                  <span className="text-white text-[72px] leading-none font-bold">
+                    {s.number}
                   </span>
                 </div>
-              </div>
-
-              <div className="mb-10">
-                <h4 className="text-white text-[15px] font-medium mb-2">
-                  Lives lost in 2024 to date
-                </h4>
-                <span className="text-white text-[72px] leading-none font-bold">
-                  131
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </div>

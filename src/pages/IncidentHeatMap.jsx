@@ -64,204 +64,6 @@ const IncidentMarker = ({ incident, color, onClick }) => {
     </div>
   );
 };
-
-// Info Window Component
-const InfoWindow = ({
-  incident,
-  color,
-  onClose,
-  addressString,
-  onAddWitnessInfo,
-}) => {
-  const date = new Date(incident.date).toLocaleDateString("en-AU");
-  const time = new Date(incident.date).toLocaleTimeString("en-AU", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const isRFI = incident.incidentType === "Request For Information";
-
-  return (
-    <div
-      style={{
-        position: "absolute",
-        transform: "translate(-50%, -120%)",
-        backgroundColor: "white",
-        padding: "0",
-        minWidth: "320px",
-        maxWidth: "400px",
-        fontFamily: "'Inter', sans-serif",
-        borderRadius: "12px",
-        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-        zIndex: 1000,
-        pointerEvents: "auto",
-        border: "1px solid #e5e7eb",
-        overflow: "hidden",
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          backgroundColor: isRFI ? "black" : color,
-          padding: "16px 20px",
-          position: "relative",
-        }}
-      >
-        <button
-          onClick={onClose}
-          style={{
-            position: "absolute",
-            top: "12px",
-            right: "12px",
-            background: "rgba(255,255,255,0.2)",
-            border: "none",
-            borderRadius: "6px",
-            width: "28px",
-            height: "28px",
-            cursor: "pointer",
-            color: "white",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "background-color 0.2s ease",
-          }}
-          onMouseEnter={(e) =>
-            (e.target.style.backgroundColor = "rgba(255,255,255,0.3)")
-          }
-          onMouseLeave={(e) =>
-            (e.target.style.backgroundColor = "rgba(255,255,255,0.2)")
-          }
-        >
-          <X size={16} />
-        </button>
-
-        <h3
-          style={{
-            margin: "0",
-            color: "white",
-            fontSize: "18px",
-            fontWeight: "600",
-            paddingRight: "40px",
-            lineHeight: "1.3",
-          }}
-        >
-          {incident.incidentType}
-        </h3>
-      </div>
-
-      {/* Content */}
-      <div style={{ padding: "20px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Calendar size={16} color="#6b7280" />
-            <span
-              style={{ fontSize: "14px", color: "#374151", fontWeight: "500" }}
-            >
-              {date}
-            </span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Clock size={16} color="#6b7280" />
-            <span
-              style={{ fontSize: "14px", color: "#374151", fontWeight: "500" }}
-            >
-              {time}
-            </span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <Car size={16} color="#6b7280" />
-            <span
-              style={{ fontSize: "14px", color: "#374151", fontWeight: "500" }}
-            >
-              {incident.vehicleType}
-            </span>
-          </div>
-
-          <div
-            style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}
-          >
-            <MapPin
-              size={16}
-              color="#6b7280"
-              style={{ marginTop: "2px", flexShrink: 0 }}
-            />
-            <span
-              style={{
-                fontSize: "14px",
-                color: "#374151",
-                fontWeight: "500",
-                lineHeight: "1.4",
-                wordBreak: "break-word",
-              }}
-            >
-              {addressString}
-            </span>
-          </div>
-        </div>
-
-        {incident.description && (
-          <div
-            style={{
-              marginTop: "16px",
-              padding: "12px",
-              backgroundColor: "#f9fafb",
-              borderLeft: `3px solid ${color}`,
-              borderRadius: "6px",
-            }}
-          >
-            <p
-              style={{
-                margin: "0",
-                fontSize: "13px",
-                color: "#6b7280",
-                fontStyle: "italic",
-                lineHeight: "1.5",
-              }}
-            >
-              "
-              {incident.description.length > 100
-                ? incident.description.substring(0, 100) + "..."
-                : incident.description}
-              "
-            </p>
-          </div>
-        )}
-
-        {/* Add Witness Info Button - Only show for RFI (white dots) */}
-        {isRFI && (
-          <div style={{ marginTop: "16px" }}>
-            <button
-              onClick={onAddWitnessInfo}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                backgroundColor: "#3b82f6",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "14px",
-                fontWeight: "500",
-                cursor: "pointer",
-                transition: "background-color 0.2s ease",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-              }}
-              onMouseEnter={(e) => (e.target.style.backgroundColor = "#2563eb")}
-              onMouseLeave={(e) => (e.target.style.backgroundColor = "#3b82f6")}
-            >
-              <Eye size={16} />
-              Add Witness Information
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 // Filter Component
 const IncidentFilter = ({ activeFilters, onFilterChange, incidentCounts }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -401,6 +203,7 @@ const IncidentHeatMap = () => {
   const [witnessInfo, setWitnessInfo] = useState("");
   const [witnessEmail, setWitnessEmail] = useState("");
   const [submittingWitness, setSubmittingWitness] = useState(false);
+  const [incidentDialogOpen, setIncidentDialogOpen] = useState(false);
 
   const incidentColors = {
     Collision: "#DC2626",
@@ -521,7 +324,7 @@ const IncidentHeatMap = () => {
           contactEmail: witnessEmail.trim() || null,
         },
         {
-          skipAuth: true, 
+          skipAuth: true,
         }
       );
 
@@ -578,23 +381,24 @@ const IncidentHeatMap = () => {
 
   const handleMarkerClick = (incident) => {
     setSelectedIncident(incident);
+    setIncidentDialogOpen(true);
   };
 
   const handleCloseInfoWindow = () => {
     setSelectedIncident(null);
+    setIncidentDialogOpen(false);
   };
 
   const handleFilterChange = (newFilters) => {
     setActiveFilters(newFilters);
-    // Close info window if selected incident is no longer visible
     if (
       selectedIncident &&
       !newFilters.includes(selectedIncident.incidentType)
     ) {
       setSelectedIncident(null);
+      setIncidentDialogOpen(false);
     }
   };
-
   // Filter incidents based on active filters
   const filteredIncidents = geocodedIncidents.filter((incident) =>
     activeFilters.includes(incident.incidentType)
@@ -698,7 +502,7 @@ const IncidentHeatMap = () => {
                   >
                     {filteredIncidents.map((incident, index) => (
                       <IncidentMarker
-                        key={index}
+                        key={`${incident._id}-${index}`}
                         lat={incident.lat}
                         lng={incident.lng}
                         incident={incident}
@@ -706,86 +510,166 @@ const IncidentHeatMap = () => {
                         onClick={() => handleMarkerClick(incident)}
                       />
                     ))}
-
-                    {selectedIncident && (
-                      <InfoWindow
-                        key={`info-${selectedIncident.lat}-${selectedIncident.lng}`}
-                        lat={selectedIncident.lat}
-                        lng={selectedIncident.lng}
-                        incident={selectedIncident}
-                        color={selectedIncident.color}
-                        addressString={selectedIncident.addressString}
-                        onClose={handleCloseInfoWindow}
-                        onAddWitnessInfo={() => setWitnessDialogOpen(true)}
-                      />
-                    )}
-                    <Dialog
-                      open={witnessDialogOpen}
-                      onOpenChange={setWitnessDialogOpen}
-                    >
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Add Witness Information</DialogTitle>
-                          <DialogDescription>
-                            Share what you witnessed about this incident. Your
-                            information will be submitted anonymously.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="witness-info">
-                              What did you see?
-                            </Label>
-                            <Textarea
-                              id="witness-info"
-                              placeholder="e.g., Red SUV, partial plate 7XK, backed into a black sedan at around 3:15pm..."
-                              value={witnessInfo}
-                              onChange={(e) => setWitnessInfo(e.target.value)}
-                              rows={4}
-                              className="mt-2"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="witness-email">
-                              Contact Email (Optional)
-                            </Label>
-                            <Input
-                              id="witness-email"
-                              type="email"
-                              placeholder="your.email@example.com"
-                              value={witnessEmail}
-                              onChange={(e) => setWitnessEmail(e.target.value)}
-                              className="mt-2"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Only provide if you're willing to be contacted for
-                              follow-up questions
-                            </p>
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              setWitnessDialogOpen(false);
-                              setWitnessInfo("");
-                              setWitnessEmail("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleWitnessSubmit}
-                            disabled={!witnessInfo.trim() || submittingWitness}
-                          >
-                            {submittingWitness
-                              ? "Submitting..."
-                              : "Submit Anonymously"}
-                          </Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
                   </GoogleMapReact>
+                  <Dialog
+                    open={witnessDialogOpen}
+                    onOpenChange={setWitnessDialogOpen}
+                  >
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add Witness Information</DialogTitle>
+                        <DialogDescription>
+                          Share what you witnessed about this incident. Your
+                          information will be submitted anonymously.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="witness-info">
+                            What did you see?
+                          </Label>
+                          <Textarea
+                            id="witness-info"
+                            placeholder="e.g., Red SUV, partial plate 7XK, backed into a black sedan at around 3:15pm..."
+                            value={witnessInfo}
+                            onChange={(e) => setWitnessInfo(e.target.value)}
+                            rows={4}
+                            className="mt-2"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="witness-email">
+                            Contact Email (Optional)
+                          </Label>
+                          <Input
+                            id="witness-email"
+                            type="email"
+                            placeholder="your.email@example.com"
+                            value={witnessEmail}
+                            onChange={(e) => setWitnessEmail(e.target.value)}
+                            className="mt-2"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Only provide if you're willing to be contacted for
+                            follow-up questions
+                          </p>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setWitnessDialogOpen(false);
+                            setWitnessInfo("");
+                            setWitnessEmail("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleWitnessSubmit}
+                          disabled={!witnessInfo.trim() || submittingWitness}
+                        >
+                          {submittingWitness
+                            ? "Submitting..."
+                            : "Submit Anonymously"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog
+                    open={incidentDialogOpen}
+                    onOpenChange={setIncidentDialogOpen}
+                  >
+                    <DialogContent className="sm:max-w-lg">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-3">
+                          <div
+                            className="w-4 h-4 rounded-full border-2 border-white shadow-sm"
+                            style={{ backgroundColor: selectedIncident?.color }}
+                          />
+                          {selectedIncident?.incidentType}
+                        </DialogTitle>
+                      </DialogHeader>
+
+                      {selectedIncident && (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="flex items-center gap-2">
+                              <Calendar size={16} className="text-gray-500" />
+                              <span className="text-sm">
+                                {new Date(
+                                  selectedIncident.date
+                                ).toLocaleDateString("en-AU")}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock size={16} className="text-gray-500" />
+                              <span className="text-sm">
+                                {new Date(
+                                  selectedIncident.date
+                                ).toLocaleTimeString("en-AU", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Car size={16} className="text-gray-500" />
+                            <span className="text-sm">
+                              {selectedIncident.vehicleType}
+                            </span>
+                          </div>
+
+                          <div className="flex items-start gap-2">
+                            <MapPin
+                              size={16}
+                              className="text-gray-500 mt-0.5 flex-shrink-0"
+                            />
+                            <span className="text-sm">
+                              {selectedIncident.addressString}
+                            </span>
+                          </div>
+
+                          {selectedIncident.description && (
+                            <div>
+                              <Label className="text-sm font-medium">
+                                Description:
+                              </Label>
+                              <div
+                                className="mt-1 p-3 bg-gray-50 rounded-md border-l-4"
+                                style={{
+                                  borderLeftColor: selectedIncident.color,
+                                }}
+                              >
+                                <p className="text-sm text-gray-700 leading-relaxed">
+                                  {selectedIncident.description}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {selectedIncident.incidentType ===
+                            "Request For Information" && (
+                            <Button
+                              onClick={() => {
+                                setIncidentDialogOpen(false);
+                                setWitnessDialogOpen(true);
+                              }}
+                              className="w-full"
+                              variant="outline"
+                            >
+                              <Eye size={16} className="mr-2" />
+                              Add Witness Information
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             </div>

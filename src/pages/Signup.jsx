@@ -35,8 +35,8 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [captchaToken, setCaptchaToken] = useState(null);
 
-  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  // const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
+  // const RECAPTCHA_SITE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
   
   const {
     register,
