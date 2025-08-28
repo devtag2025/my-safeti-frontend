@@ -37,6 +37,7 @@ const useAuthStore = create((set) => ({
     
   },
 
+  isSuperAdmin: () => useAuthStore.getState().user?.role === "super-admin",
   isAdmin: () => useAuthStore.getState().user?.role === "admin",
   isClient: () => useAuthStore.getState().user?.role === "client",
 }));

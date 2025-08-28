@@ -81,19 +81,17 @@ const Login = () => {
 
       if (user?.role === "admin") {
         navigate("/admin");
-      } else if (user.role === "client") {
-        if (user.approvalStatus === "pending") {
-          setError("Your account is pending approval.");
-        } else if (user.approvalStatus === "rejected") {
-          setError("Your account was rejected. Contact support.");
+      } else if (user?.role === "super-admin") {
+        navigate("/admin");
+      } else if (user?.role === "client") {
+        if (user?.status === "inactive") {
+          setError("Your account is currently inactive.");
         } else {
           navigate("/client");
         }
       } else {
-        if (user.approvalStatus === "pending") {
-          setError("Your account is pending approval.");
-        } else if (user.approvalStatus === "rejected") {
-          setError("Your account was rejected. Contact support.");
+        if (user?.status === "inactive") {
+          setError("Your account is currently inactive.");
         } else {
           navigate("/user");
         }

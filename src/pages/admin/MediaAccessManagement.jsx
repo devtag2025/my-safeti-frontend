@@ -111,7 +111,7 @@ const MediaAccessManagement = () => {
     // Validate file sizes and types
     const validFiles = files.filter((file) => {
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
+        toast.error(`File ${file.name} is too large. Maximum size is 50MB.`);
         return false;
       }
 
@@ -777,7 +777,7 @@ const MediaAccessManagement = () => {
                     Images (JPG, PNG, GIF, WEBP) or videos (MP4, MOV, AVI)
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    Up to {MAX_FILES} files, max 10MB each
+                    Up to {MAX_FILES} files, max 50MB each
                   </p>
                   <input
                     type="file"

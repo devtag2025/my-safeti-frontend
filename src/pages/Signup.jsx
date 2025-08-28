@@ -36,7 +36,7 @@ const Signup = () => {
 
   // const RECAPTCHA_SITE_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
-  
+
   const {
     register,
     handleSubmit,
@@ -45,13 +45,7 @@ const Signup = () => {
     watch,
   } = useForm();
 
-  // For the Select components to work with react-hook-form
-  const selectedRole = watch("role", "");
   const selectedState = watch("state", "");
-
-  const handleRoleChange = (value) => {
-    setValue("role", value);
-  };
 
   const handleStateChange = (value) => {
     setValue("state", value);
@@ -250,71 +244,40 @@ const Signup = () => {
               )}
             </div>
 
-            {/* Two columns for state and role */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* State Selection */}
-              <div className="space-y-1">
-                <Label htmlFor="state" className="text-sm">
-                  State
-                </Label>
-                <Select
-                  onValueChange={handleStateChange}
-                  value={selectedState}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="state" className="h-9">
-                    <SelectValue placeholder="Select state" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACT">ACT</SelectItem>
-                    <SelectItem value="NSW">NSW</SelectItem>
-                    <SelectItem value="NT">NT</SelectItem>
-                    <SelectItem value="QLD">QLD</SelectItem>
-                    <SelectItem value="SA">SA</SelectItem>
-                    <SelectItem value="TAS">TAS</SelectItem>
-                    <SelectItem value="VIC">VIC</SelectItem>
-                    <SelectItem value="WA">WA</SelectItem>
-                    <SelectItem value="HEAVY VEHICLE">HEAVY VEHICLE</SelectItem>
-                    <SelectItem value="OTHER">OTHER</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="hidden"
-                  {...register("state", { required: "Please select a state" })}
-                  value={selectedState}
-                />
-                {errors.state && (
-                  <p className="text-xs text-red-600">{errors.state.message}</p>
-                )}
-              </div>
-
-              {/* Role Selection */}
-              <div className="space-y-1">
-                <Label htmlFor="role" className="text-sm">
-                  Select Role
-                </Label>
-                <Select
-                  onValueChange={handleRoleChange}
-                  value={selectedRole}
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger id="role" className="h-9">
-                    <SelectValue placeholder="Select Role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
-                  </SelectContent>
-                </Select>
-                <input
-                  type="hidden"
-                  {...register("role", { required: "Please select a role" })}
-                  value={selectedRole}
-                />
-                {errors.role && (
-                  <p className="text-xs text-red-600">{errors.role.message}</p>
-                )}
-              </div>
+            {/* State Selection */}
+            <div className="space-y-1">
+              <Label htmlFor="state" className="text-sm">
+                State
+              </Label>
+              <Select
+                onValueChange={handleStateChange}
+                value={selectedState}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger id="state" className="h-9">
+                  <SelectValue placeholder="Select state" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACT">ACT</SelectItem>
+                  <SelectItem value="NSW">NSW</SelectItem>
+                  <SelectItem value="NT">NT</SelectItem>
+                  <SelectItem value="QLD">QLD</SelectItem>
+                  <SelectItem value="SA">SA</SelectItem>
+                  <SelectItem value="TAS">TAS</SelectItem>
+                  <SelectItem value="VIC">VIC</SelectItem>
+                  <SelectItem value="WA">WA</SelectItem>
+                  <SelectItem value="HEAVY VEHICLE">HEAVY VEHICLE</SelectItem>
+                  <SelectItem value="OTHER">OTHER</SelectItem>
+                </SelectContent>
+              </Select>
+              <input
+                type="hidden"
+                {...register("state", { required: "Please select a state" })}
+                value={selectedState}
+              />
+              {errors.state && (
+                <p className="text-xs text-red-600">{errors.state.message}</p>
+              )}
             </div>
 
             {/* reCAPTCHA */}

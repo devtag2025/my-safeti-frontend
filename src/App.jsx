@@ -80,16 +80,18 @@ const AppContent = () => {
           </Route>
 
           {/* Admin Protected Routes */}
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route
+            element={<ProtectedRoute allowedRoles={["admin", "super-admin"]} />}
+          >
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/media-review" element={<AdminMediaReview />} />
-            <Route path="/ads" element={<Advertisement />} />
           </Route>
 
           {/* Unified User Profile Route */}
           <Route
             element={
-              <ProtectedRoute allowedRoles={["user", "client", "admin"]} />
+              <ProtectedRoute
+                allowedRoles={["user", "client", "admin", "super-admin"]}
+              />
             }
           >
             <Route path="/user-profile" element={<UserProfile />} />

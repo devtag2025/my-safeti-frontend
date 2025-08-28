@@ -76,9 +76,9 @@ const MediaRequests = () => {
 
     // Validate the selected files
     selectedFiles.forEach((file) => {
-      // Check if the file is larger than 10MB
+      // Check if the file is larger than 50MB
       if (file.size > MAX_FILE_SIZE) {
-        errors.push(`${file.name} is too large. Max file size is 10MB.`);
+        errors.push(`${file.name} is too large. Max file size is 50MB.`);
       }
 
       // Check if the file type is supported
@@ -399,7 +399,7 @@ const MediaRequests = () => {
                 Images (JPG, PNG, GIF, WEBP) or videos (MP4, MOV, AVI)
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Up to {MAX_FILES} files, max 10MB each
+                Up to {MAX_FILES} files, max 50MB each
               </p>
               <input
                 type="file"
