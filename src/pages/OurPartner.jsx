@@ -7,7 +7,7 @@ const OurPartner = () => {
       <HomeNavbar />
       
       {/* Coming Soon Content */}
-      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4">
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 px-4 pt-20">
         <div className="text-center max-w-4xl mx-auto">
           
           {/* Icon/Illustration */}

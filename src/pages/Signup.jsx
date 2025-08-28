@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import useAuthStore from "../store/authStore";
-import BackgroundImage from "../../public/images/bg.png";
 
 // Import shadcn components
 import { Button } from "@/components/ui/button";
@@ -108,7 +107,7 @@ const Signup = () => {
       <div className="mb-6">
         <div className="relative h-24 w-64 mx-auto overflow-hidden">
           <img
-            src={BackgroundImage}
+            src="/images/bg.png"
             onClick={() => navigate("/home")}
             alt="Company Logo"
             className="absolute inset-0 w-full h-auto"

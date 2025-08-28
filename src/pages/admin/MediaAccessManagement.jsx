@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { uploadMedia } from "../../api/mediaRequestService";
+import { toast } from "react-hot-toast";
 
 const MediaAccessManagement = () => {
   const [mediaRequests, setMediaRequests] = useState([]);
@@ -103,14 +104,14 @@ const MediaAccessManagement = () => {
 
     // Validate file count
     if (files.length > MAX_FILES) {
-      alert(`You can only upload up to ${MAX_FILES} files at once.`);
+      toast.error(`You can only upload up to ${MAX_FILES} files at once.`);
       return;
     }
 
     // Validate file sizes and types
     const validFiles = files.filter((file) => {
       if (file.size > MAX_FILE_SIZE) {
-        alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+        toast.error(`File ${file.name} is too large. Maximum size is 10MB.`);
         return false;
       }
 
@@ -125,7 +126,7 @@ const MediaAccessManagement = () => {
       ];
 
       if (!allowedTypes.includes(file.type)) {
-        alert(`File ${file.name} is not a supported format.`);
+        toast.error(`File ${file.name} is not a supported format.`);
         return false;
       }
 
@@ -173,13 +174,13 @@ const MediaAccessManagement = () => {
       setTimeout(() => {
         setIsUploadModalOpen(false);
         setSelectedUploadRequest(null);
-        setUploadFiles([]); 
+        setUploadFiles([]);
         setUploadProgress(0);
-        alert("Media uploaded successfully!");
+        toast.success("Media uploaded successfully!");
       }, 1000);
     } catch (error) {
       console.error("Error uploading media:", error.message);
-      alert("Failed to upload media. Please try again.");
+      toast.error("Failed to upload media. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -346,7 +347,7 @@ const MediaAccessManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      className={`px-2 capitalize inline-flex text-xs leading-5 font-semibold rounded-full ${
                         request.status === "approved"
                           ? "bg-green-100 text-green-800"
                           : request.status === "pending"
@@ -420,6 +421,19 @@ const MediaAccessManagement = () => {
                           <X className="w-5 h-5" />
                         </button>
                       )}
+
+                      {request.status === "approved" &&
+                        request.mediaUrls?.length > 0 && (
+                          <button
+                            onClick={() =>
+                              openMediaViewer(request.mediaUrls[0])
+                            }
+                            className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded-full"
+                            title="View media"
+                          >
+                            <Camera className="w-5 h-5" />
+                          </button>
+                        )}
 
                       {request.status === "rejected" && (
                         <>

@@ -30,7 +30,7 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import axios from "axios";
 import API from "../../api/axiosConfig";
-import { toast } from "react-toastify";
+import { toast } from "react-hot-toast";
 
 const ReportModeration = () => {
   const [reports, setReports] = useState([]);
@@ -282,7 +282,7 @@ const ReportModeration = () => {
   const downloadAllReportsAsExcel = () => {
     try {
       if (!reports || reports.length === 0) {
-        alert("No reports available to export");
+        toast.error("No reports available to export");
         return;
       }
 
@@ -303,7 +303,7 @@ const ReportModeration = () => {
       );
     } catch (error) {
       console.error("Error exporting reports to Excel:", error);
-      alert("Failed to export reports to Excel");
+      toast.error("Failed to export reports to Excel");
     }
   };
 
@@ -600,7 +600,7 @@ const ReportModeration = () => {
       XLSX.writeFile(wb, fileName);
     } catch (error) {
       console.error("Error downloading report:", error);
-      alert("Failed to download report data");
+      toast.error("Failed to download report data");
     }
   };
 
@@ -978,60 +978,9 @@ const ReportModeration = () => {
       doc.save(fileName);
     } catch (error) {
       console.error("Error creating PDF:", error);
-      alert("Failed to create PDF report");
+      toast.error("Failed to create PDF report");
     }
   };
-
-  // const generateEmailTemplate = (report) => {
-  //   const reportId = report._id;
-  //   const subject = `Request for Dashcam Footage: Incident ${report.customId}`;
-
-  //   const rawBody = `
-  // Dear ${report.name},
-
-  // Thank you for submitting your incident report (ID: ${report.customId}) regarding a ${report.incidentType.toLowerCase()} incident that occurred on ${formatDate(report.date)}.
-
-  // A formal request for dashcam relevant to the incident you reported has been submitted.
-
-  // The next step is for you to provide the dashcam footage to us via the below OneDrive link.
-
-  // Please upload the full unedited footage of the incident. Once the footage is submitted, SafeStreet AU will review the footage to confirm it matches the incident reported. The footage will then be provided to the requestor.
-
-  // Once the quality control process is completed, a payment will be processed to your nominated bank account.
-
-  // If you have any questions, please contact us via email at admin@safestreet.com.au.
-
-  // As you indicated that you have dashcam footage available, we would greatly appreciate if you could provide this evidence to help us process your report. Please upload your footage to the following secure OneDrive link:
-
-  // [ONEDRIVE_LINK]
-
-  // Important information to include with your upload:
-  // - Your Report ID: ${report.customId}
-  // - Date of Incident: ${formatDate(report.date)}
-  // - Location: ${report.location}, ${report.suburb}, ${report.state}
-  // - Vehicle Registration: ${
-  //     report.vehicles && report.vehicles.length > 0
-  //       ? report.vehicles[0].registration
-  //       : "N/A"
-  //   }
-
-  // If you have any questions or need assistance with uploading your footage, please don't hesitate to contact our support team on admin@safestreet.com.au.
-
-  // Thank you again.
-
-  // Best regards,
-  // The Incident Reporting Team
-  // `;
-
-  //   setOriginalEmailBody(rawBody);
-
-  //   return {
-  //     email: report.email,
-  //     subject,
-  //     message: rawBody,
-  //     reportId,
-  //   };
-  // };
 
   const generateEmailTemplate = (report) => {
     const reportId = report._id;
@@ -1107,11 +1056,11 @@ const ReportModeration = () => {
     navigator.clipboard
       .writeText(emailContent)
       .then(() => {
-        alert("Email template copied to clipboard!");
+        toast.success("Email template copied to clipboard!");
       })
       .catch((err) => {
         console.error("Failed to copy email template: ", err);
-        alert("Failed to copy email template to clipboard");
+        toast.error("Failed to copy email template to clipboard");
       });
   };
 

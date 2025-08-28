@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import useAuthStore from "../store/authStore";
-import BackgroundImage from "../../public/images/bg.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -116,7 +115,7 @@ const Login = () => {
       <div className="mb-8">
         <div className="relative h-24 w-64 mx-auto overflow-hidden">
           <img
-            src={BackgroundImage}
+            src="/images/bg.png"
             alt="Company Logo"
             onClick={() => navigate("/home")}
             className="absolute inset-0 w-full h-auto"

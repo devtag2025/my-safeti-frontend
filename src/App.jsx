@@ -26,7 +26,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import OurPartner from "./pages/OurPartner";
 import IncidentHeatMap from "./pages/IncidentHeatMap";
 import ScrollToTop from "./components/layout/ScrollToTop";
-import { ToastContainer } from "react-toastify";
+import { Toaster } from "react-hot-toast";
 
 const AppContent = () => {
   const location = useLocation();
@@ -41,7 +41,13 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-  const noPaddingRoutes = ["/login", "/signup", "/home"];
+  const noPaddingRoutes = [
+    "/login",
+    "/signup",
+    "/home",
+    "/incident-heatMap",
+    "/our-partners",
+  ];
   const shouldApplyPadding =
     !noPaddingRoutes.includes(location.pathname) && !isAdminRoute;
 
@@ -100,7 +106,7 @@ const App = () => (
   <Router>
     <ScrollToTop />
     <AppContent />
-    <ToastContainer position="top-right" autoClose={3000} />
+    <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
   </Router>
 );
 

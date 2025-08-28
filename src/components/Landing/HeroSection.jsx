@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import HeroVideo from "../../../public/images/homePageVideo.mp4";
 
 const HeroSection = () => {
   return (
@@ -32,14 +31,14 @@ const HeroSection = () => {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <video
-              src={HeroVideo}
+              src="/images/homePageVideo.mp4"
               autoPlay
               loop
               muted
               playsInline
               className="rounded-lg shadow-xl w-full h-full object-cover"
             >
-              <source src={HeroVideo} type="video/mp4" />
+              <source src="/images/homePageVideo.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>

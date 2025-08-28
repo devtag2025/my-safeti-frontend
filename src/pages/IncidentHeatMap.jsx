@@ -11,6 +11,7 @@ import {
   LoadingState,
   ErrorState,
 } from "../components/IncidentHeatMap/LoadingErrors";
+import { toast } from "react-hot-toast";
 
 const IncidentHeatMap = () => {
   const [incidents, setIncidents] = useState([]);
@@ -153,12 +154,12 @@ const IncidentHeatMap = () => {
       setWitnessDialogOpen(false);
       setWitnessInfo("");
       setWitnessEmail("");
-      alert(
+      toast.success(
         "Thank you! Your witness information has been submitted anonymously."
       );
     } catch (error) {
       console.error("Error submitting witness info:", error);
-      alert("Failed to submit witness information. Please try again.");
+      toast.error("Failed to submit witness information. Please try again.");
     } finally {
       setSubmittingWitness(false);
     }
@@ -234,7 +235,7 @@ const IncidentHeatMap = () => {
   return (
     <div>
       <HomeNavbar />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 pt-20">
         <HeatMapHeader />
 
         {/* Filter and Map Section */}

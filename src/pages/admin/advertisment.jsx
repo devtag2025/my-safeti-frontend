@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { uploadAd, getActiveAds, deleteAd } from "../../api/adsService";
 import { X, Plus, Trash, UploadCloud, FileText } from "lucide-react";
 import { Loader } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const Advertisement = () => {
   const [ads, setAds] = useState([]);
@@ -91,7 +92,7 @@ const Advertisement = () => {
     e.preventDefault();
 
     if (!formData.title || !selectedFile || !formData.expiryDate) {
-      alert("Title, media file, and expiry date are required.");
+      toast.error("Title, media file, and expiry date are required.");
       return;
     }
 
@@ -121,7 +122,7 @@ const Advertisement = () => {
       });
     } catch (error) {
       console.error("Error uploading ad:", error);
-      alert("Failed to upload advertisement. Please try again.");
+      toast.error("Failed to upload advertisement. Please try again.");
     } finally {
       setIsUploading(false);
     }

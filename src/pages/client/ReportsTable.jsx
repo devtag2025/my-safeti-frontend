@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { requestMedia } from "../../api/mediaRequestService";
 import PDFExport from "./PdfExport";
+import { toast } from "react-hot-toast";
 
 const ReportsTable = ({
   reports,
@@ -52,7 +53,7 @@ const ReportsTable = ({
       reset({ inquiryText: "" });
     } catch (error) {
       console.error("Error requesting media:", error.message);
-      alert("Failed to request media. Please try again.");
+      toast.error("Failed to request media. Please try again.");
     }
   };
 
@@ -159,7 +160,7 @@ const ReportsTable = ({
 
                       {!compact && (
                         <td
-                          className={`px-6 py-4 ${
+                          className={`px-6 py-4 capitalize ${
                             report.status === "approved"
                               ? "text-green-700"
                               : report.status === "rejected"

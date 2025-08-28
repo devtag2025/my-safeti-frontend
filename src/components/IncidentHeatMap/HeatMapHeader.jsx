@@ -3,7 +3,7 @@ import React from "react";
 const HeatMapHeader = () => {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-      <div className="container mx-auto px-6 pt-24 pb-12">
+      <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Road Safety Heat Map

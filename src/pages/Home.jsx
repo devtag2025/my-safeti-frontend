@@ -43,7 +43,7 @@ const Homepage = () => {
   return (
     <div>
       <HomeNavbar />
-      <div className="font-inter text-gray-800 pt-14">
+      <div className="font-inter text-gray-800 pt-20">
         <HeroSection />
         <HowItWorksSection />
         <div>

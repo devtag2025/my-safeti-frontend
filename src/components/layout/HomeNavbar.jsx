@@ -1,10 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import useAuthStore from "../../store/authStore";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Menu, 
+  Home, 
+  Map, 
+  Users, 
+  LogIn, 
+  UserPlus, 
+  LayoutDashboard 
+} from "lucide-react";
 
 const HomeNavbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
 
@@ -20,187 +33,210 @@ const HomeNavbar = () => {
 
   // Close mobile menu when route changes
   useEffect(() => {
-    setIsOpen(false);
+    setIsMobileMenuOpen(false);
   }, [location]);
-
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (isOpen && !event.target.closest(".navbar-container")) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [isOpen]);
-
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
 
   const isActive = (path) => {
     return location.pathname === path;
   };
 
   const navLinks = [
-    { path: "/home", label: "Home" },
-    { path: "/incident-heatMap", label: "Incident HeatMap" },
-    { path: "/our-partners", label: "Our Partners" },
+    { path: "/home", label: "Home", icon: Home },
+    { path: "/incident-heatMap", label: "Incident HeatMap", icon: Map },
+    { path: "/our-partners", label: "Our Partners", icon: Users },
   ];
 
-  return (
-    <nav
-      className={`navbar-container fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-100"
-          : "bg-white/90 backdrop-blur-sm"
-      }`}
-    >
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/">
-            <img src="/images/bg.png" className="h-28" alt="" />
-          </Link>
+  const getUserInitials = (name) => {
+    return name
+      ?.split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || 'U';
+  };
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navLinks.map((link) => (
-              <Link
+  return (
+    <nav className={`bg-white fixed w-full z-50 transition-all duration-300 ${
+      isScrolled ? "border-b border-gray-200 shadow-sm" : ""
+    }`}>
+      <div className="container mx-auto flex justify-between items-center px-4 py-3">
+        {/* Logo */}
+        <Link to="/" className="transition-transform hover:scale-105">
+          <img src="/images/bg.png" className="h-16" alt="Logo" />
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-2">
+          {navLinks.map((link) => {
+            const IconComponent = link.icon;
+            return (
+              <Button
                 key={link.path}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                asChild
+                variant="ghost"
+                size="sm"
+                className={`transition-all duration-200 ${
                   isActive(link.path)
-                    ? "bg-indigo-100 text-indigo-700 shadow-sm"
+                    ? "text-indigo-600 bg-indigo-50"
                     : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
                 }`}
               >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+                <Link to={link.path} className="flex items-center space-x-2">
+                  <span className="text-indigo-500">{React.createElement(IconComponent, { size: 16 })}</span>
+                  <span className="text-sm">{link.label}</span>
+                </Link>
+              </Button>
+            );
+          })}
+        </div>
 
-          {/* Desktop CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-3">
-            {user?.role === "user" ? (
-              <Link
-                to="/dashboard"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
+        {/* Desktop User Section */}
+        <div className="hidden md:flex items-center">
+          {user?.role === "user" ? (
+            <div className="flex items-center space-x-3">
+              <Avatar className="w-8 h-8 bg-indigo-100">
+                <AvatarFallback className="text-indigo-700 text-sm font-semibold">
+                  {getUserInitials(user.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                asChild 
+                size="sm" 
+                className="bg-indigo-600 hover:bg-indigo-700"
               >
-                Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="px-4 py-2 text-gray-700 hover:text-indigo-600 font-medium transition-colors"
-                >
-                  Login
+                <Link to="/dashboard" className="flex items-center space-x-2">
+                  <LayoutDashboard size={16} />
+                  <span>Dashboard</span>
                 </Link>
-                <Link
-                  to="/signup"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5"
-                >
-                  Sign Up
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-3">
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/login" className="flex items-center space-x-2">
+                  <LogIn size={16} />
+                  <span>Log in</span>
                 </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden p-2 rounded-lg text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
-            aria-label="Toggle menu"
-          >
-            <svg
-              className={`w-6 h-6 transform transition-transform duration-200 ${
-                isOpen ? "rotate-90" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
-          </button>
+              </Button>
+              <Button asChild size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                <Link to="/signup" className="flex items-center space-x-2">
+                  <UserPlus size={16} />
+                  <span>Sign up</span>
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}
-        <div
-          className={`md:hidden transition-all duration-300 ease-in-out ${
-            isOpen
-              ? "max-h-96 opacity-100 pb-6"
-              : "max-h-0 opacity-0 overflow-hidden"
-          }`}
-        >
-          <div className="pt-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`block px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  isActive(link.path)
-                    ? "bg-indigo-100 text-indigo-700 shadow-sm border-l-4 border-indigo-600"
-                    : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50 hover:border-l-4 hover:border-indigo-300"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+        <div className="md:hidden">
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-2">
+                <Menu size={24} />
+                <span className="sr-only">Open main menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="flex flex-col h-full">
+                {/* Mobile Header */}
+                <div className="flex items-center justify-between pb-6 border-b">
+                  <img src="/images/bg.png" className="h-12" alt="Logo" />
+                </div>
 
-            {/* Mobile CTA Buttons */}
-            <div className="pt-4 space-y-3 border-t border-gray-200 mt-4">
-              {user?.role === "user" ? (
-                <Link
-                  to="/dashboard"
-                  className="block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-semibold text-center shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  Dashboard
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="block px-4 py-3 text-gray-700 hover:text-indigo-600 font-medium transition-colors rounded-lg hover:bg-indigo-50"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-semibold text-center shadow-md hover:shadow-lg transition-all duration-200"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
+                {/* Mobile Navigation Links */}
+                <div className="flex-1 py-6">
+                  <nav className="space-y-2">
+                    {navLinks.map((link) => {
+                      const IconComponent = link.icon;
+                      return (
+                        <Button
+                          key={link.path}
+                          asChild
+                          variant="ghost"
+                          className={`w-full justify-start transition-all duration-200 ${
+                            isActive(link.path)
+                              ? "text-indigo-600 bg-indigo-50"
+                              : "text-gray-700 hover:text-indigo-600 hover:bg-indigo-50"
+                          }`}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Link to={link.path} className="flex items-center space-x-3">
+                            <span className="text-indigo-500">{React.createElement(IconComponent, { size: 16 })}</span>
+                            <span>{link.label}</span>
+                          </Link>
+                        </Button>
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                {/* Mobile User Section */}
+                <div className="border-t pt-6 space-y-4">
+                  {user?.role === "user" ? (
+                    <div className="space-y-4">
+                      {/* User Info */}
+                      <div className="flex items-center space-x-3 px-3">
+                        <Avatar className="w-10 h-10 bg-indigo-100">
+                          <AvatarFallback className="text-indigo-600 text-sm font-semibold">
+                            {getUserInitials(user.fullName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="text-base font-medium text-gray-800 capitalize">
+                            {user.fullName || "User"}
+                          </div>
+                          <Badge variant="secondary" className="text-xs">
+                            {user.role}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Dashboard Button */}
+                      <div className="space-y-2">
+                        <Button
+                          asChild
+                          className="w-full bg-indigo-600 hover:bg-indigo-700"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <Link to="/dashboard" className="flex items-center justify-center space-x-2">
+                            <LayoutDashboard size={16} />
+                            <span>Dashboard</span>
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Button 
+                        asChild 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Link to="/login" className="flex items-center justify-center space-x-2">
+                          <LogIn size={16} />
+                          <span>Log in</span>
+                        </Link>
+                      </Button>
+                      <Button 
+                        asChild 
+                        className="w-full bg-indigo-600 hover:bg-indigo-700"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <Link to="/signup" className="flex items-center justify-center space-x-2">
+                          <UserPlus size={16} />
+                          <span>Sign up</span>
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      {isOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/20 backdrop-blur-sm -z-10"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
     </nav>
   );
 };

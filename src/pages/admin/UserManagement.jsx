@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Bell, UserX, UserCheck, Mail } from "lucide-react";
 import { fetchClients, updateClient } from "../../api/clientService";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -62,7 +63,7 @@ const UserManagement = () => {
 
   // Send notification
   const sendNotification = async () => {
-    await API.post("/auth/emailSender", {
+    await axios.post("/auth/emailSender", {
       email: notification.email,
       subject: notification.subject,
       message: notification.message,
@@ -74,7 +75,7 @@ const UserManagement = () => {
     setSelectedUser(null);
 
     // Show success alert (in a real app, use a proper notification system)
-    alert("Notification sent successfully!");
+    toast.success("Notification sent successfully!");
   };
 
   const filteredUsers = users.filter((user) => {
@@ -277,7 +278,7 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                      className={`px-2 inline-flex capitalize  text-xs leading-5 font-semibold rounded-full 
                 ${
                   user.approvalStatus === "approved"
                     ? "bg-green-100 text-green-800"
