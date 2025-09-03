@@ -59,12 +59,12 @@ const Advertisement = () => {
   };
 
   // If there are no ads, don't render anything
-  if (!loading && advertisements.length === 0 && !error) {
+  if (loading && advertisements.length === 0 && !error) {
     return null;
   }
 
   return (
-    <div className="w-full mx-auto my-6">
+    <div className="w-full mx-auto">
       <Card className="border-none shadow-lg rounded-xl overflow-hidden">
         <CardContent className="p-0">
           <div className="relative">

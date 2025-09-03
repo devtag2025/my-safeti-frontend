@@ -95,6 +95,19 @@ export const deleteReport = async (reportId) => {
   }
 };
 
+export const deleteByAdmin = async (reportId) => {
+  try {
+    const response = await API.delete(`/report/deleteReportByAdmin/${reportId}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error deleting report:",
+      error.response?.data?.message || error.message
+    );
+    throw error.response?.data || error;
+  }
+};
+
 
 export const getTotalReports = async () => {
   try {

@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Info,
   Search,
-  Clipboard,
   Filter,
   X,
   ChevronDown,
@@ -24,13 +23,29 @@ import {
   Download,
   ClipboardCopy,
   MessagesSquare,
+  Trash2,
+  Loader2,
 } from "lucide-react";
-import { getAllReports, updateReport } from "../../api/reportService";
+import {
+  getAllReports,
+  updateReport,
+  deleteByAdmin,
+} from "../../api/reportService";
 import * as XLSX from "xlsx";
-import { jsPDF } from "jspdf";
-import axios from "axios";
 import API from "../../api/axiosConfig";
 import { toast } from "react-hot-toast";
+import PDFExport from "../client/PdfExport";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const ReportModeration = () => {
   const [reports, setReports] = useState([]);
@@ -57,30 +72,13 @@ const ReportModeration = () => {
   const [commentReport, setCommentReport] = useState(null);
   const [originalEmailBody, setOriginalEmailBody] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const openCommentModal = (report) => {
     setCommentReport(report);
     setCommentText(report.adminComments);
 
     setIsCommentModalOpen(true);
-  };
-
-  const formatActionType = (actionType) => {
-    switch (actionType) {
-      case "comment":
-        return "Comment";
-      case "footage_request":
-        return "Footage Request";
-      case "contact":
-        return "User Contact";
-      case "status_change":
-        return "Status Changed";
-      default:
-        return (
-          actionType.charAt(0).toUpperCase() +
-          actionType.slice(1).replace("_", " ")
-        );
-    }
   };
 
   const sendEmailAndRequestMediaByAdmin = async (template) => {
@@ -134,7 +132,6 @@ const ReportModeration = () => {
     }
   };
 
-  // Fetch reports from API
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -153,13 +150,11 @@ const ReportModeration = () => {
     fetchReports();
   }, []);
 
-  // Apply filters and search
   useEffect(() => {
     if (!reports.length) return;
 
     let result = [...reports];
 
-    // Apply search term
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter((report) => {
@@ -192,7 +187,6 @@ const ReportModeration = () => {
       });
     }
 
-    // Apply filters
     if (filters.status) {
       result = result.filter((report) => report.status === filters.status);
     }
@@ -212,7 +206,6 @@ const ReportModeration = () => {
 
     if (filters.dateTo) {
       const toDate = new Date(filters.dateTo);
-      // Set to end of day
       toDate.setHours(23, 59, 59, 999);
       result = result.filter((report) => new Date(report.createdAt) <= toDate);
     }
@@ -238,15 +231,12 @@ const ReportModeration = () => {
     setFilteredReports(result);
   }, [reports, searchTerm, filters]);
 
-  // Handle report approval
   const handleApproveReport = async (reportId, userId) => {
     try {
-      // Call API to update report status
       await updateReport(reportId, userId, {
         status: "approved",
       });
 
-      // Update local state
       const updatedReports = reports.map((report) =>
         report._id === reportId ? { ...report, status: "approved" } : report
       );
@@ -262,7 +252,6 @@ const ReportModeration = () => {
         status: "rejected",
       });
 
-      // Update local state
       const updatedReports = reports.map((report) =>
         report._id === reportId ? { ...report, status: "rejected" } : report
       );
@@ -272,7 +261,6 @@ const ReportModeration = () => {
     }
   };
 
-  // Open modal to view report details
   const openViewModal = (report) => {
     setSelectedReport(report);
     setIsModalOpen(true);
@@ -286,7 +274,7 @@ const ReportModeration = () => {
         return;
       }
 
-      const transformedData = transformReportsForExcel(reports); // Pass the state variable
+      const transformedData = transformReportsForExcel(reports);
 
       const ws = XLSX.utils.json_to_sheet(transformedData);
       const columnWidths = calculateColumnWidths(transformedData);
@@ -409,19 +397,12 @@ const ReportModeration = () => {
     return widths.map((w) => ({ wch: w.wch + 2 }));
   };
 
-  // Format date in a readable format
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
-  // Get user info (if available)
-  const getUserInfo = (userId) => {
-    return userId || "Anonymous";
-  };
-
-  // Get media URLs or placeholders
   const getMediaUrls = (report) => {
     if (report.mediaUrls && report.mediaUrls.length > 0) {
       return report.mediaUrls;
@@ -434,12 +415,10 @@ const ReportModeration = () => {
     return [];
   };
 
-  // Handle filter changes
   const handleFilterChange = (key, value) => {
     setFilters((prevFilters) => ({ ...prevFilters, [key]: value }));
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setFilters({
       status: "",
@@ -452,534 +431,12 @@ const ReportModeration = () => {
     setSearchTerm("");
   };
 
-  // Get unique incident types from reports
-  const getIncidentTypes = () => {
-    const types = new Set();
-    reports.forEach((report) => {
-      if (report.incidentType) types.add(report.incidentType);
-    });
-    return Array.from(types);
-  };
-
-  // Get unique states from reports
   const getStates = () => {
     const states = new Set();
     reports.forEach((report) => {
       if (report.state) states.add(report.state);
     });
     return Array.from(states);
-  };
-
-  // Function to download report data as Excel
-  const downloadReportAsExcel = (report) => {
-    try {
-      // Create a structured data object for Excel
-      const reportData = [
-        // General Info
-        { Category: "Report ID", Value: report.customId },
-        { Category: "Status", Value: report.status },
-        { Category: "Incident Type", Value: report.incidentType },
-        { Category: "Vehicle Type", Value: report.vehicleType },
-        { Category: "Date", Value: formatDate(report.date) },
-        { Category: "Created At", Value: formatDate(report.createdAt) },
-        { Category: "Updated At", Value: formatDate(report.updatedAt) },
-        { Category: "", Value: "" }, // Empty row as separator
-
-        // Location Info
-        { Category: "Location", Value: report.location },
-        { Category: "Cross Street", Value: report.crossStreet || "N/A" },
-        { Category: "Suburb", Value: report.suburb },
-        { Category: "State", Value: report.state },
-        { Category: "", Value: "" }, // Empty row as separator
-
-        // Reporter Info
-        { Category: "Reporter Name", Value: report.name },
-        { Category: "Reporter Email", Value: report.email },
-        { Category: "Reporter Phone", Value: report.phone },
-        {
-          Category: "Reporter User ID",
-          Value: report.userId.customId || "N/A",
-        },
-        { Category: "", Value: "" }, // Empty row as separator
-
-        // Evidence Info
-        { Category: "Has Dashcam", Value: report.hasDashcam ? "Yes" : "No" },
-        { Category: "Has Audio", Value: report.hasAudio ? "Yes" : "No" },
-        {
-          Category: "Can Provide Footage",
-          Value: report.canProvideFootage ? "Yes" : "No",
-        },
-        {
-          Category: "Terms Accepted",
-          Value: report.acceptTerms ? "Yes" : "No",
-        },
-        { Category: "", Value: "" }, // Empty row as separator
-
-        // Description
-        {
-          Category: "Description",
-          Value: report.description || "No description provided",
-        },
-      ];
-
-      // Add vehicle information
-      if (report.vehicles && report.vehicles.length > 0) {
-        reportData.push({ Category: "", Value: "" });
-        reportData.push({ Category: "VEHICLE DETAILS", Value: "" });
-
-        report.vehicles.forEach((vehicle, index) => {
-          reportData.push({
-            Category: `Vehicle ${index + 1} Registration`,
-            Value: vehicle.registration,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Reg State`,
-            Value: vehicle.registrationState,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Make`,
-            Value: vehicle.make,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Model`,
-            Value: vehicle.model,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Body Type`,
-            Value: vehicle.bodyType,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Visible on Dashcam`,
-            Value: vehicle.isRegistrationVisible,
-          });
-          reportData.push({
-            Category: `Vehicle ${index + 1} Features`,
-            Value: vehicle.identifyingFeatures || "N/A",
-          });
-
-          if (index < report.vehicles.length - 1) {
-            reportData.push({ Category: "", Value: "" });
-          }
-        });
-      }
-
-      // Create worksheet
-      const ws = XLSX.utils.json_to_sheet(reportData);
-
-      // Auto-size columns
-      const colWidths = reportData.reduce(
-        (width, row) => {
-          const categoryWidth = row.Category
-            ? row.Category.toString().length
-            : 0;
-          const valueWidth = row.Value ? row.Value.toString().length : 0;
-          return {
-            category: Math.max(width.category, categoryWidth),
-            value: Math.max(width.value, valueWidth),
-          };
-        },
-        { category: 10, value: 10 }
-      );
-
-      ws["!cols"] = [
-        { wch: colWidths.category + 2 },
-        { wch: colWidths.value + 2 },
-      ];
-
-      // Create workbook
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Report Details");
-
-      // Generate filename
-      const fileName = `Report_${report._id}_${report.incidentType.replace(
-        /\s+/g,
-        "_"
-      )}.xlsx`;
-
-      // Write and download file
-      XLSX.writeFile(wb, fileName);
-    } catch (error) {
-      console.error("Error downloading report:", error);
-      toast.error("Failed to download report data");
-    }
-  };
-
-  const downloadReportAsPDF = (report) => {
-    try {
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      // Define colors
-      const primaryColor = [41, 65, 148]; // Indigo
-      const secondaryColor = [100, 116, 139]; // Slate gray
-      const headerBgColor = [241, 245, 249]; // Light gray bg
-      const approvedColor = [34, 197, 94]; // Green
-      const rejectedColor = [239, 68, 68]; // Red
-      const pendingColor = [234, 179, 8]; // Yellow
-
-      // Set initial position
-      let y = 15;
-      const margin = 15;
-      const pageWidth = doc.internal.pageSize.width;
-      const contentWidth = pageWidth - margin * 2;
-
-      // Add header with logo/branding
-      doc.setFillColor(...headerBgColor);
-      doc.rect(0, 0, pageWidth, 25, "F");
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.setTextColor(...primaryColor);
-      doc.text("Incident Report", margin, y);
-
-      // Add report reference info in top right
-      doc.setFontSize(8);
-      doc.setTextColor(...secondaryColor);
-      doc.text(`Report ID: ${report.customId}`, pageWidth - margin, y - 5, {
-        align: "right",
-      });
-
-      // Add status with colored badge - fixed positioning
-      const statusText = report.status.toUpperCase();
-      let statusColor;
-      if (report.status === "approved") {
-        statusColor = approvedColor;
-      } else if (report.status === "rejected") {
-        statusColor = rejectedColor;
-      } else {
-        statusColor = pendingColor;
-      }
-
-      // Better status badge calculation
-      const statusWidth =
-        (doc.getStringUnitWidth(statusText) * 8) / doc.internal.scaleFactor;
-      doc.setFillColor(...statusColor);
-      doc.roundedRect(
-        pageWidth - margin - statusWidth - 8,
-        y - 2,
-        statusWidth + 8,
-        9,
-        2,
-        2,
-        "F"
-      );
-      doc.setTextColor(255, 255, 255); // White text
-      doc.text(statusText, pageWidth - margin - 4, y, { align: "right" });
-
-      y += 15;
-
-      // Add report title
-      doc.setFontSize(14);
-      doc.setTextColor(...primaryColor);
-      doc.text(`${report.incidentType}`, margin, y);
-
-      doc.setDrawColor(...secondaryColor);
-      doc.setLineWidth(0.2);
-      doc.line(margin, y + 2, pageWidth - margin, y + 2);
-
-      y += 10;
-
-      // Function to add section with header - improved spacing
-      const addSection = (title, data) => {
-        // Section header with background
-        doc.setFillColor(...headerBgColor);
-        doc.rect(margin, y - 4, contentWidth, 8, "F");
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...primaryColor);
-        doc.text(title, margin, y);
-        y += 8; // Increased spacing after section header
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
-
-        // Create a two-column layout for data
-        const entries = Object.entries(data).filter(([_, value]) => value);
-
-        // Only create two columns if we have more than 3 entries
-        const useColumns = entries.length > 3;
-        const midPoint = Math.ceil(entries.length / (useColumns ? 2 : 1));
-
-        const originalY = y;
-        let maxY = y;
-
-        // First column (or only column if not using two columns)
-        entries.slice(0, midPoint).forEach(([key, value]) => {
-          // Check if we need a new page
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-
-          doc.setFont("helvetica", "bold");
-          doc.text(`${key}:`, margin, y);
-
-          doc.setFont("helvetica", "normal");
-          // Increased label width for better alignment
-          doc.text(`${value}`, margin + 40, y);
-          y += 7; // Increased spacing between rows
-        });
-
-        maxY = Math.max(maxY, y);
-
-        // Reset y to original position for second column if we're using columns
-        if (useColumns && entries.length > 1) {
-          y = originalY;
-
-          // Second column
-          entries.slice(midPoint).forEach(([key, value]) => {
-            // Check if we need a new page
-            if (y > 270) {
-              doc.addPage();
-              y = 20;
-            }
-
-            doc.setFont("helvetica", "bold");
-            doc.text(`${key}:`, margin + contentWidth / 2, y);
-
-            doc.setFont("helvetica", "normal");
-            doc.text(`${value}`, margin + contentWidth / 2 + 40, y);
-            y += 7; // Increased spacing between rows
-          });
-        }
-
-        // Use the maximum y value of the two columns
-        y = Math.max(maxY, y);
-        y += 3; // Space after the section
-      };
-
-      // Add report sections
-      addSection("General Information", {
-        "Incident Type": report.incidentType,
-        "Vehicle Type": report.vehicleType,
-        Date: formatDate(report.date),
-        "Created At": formatDate(report.createdAt),
-        "Updated At": formatDate(report.updatedAt),
-      });
-
-      addSection("Location Details", {
-        Location: report.location,
-        "Street Number": report.streetNumber || "N/A",
-        "Cross Street": report.crossStreet || "N/A",
-        Suburb: report.suburb,
-        State: report.state,
-      });
-
-      addSection("Reporter Details", {
-        Name: report.name,
-        Email: report.email,
-        Phone: report.phone,
-        "User ID": report.userId.customId || "N/A",
-      });
-
-      // Format boolean values with proper checkmarks/x - fixed spacing
-      const formatBoolean = (value) => {
-        return value ? "✓  Yes" : "✗  No";
-      };
-
-      addSection("Evidence Information", {
-        "Has Dashcam": formatBoolean(report.hasDashcam),
-        "Has Audio": formatBoolean(report.hasAudio),
-        "Can Provide Footage": formatBoolean(report.canProvideFootage),
-        "Terms Accepted": formatBoolean(report.acceptTerms),
-      });
-
-      // Add description with better padding
-      if (report.description) {
-        // Description section header
-        doc.setFillColor(...headerBgColor);
-        doc.rect(margin, y - 4, contentWidth, 8, "F");
-
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(...primaryColor);
-        doc.text("Description", margin, y);
-        y += 8; // Increased spacing
-
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
-
-        // Add a box around the description with better padding
-        doc.setDrawColor(...secondaryColor);
-        doc.setFillColor(252, 252, 252);
-
-        // Calculate height needed for description with added padding
-        const splitDescription = doc.splitTextToSize(
-          report.description,
-          contentWidth - 10
-        ); // Reduced width for better text wrapping
-        const descriptionHeight = splitDescription.length * 5 + 10; // Added padding
-
-        // Check if we need a new page
-        if (y + descriptionHeight > 270) {
-          doc.addPage();
-          y = 20;
-        }
-
-        // Draw background and border for description
-        doc.rect(margin, y, contentWidth, descriptionHeight, "FD");
-
-        // Add description text with proper padding
-        doc.text(splitDescription, margin + 5, y + 7);
-        y += descriptionHeight + 8; // Added spacing after description
-      }
-
-      // Add vehicle information with better spacing and formatting
-      if (report.vehicles && report.vehicles.length > 0) {
-        report.vehicles.forEach((vehicle, index) => {
-          // Vehicle section header
-          doc.setFillColor(...headerBgColor);
-          doc.rect(margin, y - 4, contentWidth, 8, "F");
-
-          doc.setFont("helvetica", "bold");
-          doc.setFontSize(11);
-          doc.setTextColor(...primaryColor);
-          doc.text(`Vehicle ${index + 1} Details`, margin, y);
-          y += 8; // Increased spacing
-
-          // Highlight registration in a special box with better padding
-          if (vehicle.registration) {
-            doc.setFillColor(...primaryColor);
-            const regText = `${vehicle.registration} (${vehicle.registrationState})`;
-            const regWidth =
-              (doc.getStringUnitWidth(regText) * 11) / doc.internal.scaleFactor; // Increased size factor
-
-            // Better positioned registration box
-            doc.roundedRect(margin, y - 5, regWidth + 10, 12, 2, 2, "F");
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(10);
-            doc.text(regText, margin + 5, y);
-
-            y += 12; // Adjusted spacing after registration
-          }
-
-          // Back to normal formatting
-          doc.setFont("helvetica", "normal");
-          doc.setFontSize(9);
-          doc.setTextColor(0, 0, 0);
-
-          // Check if we need a new page
-          if (y > 250) {
-            doc.addPage();
-            y = 20;
-          }
-
-          // Create two-column layout for vehicle details - simplified and better spacing
-          const vehicleData = {
-            Make: vehicle.make || "N/A",
-            Model: vehicle.model || "N/A",
-            "Body Type": vehicle.bodyType || "N/A",
-            "Registration Visible": vehicle.isRegistrationVisible || "N/A",
-          };
-
-          const entries = Object.entries(vehicleData).filter(
-            ([_, value]) => value
-          );
-          const midPoint = Math.ceil(entries.length / 2);
-
-          const originalY = y;
-          let maxY = y;
-
-          // First column
-          entries.slice(0, midPoint).forEach(([key, value]) => {
-            doc.setFont("helvetica", "bold");
-            doc.text(`${key}:`, margin, y);
-
-            doc.setFont("helvetica", "normal");
-            doc.text(`${value}`, margin + 40, y); // Increased spacing
-            y += 7; // Increased row spacing
-          });
-
-          maxY = Math.max(maxY, y);
-
-          // Reset y for second column
-          if (entries.length > 2) {
-            y = originalY;
-
-            // Second column
-            entries.slice(midPoint).forEach(([key, value]) => {
-              doc.setFont("helvetica", "bold");
-              doc.text(`${key}:`, margin + contentWidth / 2, y);
-
-              doc.setFont("helvetica", "normal");
-              doc.text(`${value}`, margin + contentWidth / 2 + 40, y); // Increased spacing
-              y += 7; // Increased row spacing
-            });
-          }
-
-          // Use the maximum y value of the two columns
-          y = Math.max(maxY, y);
-
-          // Add identifying features in a box if available - fixed padding issues
-          if (vehicle.identifyingFeatures) {
-            doc.setFont("helvetica", "bold");
-            doc.text("Identifying Features:", margin, y);
-            y += 6; // Fixed spacing
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-
-            // Create a box for the features with better padding
-            doc.setDrawColor(...secondaryColor);
-            doc.setFillColor(252, 252, 252);
-
-            const splitFeatures = doc.splitTextToSize(
-              vehicle.identifyingFeatures,
-              contentWidth - 10
-            ); // Reduced width for better text wrapping
-            const featuresHeight = splitFeatures.length * 5 + 10; // Added padding
-
-            // Draw box with better positioning
-            doc.rect(margin, y, contentWidth, featuresHeight, "FD");
-
-            // Add features text with proper padding
-            doc.text(splitFeatures, margin + 5, y + 7);
-
-            y += featuresHeight + 8; // Added spacing
-          } else {
-            y += 5;
-          }
-        });
-      }
-
-      // Add footer with fixed positioning
-      const footerY = doc.internal.pageSize.height - 10;
-      doc.setFontSize(8);
-      doc.setTextColor(...secondaryColor);
-      doc.text(
-        `Generated on ${new Date().toLocaleString()}`,
-        pageWidth / 2,
-        footerY,
-        { align: "center" }
-      );
-
-      // Add page numbers to all pages
-      const pageCount = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.text(`Page ${i} of ${pageCount}`, pageWidth - margin, footerY, {
-          align: "right",
-        });
-      }
-
-      // Generate filename
-      const fileName = `Report_${report._id}_${report.incidentType.replace(
-        /\s+/g,
-        "_"
-      )}.pdf`;
-
-      // Save the PDF
-      doc.save(fileName);
-    } catch (error) {
-      console.error("Error creating PDF:", error);
-      toast.error("Failed to create PDF report");
-    }
   };
 
   const generateEmailTemplate = (report) => {
@@ -1036,18 +493,7 @@ const ReportModeration = () => {
     };
   };
 
-  const openEmailTemplate = (template) => {
-    const mailtoLink = `mailto:${encodeURIComponent(
-      template.email
-    )}?subject=${encodeURIComponent(
-      template.subject
-    )}&body=${encodeURIComponent(template.message)}`;
-
-    window.location.href = mailtoLink;
-  };
-
   const copyEmailTemplateToClipboard = (template) => {
-    // Use the template directly
     const emailContent = `To: ${template.email}
   Subject: ${template.subject}
   
@@ -1068,6 +514,27 @@ const ReportModeration = () => {
     const template = generateEmailTemplate(report);
     setEmailTemplate(template);
     setIsEmailModalOpen(true);
+  };
+
+  const handleDeleteReport = async (reportId) => {
+    try {
+      setDeletingId(reportId);
+      await deleteByAdmin(reportId);
+
+      setReports((prev) => prev.filter((r) => r._id !== reportId));
+
+      if (selectedReport?._id === reportId) {
+        setIsModalOpen(false);
+        setSelectedReport(null);
+      }
+
+      toast.success("Report deleted.");
+    } catch (err) {
+      console.error("Error deleting report:", err);
+      toast.error(err?.message || "Failed to delete report");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -1260,16 +727,6 @@ const ReportModeration = () => {
               <span className="font-medium">{filteredReports.length}</span>{" "}
               report{filteredReports.length !== 1 && "s"} found
             </div>
-            {/* {(searchTerm ||
-              Object.values(filters).some((val) => val !== "")) && (
-              <button
-                className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center"
-                onClick={clearFilters}
-              >
-                <X className="h-3 w-3 mr-1" />
-                Clear all filters
-              </button>
-            )} */}
           </div>
         )}
       </div>
@@ -1471,14 +928,8 @@ const ReportModeration = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        {/* <button
-                          onClick={() => downloadReportAsExcel(report)}
-                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer ml-2"
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                        </button> */}
                         <button
-                          onClick={() => downloadReportAsPDF(report)}
+                          onClick={() => PDFExport.downloadReportAsPDF(report)}
                           className="text-indigo-600 hover:text-indigo-900 cursor-pointer ml-2"
                           title="Download PDF"
                         >
@@ -1507,6 +958,50 @@ const ReportModeration = () => {
                         >
                           <MessagesSquare className="h-4 w-4" />
                         </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-red-600 hover:text-red-800 cursor-pointer ml-2"
+                              title="Delete"
+                              aria-label="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </AlertDialogTrigger>
+
+                          <AlertDialogContent
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete this report?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete the report and remove it from
+                                the moderation lists.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteReport(report._id)}
+                                disabled={deletingId === report._id}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                {deletingId === report._id ? (
+                                  <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  "Delete"
+                                )}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </td>
                     </tr>
                   ))}
@@ -1778,7 +1273,9 @@ const ReportModeration = () => {
                         Download Excel
                       </button> */}
                       <button
-                        onClick={() => downloadReportAsPDF(selectedReport)}
+                        onClick={() =>
+                          PDFExport.downloadReportAsPDF(selectedReport)
+                        }
                         className="mr-2 inline-flex items-center px-2 py-1 bg-indigo-50 text-indigo-700 text-xs font-medium rounded hover:bg-indigo-100"
                       >
                         <FileText className="h-3 w-3 mr-1" />

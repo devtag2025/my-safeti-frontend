@@ -132,3 +132,8 @@ export const getAllMediaStats = async () => {
     throw new Error("Failed to fetch uploaded media");
   }
 };
+
+export const deleteMediaRequest = async (requestId) => {
+  const res = await API.delete(`/media-requests/${requestId}`);
+  return res.data;
+};

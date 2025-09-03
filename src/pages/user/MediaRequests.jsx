@@ -34,6 +34,11 @@ import {
   CheckCircle,
   File,
 } from "lucide-react";
+import PaymentDetailsDialog from "./PaymentDetailsDialog";
+import {
+  fetchPaymentDetails,
+  savePaymentDetails,
+} from "../../api/paymentDetailsService";
 
 const MediaRequests = () => {
   const { mediaRequests, fetchUserRequests, uploadMedia } =
@@ -44,6 +49,8 @@ const MediaRequests = () => {
   const [fileErrors, setFileErrors] = useState([]); // To hold errors related to files
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
   const SUPPORTED_FILE_TYPES = [
     "image/jpeg",
@@ -56,10 +63,6 @@ const MediaRequests = () => {
   ];
   const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
   const MAX_FILES = 10;
-
-  useEffect(() => {
-    fetchUserRequests();
-  }, [fetchUserRequests]);
 
   const handleOpenDialog = (request) => {
     setSelectedRequest(request);
@@ -118,7 +121,7 @@ const MediaRequests = () => {
       const progressInterval = setInterval(() => {
         setUploadProgress((prev) => {
           const next = prev + Math.random() * 10;
-          return next > 90 ? 90 : next; 
+          return next > 90 ? 90 : next;
         });
       }, 300);
 
@@ -128,19 +131,48 @@ const MediaRequests = () => {
       setUploadProgress(100);
 
       // Give user time to see 100% completion
-      setTimeout(() => {
-        setIsDialogOpen(false);
-        setSelectedRequest(null);
-        setFiles([]); // Reset file list
-        fetchUserRequests();
-      }, 1000);
+      setTimeout(async () => {
+        setFiles([]);
+        try {
+          const existingPayment = await fetchPaymentDetails();
+          if (!existingPayment) {
+            setShowPaymentDialog(true);
+          }
+        } catch (err) {
+          console.error("Failed to check payment details:", err);
+          setShowPaymentDialog(true);
+        }
+      }, 100);
     } catch (error) {
       console.error("Error uploading media:", error.message);
       setFileErrors(["Failed to upload media. Please try again."]);
     } finally {
       setIsUploading(false);
+      setIsDialogOpen(false);
+      fetchUserRequests();
     }
   };
+
+  const handlePaymentSubmit = async (paymentDetails) => {
+    if (!selectedRequest) return;
+
+    setIsSubmittingPayment(true);
+    try {
+      await savePaymentDetails(paymentDetails);
+      setShowPaymentDialog(false);
+      setIsDialogOpen(false);
+      setSelectedRequest(null);
+      fetchUserRequests();
+    } catch (error) {
+      console.error("Error saving payment details:", error);
+    } finally {
+      setIsSubmittingPayment(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserRequests();
+  }, [fetchUserRequests]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -486,6 +518,12 @@ const MediaRequests = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <PaymentDetailsDialog
+        isOpen={showPaymentDialog}
+        onOpenChange={setShowPaymentDialog}
+        onPaymentSubmit={handlePaymentSubmit}
+        isSubmitting={isSubmittingPayment}
+      />
     </div>
   );
 };

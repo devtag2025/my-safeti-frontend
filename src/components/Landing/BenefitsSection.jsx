@@ -9,8 +9,8 @@ const BenefitsSection = () => {
             Benefits for Everyone
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            SafeStreet creates value for both everyday users and our
-            insurance company partners.
+            SafeStreet creates value for both everyday users and our insurance
+            company partners.
           </p>
         </div>
 
@@ -36,9 +36,7 @@ const BenefitsSection = () => {
                   ></path>
                 </svg>
                 <span>
-                  <span className="font-medium">
-                    Contribute to road safety
-                  </span>{" "}
+                  <span className="font-medium">Contribute to road safety</span>{" "}
                   - Help create safer roads for everyone.
                 </span>
               </li>
@@ -58,8 +56,9 @@ const BenefitsSection = () => {
                   ></path>
                 </svg>
                 <span>
-                  <span className="font-medium">Earn rewards</span> -
-                  Receive $100 AUD for approved media submissions.
+                  <span className="font-medium">Earn rewards</span> - Receive
+                  between $50 & $100 for approved media submissions depending on
+                  the complexity of the incident.
                 </span>
               </li>
               <li className="flex items-start">
@@ -78,8 +77,8 @@ const BenefitsSection = () => {
                   ></path>
                 </svg>
                 <span>
-                  <span className="font-medium">Easy reporting</span> -
-                  Simple, user-friendly interface for quick submissions.
+                  <span className="font-medium">Easy reporting</span> - Simple,
+                  user-friendly interface for quick submissions.
                 </span>
               </li>
               <li className="flex items-start">
@@ -126,9 +125,7 @@ const BenefitsSection = () => {
                   ></path>
                 </svg>
                 <span>
-                  <span className="font-medium">
-                    Enhanced risk assessment
-                  </span>{" "}
+                  <span className="font-medium">Enhanced risk assessment</span>{" "}
                   - Access real-world driver behaviour data.
                 </span>
               </li>
@@ -168,10 +165,8 @@ const BenefitsSection = () => {
                   ></path>
                 </svg>
                 <span>
-                  <span className="font-medium">
-                    Comprehensive analytics
-                  </span>{" "}
-                  - Detailed reports and visualisations.
+                  <span className="font-medium">Comprehensive analytics</span> -
+                  Detailed reports and visualisations.
                 </span>
               </li>
               <li className="flex items-start">

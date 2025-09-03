@@ -9,6 +9,8 @@ import {
   Camera,
   Upload,
   Plus,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import axios from "axios";
 import API from "../../api/axiosConfig";
@@ -22,8 +24,19 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { uploadMedia } from "../../api/mediaRequestService";
+import { deleteMediaRequest, uploadMedia } from "../../api/mediaRequestService";
 import { toast } from "react-hot-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const MediaAccessManagement = () => {
   const [mediaRequests, setMediaRequests] = useState([]);
@@ -33,7 +46,7 @@ const MediaAccessManagement = () => {
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState([]);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [selectedUploadRequest, setSelectedUploadRequest] = useState(null);
@@ -42,10 +55,11 @@ const MediaAccessManagement = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const MAX_FILES = 5;
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
+  const [deletingId, setDeletingId] = useState(null);
 
   // Add this function to handle opening the media viewer
-  const openMediaViewer = (mediaUrl) => {
-    setSelectedMedia(mediaUrl);
+  const openMediaViewer = (mediaUrls) => {
+    setSelectedMedia(mediaUrls);
     setIsMediaModalOpen(true);
   };
 
@@ -185,8 +199,29 @@ const MediaAccessManagement = () => {
       setIsUploading(false);
     }
   };
+
   const removeFile = (indexToRemove) => {
     setUploadFiles(uploadFiles.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      setDeletingId(requestId);
+      await deleteMediaRequest(requestId);
+      setMediaRequests((prev) => prev.filter((r) => r._id !== requestId));
+      if (selectedRequest?._id === requestId) {
+        setIsViewModalOpen(false);
+        setSelectedRequest(null);
+      }
+      toast.success("Media request deleted.");
+    } catch (err) {
+      console.error("Error deleting media request:", err);
+      toast.error(
+        err?.response?.data?.message || err?.message || "Failed to delete."
+      );
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   // Filter requests based on search and filters
@@ -376,9 +411,7 @@ const MediaAccessManagement = () => {
                         request.mediaUrls &&
                         request.mediaUrls.length > 0 && (
                           <button
-                            onClick={() =>
-                              openMediaViewer(request.mediaUrls[0])
-                            }
+                            onClick={() => openMediaViewer(request.mediaUrls)}
                             className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded-full"
                             title="View media"
                           >
@@ -425,9 +458,7 @@ const MediaAccessManagement = () => {
                       {request.status === "approved" &&
                         request.mediaUrls?.length > 0 && (
                           <button
-                            onClick={() =>
-                              openMediaViewer(request.mediaUrls[0])
-                            }
+                            onClick={() => openMediaViewer(request.mediaUrls)}
                             className="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded-full"
                             title="View media"
                           >
@@ -455,6 +486,48 @@ const MediaAccessManagement = () => {
                       >
                         <Upload className="w-5 h-5" />
                       </button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-red-600 hover:text-red-900 bg-red-50 p-1 rounded-full"
+                            title="Delete request"
+                            aria-label="Delete request"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Delete this media request?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. The media request
+                              will be permanently removed.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteRequest(request._id)}
+                              disabled={deletingId === request._id}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              {deletingId === request._id ? (
+                                <>
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete"
+                              )}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </td>
                 </tr>
@@ -516,33 +589,43 @@ const MediaAccessManagement = () => {
                 className="bg-gray-900 flex justify-center items-center p-2"
                 style={{ minHeight: "400px" }}
               >
-                {selectedMedia.toLowerCase().endsWith(".mp4") ||
-                selectedMedia.toLowerCase().endsWith(".mov") ||
-                selectedMedia.toLowerCase().endsWith(".avi") ? (
-                  <video controls className="max-h-[70vh] max-w-full" autoPlay>
-                    <source src={selectedMedia} />
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  <img
-                    src={selectedMedia}
-                    alt="Uploaded evidence"
-                    className="max-h-[70vh] max-w-full object-contain"
-                  />
-                )}
+                <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                  {selectedMedia.map((media, idx) =>
+                    media.toLowerCase().match(/\.(mp4|mov|avi)$/) ? (
+                      <video
+                        key={idx}
+                        controls
+                        className="max-h-[300px] w-full rounded object-contain"
+                      >
+                        <source src={media} />
+                        Your browser does not support the video tag.
+                      </video>
+                    ) : (
+                      <img
+                        key={idx}
+                        src={media}
+                        alt={`Uploaded evidence ${idx + 1}`}
+                        className="max-h-[300px] w-full rounded object-contain"
+                      />
+                    )
+                  )}
+                </div>
               </div>
 
               <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <a
-                  href={selectedMedia}
-                  download
-                  target="_blank"
-                  rel="noopener noreferrer"
+                {/* <button
+                  onClick={() => {
+                    selectedMedia.forEach((media) => {
+                      // console.log("Opening media:", media);
+                      window.open(media, "_blank");
+                    });
+                  }}
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Download Media
-                </a>
+                  Open in Tabs
+                </button> */}
+
                 <button
                   type="button"
                   className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"

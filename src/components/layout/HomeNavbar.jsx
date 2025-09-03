@@ -12,7 +12,8 @@ import {
   Users, 
   LogIn, 
   UserPlus, 
-  LayoutDashboard 
+  LayoutDashboard, 
+  FileText
 } from "lucide-react";
 
 const HomeNavbar = () => {
@@ -44,6 +45,7 @@ const HomeNavbar = () => {
     { path: "/home", label: "Home", icon: Home },
     { path: "/incident-heatMap", label: "Incident HeatMap", icon: Map },
     { path: "/our-partners", label: "Our Partners", icon: Users },
+    { path: "/terms", label: "Terms & Conditions", icon: FileText },
   ];
 
   const getUserInitials = (name) => {

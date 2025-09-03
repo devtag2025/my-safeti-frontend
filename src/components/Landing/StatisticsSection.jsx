@@ -4,7 +4,7 @@ const StatisticsSection = ({ stats }) => {
   if (!stats) return null;
 
   return (
-    <section className="py-20 bg-indigo-900 text-white">
+    <section className="py-20 bg-indigo-800 text-white">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">

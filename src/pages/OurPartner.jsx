@@ -1,5 +1,6 @@
 import React from 'react'
 import HomeNavbar from '../components/layout/HomeNavbar'
+import Footer from '../components/Landing/Footer'
 
 const OurPartner = () => {
   return (
@@ -12,7 +13,7 @@ const OurPartner = () => {
           
           {/* Icon/Illustration */}
           <div className="my-8">
-            <div className="mx-auto w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
+            <div className="mx-auto w-32 h-32 bg-indigo-600 rounded-full flex items-center justify-center mb-6 shadow-lg">
               <svg className="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
@@ -21,7 +22,7 @@ const OurPartner = () => {
 
           {/* Main Heading */}
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-            Our <span className="text-blue-600">Partners</span>
+            Our <span className="text-indigo-600">Partners</span>
           </h1>
           
           {/* Subheading */}
@@ -81,13 +82,8 @@ const OurPartner = () => {
           
         </div>
       </div>
-      
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-6">
-        <p className="text-gray-400 text-sm text-center">
-          © 2025 SafeStreet.com.au. All rights reserved.
-        </p>
-      </footer>
+
+      <Footer />
     </div>
   )
 }

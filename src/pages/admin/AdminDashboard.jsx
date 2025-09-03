@@ -8,6 +8,7 @@ import {
   X,
   Video,
   Shield,
+  User2,
 } from "lucide-react";
 import Advertisement from "./advertisment";
 import OverviewDashboard from "./OverviewDashboard";
@@ -16,6 +17,7 @@ import ReportModeration from "./ReportModeration";
 import useAuthStore from "../../store/authStore";
 import UserIcon from "../../assets/svgs/UserIcon";
 import MediaAccessManagement from "./MediaAccessManagement";
+import UserProfile from "../UserProfile";
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -59,6 +61,12 @@ const AdminDashboard = () => {
       icon: <BarChart className="w-5 h-5" />,
       allowedRoles: ["super-admin", "admin"],
     },
+    {
+      id: "profile",
+      label: "Profile",
+      icon: <User2 className="w-5 h-5" />,
+      allowedRoles: ["super-admin", "admin"],
+    },
   ].filter((item) => item.allowedRoles.includes(user?.role));
 
   const renderActiveComponent = () => {
@@ -75,6 +83,8 @@ const AdminDashboard = () => {
         return <MediaAccessManagement />;
       case "revenue":
         return <RevenueDashboard />;
+      case "profile":
+        return <UserProfile />;
       default:
         return <OverviewDashboard />;
     }
@@ -192,6 +202,15 @@ const AdminDashboard = () => {
                         {user?.role?.replace("-", " ")}
                       </p>
                     </div>
+                    <button
+                      onClick={() => {
+                        setActiveTab("profile");
+                        setDropdownOpen(false);
+                      }}
+                      className="w-full flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    >
+                      <User2 size={16} className="mr-2" /> Profile
+                    </button>
                     <button
                       onClick={logout}
                       className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-gray-100"

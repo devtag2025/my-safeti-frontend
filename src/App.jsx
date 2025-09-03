@@ -27,6 +27,8 @@ import OurPartner from "./pages/OurPartner";
 import IncidentHeatMap from "./pages/IncidentHeatMap";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import { Toaster } from "react-hot-toast";
+import SiteLayout from "./components/layout/SiteLayout";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 const AppContent = () => {
   const location = useLocation();
@@ -37,16 +39,18 @@ const AppContent = () => {
     "/home",
     "/our-partners",
     "/incident-heatMap",
+    "/terms",
   ];
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-  const noPaddingRoutes = [
+    const noPaddingRoutes = [
     "/login",
     "/signup",
     "/home",
     "/incident-heatMap",
     "/our-partners",
+    "/terms",
   ];
   const shouldApplyPadding =
     !noPaddingRoutes.includes(location.pathname) && !isAdminRoute;
@@ -54,7 +58,7 @@ const AppContent = () => {
   return (
     <>
       {shouldShowNavbar && <Navbar />}
-      <div className={shouldApplyPadding ? "pt-16" : ""}>
+      <SiteLayout withTopPadding={shouldApplyPadding}>
         <Routes>
           {/* Role-Based Redirect */}
           <Route path="/" element={<RoleRedirect />} />
@@ -65,6 +69,7 @@ const AppContent = () => {
           <Route path="/home" element={<Homepage />} />
           <Route path="/our-partners" element={<OurPartner />} />
           <Route path="/incident-heatMap" element={<IncidentHeatMap />} />
+          <Route path="/terms" element={<TermsAndConditions />} />
 
           {/* 🔒User Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
@@ -100,7 +105,7 @@ const AppContent = () => {
           {/* Catch-All 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </div>
+      </SiteLayout>
     </>
   );
 };

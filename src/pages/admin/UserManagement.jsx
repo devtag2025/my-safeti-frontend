@@ -212,7 +212,7 @@ const UserManagement = () => {
               </SelectContent>
             </Select>
 
-            <Button onClick={openCreateModal} className="md:w-auto w-full">
+            <Button onClick={openCreateModal} className="md:w-auto bg-indigo-600 w-full">
               <Plus className="w-4 h-4 mr-2" />
               Create User
             </Button>
@@ -263,12 +263,12 @@ const UserManagement = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap capitalize">
                       <Badge className={getRoleBadgeColor(user.role)}>
                         {user.role}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap capitalize">
                       <Badge className={getStatusBadgeColor(user.status)}>
                         {user.status}
                       </Badge>
