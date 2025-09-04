@@ -29,9 +29,14 @@ import ScrollToTop from "./components/layout/ScrollToTop";
 import { Toaster } from "react-hot-toast";
 import SiteLayout from "./components/layout/SiteLayout";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import { useRoleVerification } from "./hooks/useRoleVerification";
 
 const AppContent = () => {
   const location = useLocation();
+  
+  // Initialize role verification
+  useRoleVerification();
+  
   const hideNavbarRoutes = [
     "/",
     "/login",
@@ -44,7 +49,7 @@ const AppContent = () => {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
     !hideNavbarRoutes.includes(location.pathname) && !isAdminRoute;
-    const noPaddingRoutes = [
+  const noPaddingRoutes = [
     "/login",
     "/signup",
     "/home",

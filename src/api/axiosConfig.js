@@ -9,6 +9,7 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 // Request Interceptor: Attach Token
@@ -18,9 +19,11 @@ API.interceptors.request.use(
       return config;
     }
      
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    const csrfToken = localStorage.getItem("csrfToken");
+    const method = (config.method || "get").toLowerCase();
+    const isStateChanging = ["post", "put", "patch", "delete"].includes(method);
+    if (isStateChanging && csrfToken) {
+      config.headers["X-CSRF-Token"] = csrfToken;
     }
     return config;
   },
@@ -35,15 +38,34 @@ API.interceptors.response.use(
     const message = error.response?.data?.message || error.response?.data?.error || error.message || "Something went wrong";
 
     if (status === 401) {
-      // Logout user if token is invalid/expired
-      useAuthStore.getState().logout();
-      localStorage.removeItem("token");
-      window.location.href = "/login"; // Redirect to login
-      toast.error("Session expired. Please log in again.");
+      // Try refresh once
+      if (!error.config.__isRetryRequest) {
+        error.config.__isRetryRequest = true;
+        return API.post("/auth/refresh", {}, { withCredentials: true })
+          .then(() => API.request(error.config))
+          .catch(() => {
+            useAuthStore.getState().verifyRole().then((isValid) => {
+              if (!isValid) {
+                useAuthStore.getState().logout();
+                toast.error("Session expired. Please log in again.");
+                window.location.href = "/login";
+              }
+            });
+          });
+      }
+      
+      useAuthStore.getState().verifyRole().then((isValid) => {
+        if (!isValid) {
+          useAuthStore.getState().logout();
+          toast.error("Session expired. Please log in again.");
+          window.location.href = "/login";
+        }
+      });
+    } else if (status === 403) {
+      useAuthStore.getState().verifyRole();
+      toast.error(message || "Access denied. Your role may have changed.");
     } else if (status === 400) {
       toast.error(message || "Bad request");
-    } else if (status === 403) {
-      toast.error(message || "Forbidden");
     } else if (status === 404) {
       toast.error(message || "Not found");
     } else if (status >= 500) {

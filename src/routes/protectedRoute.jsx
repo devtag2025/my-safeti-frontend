@@ -1,12 +1,61 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import useAuthStore from "../store/authStore";
 
 const ProtectedRoute = ({ allowedRoles }) => {
-  const user = useAuthStore((state) => state.user);
-  const role = user?.role || "guest";
+  const { user, isRoleVerified, verifyRole, loading } = useAuthStore();
+  const [isVerifying, setIsVerifying] = useState(true);
+  const location = useLocation();
 
-  if (!user) return <Navigate to="/login" replace />;
-  if (!allowedRoles.includes(role)) return <Navigate to="/" replace />;
+  useEffect(() => {
+    const verifyUserRole = async () => {
+      if (user && !isRoleVerified) {
+        setIsVerifying(true);
+        await verifyRole();
+        setIsVerifying(false);
+      } else {
+        setIsVerifying(false);
+      }
+    };
+
+    verifyUserRole();
+  }, [user, isRoleVerified, verifyRole]);
+
+  if (loading || isVerifying) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  if (!isRoleVerified) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+
+  const hasAccess = allowedRoles.some(role => {
+    if (role === "super-admin") return user.role === "super-admin";
+    if (role === "admin") return user.role === "admin" || user.role === "super-admin";
+    if (role === "client") return user.role === "client" || user.role === "admin" || user.role === "super-admin";
+    if (role === "user") return user.role === "user" || user.role === "client" || user.role === "admin" || user.role === "super-admin";
+    return false;
+  });
+
+  if (!hasAccess) {
+    const roleRoutes = {
+      "super-admin": "/admin",
+      "admin": "/admin",
+      "client": "/client",
+      "user": "/user"
+    };
+    
+    const redirectPath = roleRoutes[user.role] || "/";
+    return <Navigate to={redirectPath} replace />;
+  }
 
   return <Outlet />;
 };

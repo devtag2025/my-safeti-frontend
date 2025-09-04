@@ -1,8 +1,7 @@
 import API from "./axiosConfig";
 
-// Save token & user in localStorage
-const saveUserSession = (user, token) => {
-  localStorage.setItem("token", token);
+const saveUserSession = (user, csrfToken) => {
+  if (csrfToken) localStorage.setItem("csrfToken", csrfToken);
   localStorage.setItem("user", JSON.stringify(user));
 };
 
@@ -14,7 +13,7 @@ const clearUserSession = () => {
 };
 
 export const loginUser = async (credentials) => {
-  const response = await API.post("/auth/login", credentials);
+  const response = await API.post("/auth/login", credentials, { withCredentials: true });
   const user = response.data.user;
 
   if (user.role === "client") {
@@ -28,21 +27,19 @@ export const loginUser = async (credentials) => {
     }
   }
 
-  saveUserSession(user, response.data.token);
+  saveUserSession(user, response.data.csrfToken);
   return user;
 };
 
-// Signup API
 export const signupUser = async (userData) => {
   try {
-    const response = await API.post("/auth/register", userData);
+    const response = await API.post("/auth/register", userData, { withCredentials: true });
 
-    // Ensure response contains expected data
-    if (!response.data.user || !response.data.token) {
+    if (!response.data.user) {
       throw new Error("Invalid response from server");
     }
 
-    saveUserSession(response.data.user, response.data.token);
+    saveUserSession(response.data.user, response.data.csrfToken);
     return response.data.user;
   } catch (error) {
     console.error("Signup Error:", error.response?.data || error.message);
@@ -51,7 +48,7 @@ export const signupUser = async (userData) => {
 };
 
 
-// Logout (clear session)
 export const logoutUser = () => {
   clearUserSession();
+  return API.post("/auth/logout", {}, { withCredentials: true });
 };
