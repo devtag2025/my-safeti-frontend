@@ -37,13 +37,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  const hasAccess = allowedRoles.some(role => {
-    if (role === "super-admin") return user.role === "super-admin";
-    if (role === "admin") return user.role === "admin" || user.role === "super-admin";
-    if (role === "client") return user.role === "client" || user.role === "admin" || user.role === "super-admin";
-    if (role === "user") return user.role === "user" || user.role === "client" || user.role === "admin" || user.role === "super-admin";
-    return false;
-  });
+  const hasAccess = allowedRoles.includes(user.role);
 
   if (!hasAccess) {
     const roleRoutes = {
