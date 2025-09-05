@@ -61,10 +61,10 @@ const HomeNavbar = () => {
     <nav className={`bg-white fixed w-full z-50 transition-all duration-300 ${
       isScrolled ? "border-b border-gray-200 shadow-sm" : ""
     }`}>
-      <div className="container mx-auto flex justify-between items-center px-4 py-3">
+      <div className="container mx-auto flex justify-between items-center px-4">
         {/* Logo */}
         <Link to="/" className="transition-transform hover:scale-105">
-          <img src="/images/bg.png" className="h-16" alt="Logo" />
+          <img src="/images/bg.png" className="h-24" alt="Logo" />
         </Link>
 
         {/* Desktop Navigation */}
