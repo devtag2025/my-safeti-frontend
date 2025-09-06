@@ -25,6 +25,7 @@ import {
   MessagesSquare,
   Trash2,
   Loader2,
+  Pencil,
 } from "lucide-react";
 import {
   getAllReports,
@@ -46,6 +47,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import EditReportForm from "../../components/forms/EditReportForm";
 
 const ReportModeration = () => {
   const [reports, setReports] = useState([]);
@@ -73,6 +75,8 @@ const ReportModeration = () => {
   const [originalEmailBody, setOriginalEmailBody] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [reportToEdit, setReportToEdit] = useState(null);
 
   const openCommentModal = (report) => {
     setCommentReport(report);
@@ -132,23 +136,39 @@ const ReportModeration = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        setIsLoading(true);
-        const reportsData = await getAllReports();
-        setReports(reportsData);
-        setFilteredReports(reportsData);
-      } catch (error) {
-        console.error("Error fetching reports:", error);
-        setError("Failed to load reports. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchReports = async () => {
+    try {
+      setIsLoading(true);
+      const reportsData = await getAllReports();
+      setReports(reportsData);
+      setFilteredReports(reportsData);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      setError("Failed to load reports. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReports();
   }, []);
+
+  const openEditModal = (report) => {
+    setReportToEdit(report);
+    setIsEditOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditOpen(false);
+    setReportToEdit(null);
+  };
+
+  const handleEditSuccess = async () => {
+    await fetchReports();
+    toast.success("Report updated");
+    closeEditModal();
+  };
 
   useEffect(() => {
     if (!reports.length) return;
@@ -799,6 +819,13 @@ const ReportModeration = () => {
                         View
                       </button>
                       <button
+                        onClick={() => openEditModal(report)}
+                        className="cursor-pointer inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Edit
+                      </button>
+                      <button
                         onClick={() =>
                           handleApproveReport(report._id, report.userId)
                         }
@@ -929,11 +956,18 @@ const ReportModeration = () => {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
+                          onClick={() => openEditModal(report)}
+                          className="text-indigo-600 hover:text-indigo-900 cursor-pointer ml-2"
+                          title="Edit"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => PDFExport.downloadReportAsPDF(report)}
                           className="text-indigo-600 hover:text-indigo-900 cursor-pointer ml-2"
                           title="Download PDF"
                         >
-                          <FileText className="h-3 w-3" />
+                          <FileText className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() =>
@@ -1889,6 +1923,37 @@ const ReportModeration = () => {
                 >
                   Close
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditOpen && reportToEdit && (
+        <div
+          className="fixed z-50 inset-0 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div
+              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+              aria-hidden="true"
+              onClick={closeEditModal}
+            />
+            <span
+              className="hidden sm:inline-block sm:align-middle sm:h-screen"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+              <div className="bg-white">
+                <EditReportForm
+                  reportToEdit={reportToEdit}
+                  onSuccess={handleEditSuccess}
+                  onCancel={closeEditModal}
+                />
               </div>
             </div>
           </div>
