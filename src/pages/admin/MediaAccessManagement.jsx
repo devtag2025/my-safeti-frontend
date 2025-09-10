@@ -11,6 +11,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import axios from "axios";
 import API from "../../api/axiosConfig";
@@ -56,6 +57,10 @@ const MediaAccessManagement = () => {
   const MAX_FILES = 5;
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
   const [deletingId, setDeletingId] = useState(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState(null);
 
   // Add this function to handle opening the media viewer
   const openMediaViewer = (mediaUrls) => {
@@ -80,6 +85,26 @@ const MediaAccessManagement = () => {
     };
     fetchMediaRequests();
   }, []);
+
+  const openPaymentModal = async (request) => {
+    setIsPaymentModalOpen(true);
+    setPaymentDetails(null);
+    setPaymentError(null);
+    setIsPaymentLoading(true);
+
+    try {
+      const response = await API.get(
+        `/media-requests/${request._id}/payment-details`
+      );
+      setPaymentDetails(response.data);
+    } catch (err) {
+      setPaymentError(
+        err.response?.data?.message || "Failed to load payment details"
+      );
+    } finally {
+      setIsPaymentLoading(false);
+    }
+  };
 
   // Handle request status change
   const handleStatusChange = async (requestId, newStatus) => {
@@ -405,6 +430,14 @@ const MediaAccessManagement = () => {
                         title="View request details"
                       >
                         <Eye className="w-5 h-5" />
+                      </button>
+
+                      <button
+                        onClick={() => openPaymentModal(request)}
+                        className="text-amber-600 hover:text-amber-900 bg-amber-50 p-1 rounded-full"
+                        title="Payment details (uploader)"
+                      >
+                        <CreditCard className="w-5 h-5" />
                       </button>
 
                       {request.status === "uploaded" &&
@@ -943,6 +976,59 @@ const MediaAccessManagement = () => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Payment Details Modal */}
+      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Payment Details</DialogTitle>
+            <DialogDescription>
+              Bank details of the uploader for this media request.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {isPaymentLoading && (
+              <div className="text-sm text-gray-600">
+                Loading payment details…
+              </div>
+            )}
+            {paymentError && (
+              <div className="text-sm text-red-600">{paymentError}</div>
+            )}
+
+            {!isPaymentLoading && !paymentError && paymentDetails && (
+              <div className="bg-gray-50 p-3 rounded-md text-sm text-gray-800">
+                <div className="mb-2">
+                  <span className="text-gray-500">Account Name:</span>{" "}
+                  <span className="font-medium">
+                    {paymentDetails.accountName}
+                  </span>
+                </div>
+                <div className="mb-2">
+                  <span className="text-gray-500">BSB:</span>{" "}
+                  <span className="font-medium">{paymentDetails.bsb}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500">Account Number:</span>{" "}
+                  <span className="font-medium">
+                    {paymentDetails.accountNumber}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsPaymentModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -30,6 +30,8 @@ import { Toaster } from "react-hot-toast";
 import SiteLayout from "./components/layout/SiteLayout";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import { useRoleVerification } from "./hooks/useRoleVerification";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const AppContent = () => {
   const location = useLocation();
@@ -45,6 +47,8 @@ const AppContent = () => {
     "/our-partners",
     "/incident-heatMap",
     "/terms",
+    "/forgot-password",
+    "/reset-password/:token",
   ];
   const isAdminRoute = location.pathname.startsWith("/admin");
   const shouldShowNavbar =
@@ -56,6 +60,8 @@ const AppContent = () => {
     "/incident-heatMap",
     "/our-partners",
     "/terms",
+    "/forgot-password",
+    "/reset-password/:token",
   ];
   const shouldApplyPadding =
     !noPaddingRoutes.includes(location.pathname) && !isAdminRoute;
@@ -75,6 +81,8 @@ const AppContent = () => {
           <Route path="/our-partners" element={<OurPartner />} />
           <Route path="/incident-heatMap" element={<IncidentHeatMap />} />
           <Route path="/terms" element={<TermsAndConditions />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* 🔒User Protected Routes */}
           <Route element={<ProtectedRoute allowedRoles={["user"]} />}>
