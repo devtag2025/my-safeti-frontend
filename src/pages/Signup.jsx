@@ -7,6 +7,7 @@ import useAuthStore from "../store/authStore";
 // Import shadcn components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Card,
   CardContent,
@@ -223,9 +224,8 @@ const Signup = () => {
               <Label htmlFor="password" className="text-sm">
                 Password
               </Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 {...register("password", {
                   required: "Password is required",
                   minLength: {

@@ -5,6 +5,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 import useAuthStore from "../store/authStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Card,
   CardContent,
@@ -170,10 +171,9 @@ const Login = () => {
                   Forgot password?
                 </Link>
               </div>
-              <Input
+              <PasswordInput
                 id="password"
                 name="password"
-                type="password"
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}

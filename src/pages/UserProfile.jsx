@@ -20,6 +20,7 @@ import { toast } from "react-hot-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -315,10 +316,9 @@ const UserProfile = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="oldPassword">Current Password</Label>
-                    <Input
+                    <PasswordInput
                       id="oldPassword"
                       name="oldPassword"
-                      type="password"
                       value={formData.oldPassword}
                       onChange={handleChange}
                       placeholder="Enter your current password"
@@ -327,10 +327,9 @@ const UserProfile = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
-                    <Input
+                    <PasswordInput
                       id="newPassword"
                       name="newPassword"
-                      type="password"
                       value={formData.newPassword}
                       onChange={handleChange}
                       placeholder="Enter a new password (optional)"
