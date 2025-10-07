@@ -64,44 +64,42 @@ const ForgotPassword = () => {
     }
   };
 
+  // ✅ Success Screen
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-8">
         {/* Logo Section */}
         <div className="mb-8">
-          <div className="relative h-24 w-64 mx-auto overflow-hidden">
+          <div className="relative h-24 w-64 mx-auto overflow-hidden cursor-pointer" onClick={() => navigate("/home")}>
             <img
-              src="/images/bg.png"
+              src="/images/logo.png"
               alt="Company Logo"
-              onClick={() => navigate("/home")}
-              className="absolute inset-0 w-full h-auto cursor-pointer"
+              className="absolute inset-0 w-full h-auto"
               style={{
-                transform: "scale(1.5)",
-                transformOrigin: "center center",
-                filter: "none",
+                transform: "scale(1.45)",
+                filter: "drop-shadow(0 6px 20px rgba(110,0,1,0.3))",
               }}
             />
           </div>
         </div>
 
-        {/* Success Card */}
-        <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
+        <Card className="w-full max-w-md mx-auto bg-white/90 backdrop-blur-md shadow-xl rounded-2xl border border-[#6e0001]/20">
           <CardHeader className="space-y-1 text-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 mx-auto mb-4 shadow-md">
+              <CheckCircle className="h-8 w-8 text-emerald-600" />
             </div>
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-2xl font-bold text-[#6e0001]">
               Reset Link Sent
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               Please check your email for the password reset link.
             </CardDescription>
           </CardHeader>
 
           <CardContent>
-            <Alert className="bg-green-50 border-green-200">
-              <Mail className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-700">
+            <Alert className="bg-emerald-50 border-emerald-200">
+              <Mail className="h-4 w-4 text-emerald-600" />
+              <AlertDescription className="text-emerald-700">
                 We've sent a password reset link to <strong>{email}</strong>
               </AlertDescription>
             </Alert>
@@ -109,7 +107,10 @@ const ForgotPassword = () => {
 
           <CardFooter className="flex justify-center">
             <Link to="/login" className="w-full">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full border-[#6e0001] text-[#6e0001] hover:bg-[#6e0001] hover:text-white rounded-xl"
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Login
               </Button>
@@ -120,40 +121,38 @@ const ForgotPassword = () => {
     );
   }
 
+  // ✅ Forgot Password Form
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white px-4 py-8">
       {/* Logo Section */}
       <div className="mb-8">
-        <div className="relative h-24 w-64 mx-auto overflow-hidden">
+        <div className="relative h-24 w-64 mx-auto overflow-hidden cursor-pointer" onClick={() => navigate("/home")}>
           <img
-            src="/images/bg.png"
+            src="/images/logo.png"
             alt="Company Logo"
-            onClick={() => navigate("/home")}
-            className="absolute inset-0 w-full h-auto cursor-pointer"
+            className="absolute inset-0 w-full h-auto"
             style={{
-              transform: "scale(1.5)",
-              transformOrigin: "center center",
-              filter: "none",
+              transform: "scale(1.45)",
+              filter: "drop-shadow(0 6px 20px rgba(110,0,1,0.3))",
             }}
           />
         </div>
       </div>
 
-      {/* Forgot Password Card */}
-      <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
+      <Card className="w-full max-w-md mx-auto bg-white/90 backdrop-blur-md shadow-xl rounded-2xl border border-[#6e0001]/20">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+          <CardTitle className="text-2xl font-bold text-center text-[#6e0001]">
             Forgot Password?
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-gray-600">
             Enter your email address to get a reset link
           </CardDescription>
         </CardHeader>
 
         <CardContent>
           {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertCircle className="h-4 w-4" />
+            <Alert variant="destructive" className="mb-4 bg-rose-50 border-rose-200 text-rose-700">
+              <AlertCircle className="h-4 w-4 text-rose-600" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
@@ -161,7 +160,9 @@ const ForgotPassword = () => {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                Email Address
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -174,13 +175,18 @@ const ForgotPassword = () => {
                 })}
                 placeholder="name@example.com"
                 disabled={isLoading}
+                className="h-10 border-gray-300 focus:border-[#6e0001] focus:ring-[#6e0001] rounded-xl"
               />
               {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+                <p className="text-sm text-rose-600">{errors.email.message}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full h-10 rounded-xl bg-gradient-to-r from-[#6e0001] to-[#8a0000] text-white hover:opacity-90 shadow-md transition"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -197,11 +203,11 @@ const ForgotPassword = () => {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-600">
             Remember your password?{" "}
             <Link
               to="/login"
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-[#6e0001] hover:underline"
             >
               Back to Login
             </Link>

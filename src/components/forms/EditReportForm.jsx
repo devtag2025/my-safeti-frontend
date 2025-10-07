@@ -788,7 +788,7 @@ export default function EditReportForm({ reportToEdit, onSuccess, onCancel }) {
                   className="ml-2 block text-sm font-medium text-gray-900"
                 >
                   I confirm I can provide the footage via the upload section if
-                  requested by SafeStreet
+                  requested by My Safeti
                 </label>
               </div>
 
@@ -807,7 +807,7 @@ export default function EditReportForm({ reportToEdit, onSuccess, onCancel }) {
                   htmlFor="acceptTerms"
                   className="ml-2 block text-sm font-medium text-gray-900"
                 >
-                  I confirm I accept the terms and conditions of SafeStreet and
+                  I confirm I accept the terms and conditions of My Safeti and
                   understand that my name, phone number and email may be
                   provided to external companies and/or law enforcement agencies
                   if the footage is requested.

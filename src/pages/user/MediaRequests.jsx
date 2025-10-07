@@ -40,6 +40,9 @@ import {
   savePaymentDetails,
 } from "../../api/paymentDetailsService";
 
+const CRIMSON = "#6e0001";
+const CRIMSON_LIGHT = "#8a0000";
+
 const MediaRequests = () => {
   const { mediaRequests, fetchUserRequests, uploadMedia } =
     useMediaRequestStore();
@@ -144,7 +147,7 @@ const MediaRequests = () => {
         }
       }, 100);
     } catch (error) {
-      console.error("Error uploading media:", error.message);
+      console.error("Error uploading media:", error?.message || error);
       setFileErrors(["Failed to upload media. Please try again."]);
     } finally {
       setIsUploading(false);
@@ -186,22 +189,21 @@ const MediaRequests = () => {
     switch (status) {
       case "pending":
         return (
-          // <Badge
-          //   variant="outline"
-          //   className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1"
-          // >
-          //   <Clock className="h-3 w-3" />
-          //   Pending
-          // </Badge>
-          <div></div>
+          <Badge
+            variant="outline"
+            className="bg-yellow-50 text-yellow-700 border-yellow-200 flex items-center gap-1"
+          >
+            <Clock className="h-3 w-3" />
+            Pending
+          </Badge>
         );
       case "uploaded":
         return (
           <Badge
             variant="outline"
-            className="bg-blue-50 text-blue-700 border-blue-200 flex items-center gap-1"
+            className="bg-slate-50 text-gray-800 border-slate-200 flex items-center gap-1"
           >
-            <CheckCircle className="h-3 w-3" />
+            <CheckCircle className="h-3 w-3 text-[${CRIMSON}]" />
             Submitted
           </Badge>
         );
@@ -209,9 +211,14 @@ const MediaRequests = () => {
         return (
           <Badge
             variant="outline"
-            className="bg-red-50 text-red-700 border-red-200 flex items-center gap-1"
+            className="flex items-center gap-1"
+            style={{
+              background: "rgba(110,0,1,0.06)",
+              color: CRIMSON,
+              borderColor: "rgba(110,0,1,0.12)",
+            }}
           >
-            <XCircle className="h-3 w-3" />
+            <XCircle className="h-3 w-3" style={{ color: CRIMSON }} />
             Rejected
           </Badge>
         );
@@ -236,9 +243,9 @@ const MediaRequests = () => {
 
   const getFileIcon = (file) => {
     if (file.type.startsWith("image/")) {
-      return <Image className="h-4 w-4 text-blue-500" />;
+      return <Image className="h-4 w-4 text-[rgba(110,0,1,0.9)]" />;
     } else if (file.type.startsWith("video/")) {
-      return <Film className="h-4 w-4 text-purple-500" />;
+      return <Film className="h-4 w-4 text-[rgba(110,0,1,0.9)]" />;
     } else {
       return <File className="h-4 w-4 text-gray-500" />;
     }
@@ -255,121 +262,147 @@ const MediaRequests = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-white text-gray-900 min-h-screen">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Media Requests</h1>
-        <p className="text-gray-500 mt-2">
+        <h1
+          className="text-3xl font-bold"
+          style={{
+            background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
+          Media Requests
+        </h1>
+        <p className="text-gray-600 mt-2">
           Upload dashcam footage and other evidence for your reports
         </p>
       </div>
 
       {mediaRequests.length === 0 ? (
-        <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <FileText className="h-8 w-8 text-gray-400" />
+        <div
+          className="text-center py-16 rounded-lg border"
+          style={{ background: "#fff", borderColor: "rgba(15,23,42,0.04)" }}
+        >
+          <div className="mx-auto w-16 h-16 bg-[#fff5f5] rounded-full flex items-center justify-center mb-4">
+            <FileText className="h-8 w-8" style={{ color: CRIMSON }} />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             No Media Requests
           </h3>
-          <p className="text-gray-500 max-w-md mx-auto">
+          <p className="text-gray-600 max-w-md mx-auto">
             You don't have any pending media requests. When law enforcement or
             insurance companies request dashcam footage, they'll appear here.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {mediaRequests
-            .map((request) => (
-              <Card
-                key={request._id}
-                className={`overflow-hidden transition-all duration-200 hover:shadow-md ${
-                  request.status === "rejected" ? "border-red-200" : ""
-                }`}
-              >
-                <CardHeader className="p-4 pb-2">
-                  <div className="flex items-center justify-between">
-                    {getStatusBadge(request.status)}
-                    <p className="text-xs text-gray-500">
-                      Requested on {formatDate(request.createdAt)}
-                    </p>
-                  </div>
-                  <CardTitle className="text-lg mt-2">
-                    {request.report.incidentType} Report
-                  </CardTitle>
-                  <CardDescription>
-                    {formatDate(request.report.date)}
-                  </CardDescription>
-                </CardHeader>
+          {mediaRequests.map((request) => (
+            <Card
+              key={request._id}
+              className={`overflow-hidden transition-all duration-200`}
+              style={{
+                background: "white",
+                borderColor:
+                  request.status === "rejected"
+                    ? "rgba(110,0,1,0.12)"
+                    : "rgba(15,23,42,0.04)",
+                boxShadow: "0 8px 30px rgba(110,0,1,0.04)",
+              }}
+            >
+              <CardHeader className="p-4 pb-2">
+                <div className="flex items-center justify-between">
+                  {getStatusBadge(request.status)}
+                  <p className="text-xs text-gray-500">
+                    Requested on {formatDate(request.createdAt)}
+                  </p>
+                </div>
+                <CardTitle className="text-lg mt-2 text-gray-900">
+                  {request.report.incidentType} Report
+                </CardTitle>
+                <CardDescription className="text-gray-600">
+                  {formatDate(request.report.date)}
+                </CardDescription>
+              </CardHeader>
 
-                <CardContent className="p-4 pb-0">
-                  <div className="space-y-3">
-                    {request.requestedBy && (
-                      <div className="flex items-start text-sm mt-3">
-                        <User className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
-                        <div>
-                          <p className="text-gray-500">Requested By</p>
-                          <p className="font-medium text-gray-900 capitalize">
-                            {request.requestedBy[0].fullName || "Unknown"}
-                            <span className="font-normal text-gray-500 ml-1">
-                              ({request.requestedBy[0].role})
-                            </span>
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {request.requestedBy.email}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    <div className="flex items-start text-sm">
-                      <MapPin className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
+              <CardContent className="p-4 pb-0">
+                <div className="space-y-3">
+                  {request.requestedBy && (
+                    <div className="flex items-start text-sm mt-3">
+                      <User className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
                       <div>
-                        <p className="text-gray-500">Location</p>
-                        <p className="font-medium text-gray-900">
-                          {request.report.location}
+                        <p className="text-gray-500">Requested By</p>
+                        <p className="font-medium text-gray-900 capitalize">
+                          {request.requestedBy[0].fullName || "Unknown"}
+                          <span className="font-normal text-gray-500 ml-1">
+                            ({request.requestedBy[0].role})
+                          </span>
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {request.requestedBy.email}
                         </p>
                       </div>
                     </div>
-                  </div>
-
-                  {request.status === "rejected" && (
-                    <Alert className="mt-4 bg-red-50 border-red-200 text-red-700">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Previous upload was rejected. Please upload new media.
-                      </AlertDescription>
-                    </Alert>
                   )}
-                </CardContent>
-
-                <CardFooter className="p-4 flex">
-                  {request.status === "approved" ? (
-                    <div className="w-full bg-green-50 text-green-700 rounded-md p-3 text-sm flex items-center">
-                      <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <span>Media submitted & approved successfully</span>
+                  <div className="flex items-start text-sm">
+                    <MapPin className="h-4 w-4 mr-2 mt-0.5 text-gray-500 flex-shrink-0" />
+                    <div>
+                      <p className="text-gray-500">Location</p>
+                      <p className="font-medium text-gray-900">
+                        {request.report.location}
+                      </p>
                     </div>
-                  ) : request.mediaUrls && request.mediaUrls.length > 0 ? (
-                    <Button
-                      className="w-full"
-                      onClick={() => handleOpenDialog(request)}
-                      variant="outline"
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Replace Uploaded Media
-                    </Button>
-                  ) : (
-                    <Button
-                      className="w-full"
-                      onClick={() => handleOpenDialog(request)}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      {request.status === "rejected"
-                        ? "Upload New Media"
-                        : "Upload Media"}
-                    </Button>
-                  )}
-                </CardFooter>
-              </Card>
-            ))}
+                  </div>
+                </div>
+
+                {request.status === "rejected" && (
+                  <Alert className="mt-4" style={{ background: "rgba(110,0,1,0.06)", borderColor: "rgba(110,0,1,0.12)", color: CRIMSON }}>
+                    <AlertCircle className="h-4 w-4" style={{ color: CRIMSON }} />
+                    <AlertDescription>
+                      Previous upload was rejected. Please upload new media.
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </CardContent>
+
+              <CardFooter className="p-4 flex">
+                {request.status === "approved" ? (
+                  <div className="w-full bg-white rounded-md p-3 text-sm flex items-center" style={{ border: "1px solid rgba(15,23,42,0.04)" }}>
+                    <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: CRIMSON }} />
+                    <span>Media submitted & approved successfully</span>
+                  </div>
+                ) : request.mediaUrls && request.mediaUrls.length > 0 ? (
+                  <Button
+                    className="w-full"
+                    onClick={() => handleOpenDialog(request)}
+                    variant="outline"
+                    style={{
+                      borderColor: `rgba(110,0,1,0.12)`,
+                      color: CRIMSON,
+                    }}
+                  >
+                    <Upload className="h-4 w-4 mr-2" style={{ color: CRIMSON }} />
+                    Replace Uploaded Media
+                  </Button>
+                ) : (
+                  <Button
+                    className="w-full"
+                    onClick={() => handleOpenDialog(request)}
+                    style={{
+                      background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+                      color: "#fff",
+                    }}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {request.status === "rejected"
+                      ? "Upload New Media"
+                      : "Upload Media"}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          ))}
         </div>
       )}
 
@@ -378,7 +411,7 @@ const MediaRequests = () => {
         <DialogContent className="sm:max-w-md w-[90vw]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Upload className="h-5 w-5 text-indigo-600" />
+              <Upload className="h-5 w-5" style={{ color: CRIMSON }} />
               Upload Evidence
             </DialogTitle>
             <DialogDescription>
@@ -387,8 +420,8 @@ const MediaRequests = () => {
           </DialogHeader>
 
           {selectedRequest && (
-            <div className="bg-gray-50 rounded-md p-3 text-sm space-y-1">
-              <p className="font-medium text-gray-700">
+            <div className="bg-white rounded-md p-3 text-sm space-y-1 border" style={{ borderColor: "rgba(15,23,42,0.04)" }}>
+              <p className="font-medium text-gray-900">
                 {selectedRequest.report.incidentType} on{" "}
                 {formatDate(selectedRequest.report.date)}
               </p>
@@ -420,10 +453,11 @@ const MediaRequests = () => {
           {!isUploading ? (
             <div
               onClick={() => document.getElementById("uploadFiles").click()}
-              className="bg-white border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+              className="bg-white border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+              style={{ borderColor: "rgba(110,0,1,0.08)" }}
             >
-              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-gray-700">
+              <Upload className="h-8 w-8 mx-auto mb-2" style={{ color: CRIMSON }} />
+              <p className="text-sm font-medium text-gray-900">
                 Click to upload or drag and drop
               </p>
               <p className="text-xs text-gray-500 mt-1">
@@ -444,28 +478,35 @@ const MediaRequests = () => {
           ) : (
             <div className="p-6 space-y-4">
               <div className="text-center">
-                <p className="text-sm font-medium text-gray-700 mb-2">
+                <p className="text-sm font-medium text-gray-900 mb-2">
                   Uploading files...
                 </p>
-                <Progress value={uploadProgress} className="h-2 w-full" />
-                <p className="text-xs text-gray-500 mt-2">
-                  {Math.round(uploadProgress)}% complete
-                </p>
+                <div style={{ height: 8 }} className="w-full rounded overflow-hidden bg-gray-100">
+                  <div
+                    style={{
+                      width: `${uploadProgress}%`,
+                      background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+                      height: "100%",
+                      transition: "width 250ms linear",
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-2">{Math.round(uploadProgress)}% complete</p>
               </div>
             </div>
           )}
 
           {/* Selected files list */}
           {files.length > 0 && !isUploading && (
-            <div className="border rounded-md overflow-hidden">
-              <div className="p-2 bg-gray-50 border-b text-xs font-medium text-gray-700">
+            <div className="border rounded-md overflow-hidden mt-4" style={{ borderColor: "rgba(15,23,42,0.04)" }}>
+              <div className="p-2 bg-white border-b text-xs font-medium text-gray-900" style={{ borderColor: "rgba(15,23,42,0.04)" }}>
                 Selected Files ({files.length})
               </div>
-              <div className="max-h-60 overflow-y-auto p-2 space-y-2">
+              <div className="max-h-60 overflow-y-auto p-2 space-y-2 bg-white">
                 {files.map((file, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between bg-gray-50 p-2 rounded text-sm"
+                    className="flex items-center justify-between bg-white p-2 rounded text-sm"
                   >
                     <div className="flex items-center gap-2 overflow-hidden">
                       {getFileIcon(file)}
@@ -488,7 +529,7 @@ const MediaRequests = () => {
 
           {/* Error messages */}
           {fileErrors.length > 0 && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="mt-4">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 <ul className="list-disc pl-5 space-y-1 text-sm">
@@ -505,23 +546,30 @@ const MediaRequests = () => {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={isUploading}
+              style={{ borderColor: "rgba(15,23,42,0.04)" }}
             >
               Cancel
             </Button>
             <Button
               onClick={handleUpload}
               disabled={isUploading || files.length === 0}
+              style={{
+                background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+                color: "#fff",
+              }}
             >
               {isUploading ? "Uploading..." : "Upload"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
       <PaymentDetailsDialog
         isOpen={showPaymentDialog}
         onOpenChange={setShowPaymentDialog}
         onPaymentSubmit={handlePaymentSubmit}
         isSubmitting={isSubmittingPayment}
+        // keep dialog's look separate, dialog receives isOpen/onOpenChange etc.
       />
     </div>
   );

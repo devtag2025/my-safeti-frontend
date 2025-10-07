@@ -27,6 +27,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import PaymentDetailsDialog from "./user/PaymentDetailsDialog";
 
+const CRIMSON = "#6e0001";
+const CRIMSON_LIGHT = "#8a0000";
+
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -148,7 +151,8 @@ const UserProfile = () => {
       case "pending":
         return "bg-yellow-100 text-yellow-800";
       case "rejected":
-        return "bg-red-100 text-red-800";
+        // use crimson-ish look for rejected badge border/text
+        return ""; // we'll style rejected badge inline where used
       default:
         return "bg-gray-100 text-gray-800";
     }
@@ -157,11 +161,17 @@ const UserProfile = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
-        <Card>
+        <Card
+          style={{
+            background: "#ffffff",
+            border: "1px solid rgba(110,0,1,0.06)",
+            boxShadow: "0 10px 30px rgba(110,0,1,0.04)",
+          }}
+        >
           <CardContent className="flex items-center justify-center h-64">
             <div className="flex items-center space-x-2">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
-              <span className="text-gray-600">Loading user details...</span>
+              <Loader2 className="h-6 w-6 animate-spin" style={{ color: CRIMSON }} />
+              <span className="text-gray-700">Loading user details...</span>
             </div>
           </CardContent>
         </Card>
@@ -170,38 +180,73 @@ const UserProfile = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="container mx-auto px-4 py-8 max-w-2xl bg-white text-gray-900">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold text-gray-900">User Profile</h2>
-        <p className="text-gray-600 mt-1">
-          Manage your account settings and preferences
-        </p>
+        <h2
+          className="text-3xl font-bold"
+          style={{
+            background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+            WebkitBackgroundClip: "text",
+            backgroundClip: "text",
+            color: "transparent",
+          }}
+        >
+          User Profile
+        </h2>
+        <p className="text-gray-600 mt-1">Manage your account settings and preferences</p>
       </div>
 
       {error && (
-        <Alert className="mb-6" variant="destructive">
+        <Alert
+          className="mb-6"
+          style={{
+            background: "rgba(110,0,1,0.06)",
+            borderColor: "rgba(110,0,1,0.12)",
+            color: CRIMSON,
+          }}
+          variant="destructive"
+        >
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
       {/* Main Profile Card */}
-      <Card className="mb-6">
+      <Card
+        className="mb-6"
+        style={{
+          background: "#fff",
+          border: "1px solid rgba(110,0,1,0.06)",
+          boxShadow: "0 8px 30px rgba(110,0,1,0.04)",
+        }}
+      >
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <User className="w-6 h-6 text-blue-600" />
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center"
+                style={{ background: "linear-gradient(180deg, rgba(110,0,1,0.06), rgba(138,0,0,0.04))" }}
+              >
+                <User className="w-6 h-6" style={{ color: CRIMSON }} />
               </div>
               <div>
-                <CardTitle className="text-2xl">{user?.fullName}</CardTitle>
+                <CardTitle className="text-2xl" style={{ color: "#0f172a" }}>
+                  {user?.fullName}
+                </CardTitle>
                 <p className="text-gray-600">
                   Member since {new Date(user?.createdAt).toLocaleDateString()}
                 </p>
               </div>
             </div>
             {!editMode && (
-              <Button onClick={() => setEditMode(true)} variant="outline">
-                <Edit2 className="w-4 h-4 mr-2" />
+              <Button
+                onClick={() => setEditMode(true)}
+                variant="outline"
+                style={{
+                  borderColor: `rgba(110,0,1,0.12)`,
+                  color: CRIMSON,
+                }}
+              >
+                <Edit2 className="w-4 h-4 mr-2" style={{ color: CRIMSON }} />
                 Edit Profile
               </Button>
             )}
@@ -213,61 +258,68 @@ const UserProfile = () => {
             <>
               <div className="grid gap-4">
                 <div className="flex items-center gap-3">
-                  <Mail className="w-5 h-5 text-gray-500" />
+                  <Mail className="w-5 h-5" style={{ color: "#7a7a7a" }} />
                   <div>
-                    <Label className="text-sm text-gray-500">
-                      Email Address
-                    </Label>
+                    <Label className="text-sm text-gray-500">Email Address</Label>
                     <p className="text-base font-medium">{user?.email}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Shield className="w-5 h-5 text-gray-500" />
+                  <Shield className="w-5 h-5" style={{ color: "#7a7a7a" }} />
                   <div>
                     <Label className="text-sm text-gray-500">Role</Label>
-                    <p className="text-base font-medium capitalize">
-                      {user?.role}
-                    </p>
+                    <p className="text-base font-medium capitalize">{user?.role}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <CalendarCheck className="w-5 h-5 text-gray-500" />
+                  <CalendarCheck className="w-5 h-5" style={{ color: "#7a7a7a" }} />
                   <div>
-                    <Label className="text-sm text-gray-500">
-                      Account Status
-                    </Label>
+                    <Label className="text-sm text-gray-500">Account Status</Label>
                     <div className="mt-1">
-                      <Badge className={getStatusColor(user?.approvalStatus)}>
-                        {user?.approvalStatus?.charAt(0).toUpperCase() +
-                          user?.approvalStatus?.slice(1)}
-                      </Badge>
+                      {user?.approvalStatus === "rejected" ? (
+                        <Badge
+                          style={{
+                            background: "rgba(110,0,1,0.06)",
+                            color: CRIMSON,
+                            borderColor: "rgba(110,0,1,0.12)",
+                          }}
+                        >
+                          {user?.approvalStatus?.charAt(0).toUpperCase() +
+                            user?.approvalStatus?.slice(1)}
+                        </Badge>
+                      ) : (
+                        <Badge className={getStatusColor(user?.approvalStatus)}>
+                          {user?.approvalStatus?.charAt(0).toUpperCase() +
+                            user?.approvalStatus?.slice(1)}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Payment Details Button - Only show for users */}
                 {user?.role === "user" && (
                   <>
                     <Separator className="my-4" />
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <CreditCard className="w-4 h-4 text-gray-500" />
-                        <Label className="text-sm font-medium">
-                          Payment Details
-                        </Label>
+                        <CreditCard className="w-4 h-4" style={{ color: "#6b7280" }} />
+                        <Label className="text-sm font-medium">Payment Details</Label>
                       </div>
                       <Button
                         type="button"
                         variant="outline"
                         onClick={() => setShowPaymentDialog(true)}
                         className="w-full"
+                        style={{
+                          borderColor: `rgba(110,0,1,0.12)`,
+                          color: CRIMSON,
+                        }}
                       >
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        {payment
-                          ? "View / Update Payment Details"
-                          : "Add Payment Details"}
+                        <CreditCard className="w-4 h-4 mr-2" style={{ color: CRIMSON }} />
+                        {payment ? "View / Update Payment Details" : "Add Payment Details"}
                       </Button>
                     </div>
                   </>
@@ -287,6 +339,10 @@ const UserProfile = () => {
                     onChange={handleChange}
                     required
                     placeholder="Enter your full name"
+                    style={{
+                      background: "#fff",
+                      borderColor: "rgba(110,0,1,0.06)",
+                    }}
                   />
                 </div>
 
@@ -301,6 +357,11 @@ const UserProfile = () => {
                     required
                     disabled
                     placeholder="Enter your email address"
+                    style={{
+                      background: "#fff",
+                      borderColor: "rgba(110,0,1,0.06)",
+                      color: "#374151",
+                    }}
                   />
                 </div>
 
@@ -308,10 +369,8 @@ const UserProfile = () => {
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <Key className="w-4 h-4 text-gray-500" />
-                    <Label className="text-sm font-medium">
-                      Change Password
-                    </Label>
+                    <Key className="w-4 h-4" style={{ color: "#6b7280" }} />
+                    <Label className="text-sm font-medium">Change Password</Label>
                   </div>
 
                   <div className="space-y-2">
@@ -322,6 +381,10 @@ const UserProfile = () => {
                       value={formData.oldPassword}
                       onChange={handleChange}
                       placeholder="Enter your current password"
+                      style={{
+                        background: "#fff",
+                        borderColor: "rgba(110,0,1,0.06)",
+                      }}
                     />
                   </div>
 
@@ -333,13 +396,25 @@ const UserProfile = () => {
                       value={formData.newPassword}
                       onChange={handleChange}
                       placeholder="Enter a new password (optional)"
+                      style={{
+                        background: "#fff",
+                        borderColor: "rgba(110,0,1,0.06)",
+                      }}
                     />
                   </div>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4">
-                <Button type="submit" disabled={updating} className="flex-1">
+                <Button
+                  type="submit"
+                  disabled={updating}
+                  className="flex-1"
+                  style={{
+                    background: `linear-gradient(90deg, ${CRIMSON}, ${CRIMSON_LIGHT})`,
+                    color: "#fff",
+                  }}
+                >
                   {updating ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -357,6 +432,7 @@ const UserProfile = () => {
                   variant="outline"
                   onClick={handleCancel}
                   className="flex-1"
+                  style={{ borderColor: "rgba(110,0,1,0.12)", color: CRIMSON }}
                 >
                   <X className="w-4 h-4 mr-2" />
                   Cancel
@@ -374,6 +450,7 @@ const UserProfile = () => {
         onPaymentSubmit={handlePaymentSubmit}
         isSubmitting={isSubmittingPayment}
         existingPaymentDetails={payment}
+        // You can style the dialog contents inside PaymentDetailsDialog to match crimson theme
       />
     </div>
   );

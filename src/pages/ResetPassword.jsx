@@ -48,21 +48,13 @@ const ResetPassword = () => {
         setIsValidToken(false);
         return;
       }
-
       try {
-        const response = await API.post("/auth/verify-reset-token", {
-          token,
-        });
-
-        if (!response.data.success) {
-          setIsValidToken(false);
-        }
-      } catch (error) {
-        console.error("Token verification error:", error);
+        const response = await API.post("/auth/verify-reset-token", { token });
+        if (!response.data.success) setIsValidToken(false);
+      } catch {
         setIsValidToken(false);
       }
     };
-
     verifyToken();
   }, [token]);
 
@@ -70,7 +62,6 @@ const ResetPassword = () => {
     try {
       setIsLoading(true);
       setError("");
-
       const response = await API.post("/auth/reset-password", {
         token,
         password: data.password,
@@ -89,42 +80,35 @@ const ResetPassword = () => {
         err.response?.data?.message || "Failed to reset password.";
       setError(errorMessage);
       toast.error(errorMessage);
-      console.error("Reset password error:", err);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ------------------- Invalid Token -------------------
   if (!isValidToken) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        {/* Logo Section */}
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
         <div className="mb-8">
-          <div className="relative h-24 w-64 mx-auto overflow-hidden">
-            <img
-              src="/images/bg.png"
-              alt="Company Logo"
-              onClick={() => navigate("/home")}
-              className="absolute inset-0 w-full h-auto cursor-pointer"
-              style={{
-                transform: "scale(1.5)",
-                transformOrigin: "center center",
-                filter: "none",
-              }}
-            />
-          </div>
+          <img
+            src="/images/logo.png"
+            alt="Company Logo"
+            onClick={() => navigate("/home")}
+            className="h-20 w-auto mx-auto cursor-pointer"
+          />
         </div>
 
         {/* Invalid Token Card */}
-        <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mx-auto mb-4">
+        <Card className="w-full max-w-md bg-white shadow-xl rounded-2xl border border-gray-100">
+          <CardHeader className="text-center space-y-3">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-red-100 mx-auto">
               <AlertTriangle className="h-8 w-8 text-red-600" />
             </div>
-            <CardTitle className="text-2xl font-bold text-red-600">
+            <CardTitle className="text-2xl font-bold text-[#6e0001]">
               Invalid Reset Link
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-600">
               Your reset link is invalid or has expired
             </CardDescription>
           </CardHeader>
@@ -134,18 +118,22 @@ const ResetPassword = () => {
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
-                Your reset link is invalid or has expired. Please request a new
-                one.
+                Please request a new password reset link.
               </AlertDescription>
             </Alert>
           </CardContent>
 
           <CardFooter className="flex flex-col space-y-2">
             <Link to="/forgot-password" className="w-full">
-              <Button className="w-full">Request New Reset Link</Button>
+              <Button className="w-full bg-[#6e0001] hover:bg-[#8a0000] text-white rounded-xl">
+                Request New Reset Link
+              </Button>
             </Link>
             <Link to="/login" className="w-full">
-              <Button variant="outline" className="w-full">
+              <Button
+                variant="outline"
+                className="w-full border-[#6e0001] text-[#6e0001] hover:bg-[#6e0001]/10 rounded-xl"
+              >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Login
               </Button>
@@ -156,43 +144,39 @@ const ResetPassword = () => {
     );
   }
 
+  // ------------------- Success -------------------
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        {/* Logo Section */}
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+        {/* Logo */}
         <div className="mb-8">
-          <div className="relative h-24 w-64 mx-auto overflow-hidden">
-            <img
-              src="/images/bg.png"
-              alt="Company Logo"
-              onClick={() => navigate("/home")}
-              className="absolute inset-0 w-full h-auto cursor-pointer"
-              style={{
-                transform: "scale(1.5)",
-                transformOrigin: "center center",
-                filter: "none",
-              }}
-            />
-          </div>
+          <img
+            src="/images/logo.png"
+            alt="Company Logo"
+            onClick={() => navigate("/home")}
+            className="h-20 w-auto mx-auto cursor-pointer"
+          />
         </div>
 
         {/* Success Card */}
-        <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mx-auto mb-4">
+        <Card className="w-full max-w-md bg-white shadow-xl rounded-2xl border border-gray-100">
+          <CardHeader className="text-center space-y-3">
+            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mx-auto">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-2xl font-bold text-[#6e0001]">
               Password Reset Successfully!
             </CardTitle>
-            <CardDescription>
-              Your password has been updated. You can now log in with your new
-              password.
+            <CardDescription className="text-gray-600">
+              You can now log in with your new password.
             </CardDescription>
           </CardHeader>
 
           <CardFooter className="flex justify-center">
-            <Button className="w-full" onClick={() => navigate("/login")}>
+            <Button
+              className="w-full bg-[#6e0001] hover:bg-[#8a0000] text-white rounded-xl"
+              onClick={() => navigate("/login")}
+            >
               Continue to Login
             </Button>
           </CardFooter>
@@ -201,32 +185,26 @@ const ResetPassword = () => {
     );
   }
 
+  // ------------------- Default Form -------------------
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      {/* Logo Section */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-white py-12 px-4 sm:px-6 lg:px-8">
+      {/* Logo */}
       <div className="mb-8">
-        <div className="relative h-24 w-64 mx-auto overflow-hidden">
-          <img
-            src="/images/bg.png"
-            alt="Company Logo"
-            onClick={() => navigate("/home")}
-            className="absolute inset-0 w-full h-auto cursor-pointer"
-            style={{
-              transform: "scale(1.5)",
-              transformOrigin: "center center",
-              filter: "none",
-            }}
-          />
-        </div>
+        <img
+          src="/images/logo.png"
+          alt="Company Logo"
+          onClick={() => navigate("/home")}
+          className="h-20 w-auto mx-auto cursor-pointer"
+        />
       </div>
 
       {/* Reset Password Card */}
-      <Card className="w-full max-w-md mx-auto bg-white shadow-xl">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+      <Card className="w-full max-w-md bg-white shadow-xl rounded-2xl border border-gray-100">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-2xl font-bold text-[#6e0001]">
             Reset Password
           </CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-gray-600">
             Enter your new password below
           </CardDescription>
         </CardHeader>
@@ -241,7 +219,7 @@ const ResetPassword = () => {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Password field */}
+            {/* Password */}
             <div className="space-y-2">
               <Label htmlFor="password">New Password</Label>
               <PasswordInput
@@ -253,13 +231,11 @@ const ResetPassword = () => {
                 disabled={isLoading}
               />
               {errors.password && (
-                <p className="text-sm text-red-500">
-                  {errors.password.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.password.message}</p>
               )}
             </div>
 
-            {/* Confirm password field */}
+            {/* Confirm Password */}
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm New Password</Label>
               <PasswordInput
@@ -279,7 +255,11 @@ const ResetPassword = () => {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-[#6e0001] hover:bg-[#8a0000] text-white rounded-xl"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -296,11 +276,11 @@ const ResetPassword = () => {
         </CardContent>
 
         <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-600">
             Remember your password?{" "}
             <Link
               to="/login"
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-[#6e0001] hover:underline"
             >
               Back to Login
             </Link>
