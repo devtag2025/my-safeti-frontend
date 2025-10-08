@@ -35,7 +35,7 @@ function clearRefreshState() {
 
 // Create Axios instance with base config
 const API = axios.create({
-  baseURL: "https://api.safestreet.com.au/api",
+  baseURL: "https://api.mysafeti.com/api",
   // baseURL: "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json",
