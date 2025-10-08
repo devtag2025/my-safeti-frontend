@@ -26,7 +26,7 @@ const Login = () => {
   const [captchaToken, setCaptchaToken] = useState(null);
   const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_TEST_KEY;
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleCaptchaChange = (token) => {
