@@ -83,7 +83,7 @@ const FAQSection = () => {
     },
     {
       q: "Is my personal information kept private?",
-      a: `Yes — personal information is kept private. We only share anonymized report details with verified partners (e.g. insurers) and comply with Australian privacy laws. We never publish your personal contact details to the reported driver.`,
+      a: `Yes — personal information is kept private. We only share anonymized report details with verified partners (e.g. insurers) and comply with UAEn privacy laws. We never publish your personal contact details to the reported driver.`,
     },
     {
       q: "How do I receive payment for my media submissions?",

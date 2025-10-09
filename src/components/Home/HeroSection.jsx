@@ -43,10 +43,10 @@ const HeroSection = () => {
 
             {/* Description */}
             <p className="mt-6 text-lg text-gray-700 max-w-xl mx-auto lg:mx-0">
-              Use My Safeti.com.au to report dangerous, reckless or unsafe
+              Use My Safeti.com.ae to report dangerous, reckless or unsafe
               driving you have witnessed with just a few clicks. Your reports
               help contribute to improved road safety outcomes for all road
-              users across Australia.
+              users across UAE.
             </p>
 
             {/* CTA */}

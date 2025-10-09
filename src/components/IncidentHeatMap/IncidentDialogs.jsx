@@ -124,7 +124,7 @@ const IncidentDialogs = ({
                   <span className="text-sm">
                     {new Date(
                       selectedIncident.date
-                    ).toLocaleDateString("en-AU")}
+                    ).toLocaleDateString("en-AE")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -132,7 +132,7 @@ const IncidentDialogs = ({
                   <span className="text-sm">
                     {new Date(
                       selectedIncident.date
-                    ).toLocaleTimeString("en-AU", {
+                    ).toLocaleTimeString("en-AE", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}

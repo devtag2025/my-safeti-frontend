@@ -12,11 +12,11 @@ const StatisticsSection = ({ stats }) => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-[#6e0001]">
-            Making Australian Roads Safer
+            Making UAEn Roads Safer
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Our platform is driving meaningful change for road safety in
-            Australia.
+            UAE.
           </p>
           <div className="mt-3 h-1 w-24 bg-gradient-to-r from-[#6e0001] to-[#8a0000] mx-auto rounded-full"></div>
         </div>

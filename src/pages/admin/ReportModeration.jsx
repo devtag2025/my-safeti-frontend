@@ -483,11 +483,11 @@ const ReportModeration = () => {
 
       <p><strong>[ONEDRIVE_LINK]</strong></p>
 
-      <p>Please upload the <strong>full unedited footage</strong> of the incident. Once the footage is submitted, My Safeti AU will review it to confirm it matches the incident reported. The footage will then be provided to the requestor.</p>
+      <p>Please upload the <strong>full unedited footage</strong> of the incident. Once the footage is submitted, My Safeti AE will review it to confirm it matches the incident reported. The footage will then be provided to the requestor.</p>
 
       <p>Once the quality control process is completed, a payment will be processed to your nominated bank account.</p>
 
-      <p>If you have any questions, please contact us at <a href="mailto:admin@My Safeti.com.au">admin@My Safeti.com.au</a>.</p>
+      <p>If you have any questions, please contact us at <a href="mailto:admin@My Safeti.com.ae">admin@My Safeti.com.ae</a>.</p>
 
       <p>Important information to include with your upload:</p>
       <ul>

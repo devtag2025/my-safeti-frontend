@@ -7,7 +7,10 @@ import IncidentFilter from "../components/IncidentHeatMap/IncidentFilter";
 import HeatMapHeader from "../components/IncidentHeatMap/HeatMapHeader";
 import IncidentDialogs from "../components/IncidentHeatMap/IncidentDialogs";
 import HeatMapFooter from "../components/IncidentHeatMap/HeatMapFooter";
-import { LoadingState, ErrorState } from "../components/IncidentHeatMap/LoadingErrors";
+import {
+  LoadingState,
+  ErrorState,
+} from "../components/IncidentHeatMap/LoadingErrors";
 import { toast } from "react-hot-toast";
 
 const IncidentHeatMap = () => {
@@ -45,7 +48,7 @@ const IncidentHeatMap = () => {
   };
 
   const mapDefaultProps = {
-    center: { lat: -25.2744, lng: 133.7751 },
+    center: { lat: 23.61, lng: 52.69 },
     zoom: getResponsiveZoom(),
   };
 
@@ -54,8 +57,16 @@ const IncidentHeatMap = () => {
       { elementType: "geometry", stylers: [{ color: "#1e293b" }] },
       { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
       { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
-      { featureType: "road", elementType: "geometry", stylers: [{ color: "#334155" }] },
-      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
+      {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#334155" }],
+      },
+      {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#0f172a" }],
+      },
     ],
   };
 
@@ -66,28 +77,38 @@ const IncidentHeatMap = () => {
     if (incident.crossStreet) parts.push(`near ${incident.crossStreet}`);
     if (incident.suburb) parts.push(incident.suburb);
     if (incident.state) parts.push(incident.state);
-    parts.push("Australia");
+    parts.push("UAE");
     return parts.join(", ");
   };
 
   const geocodeAddress = async (addressString, geocoder) => {
     return new Promise((resolve) => {
-      geocoder.geocode({ address: addressString, region: "AU" }, (results, status) => {
-        if (status === "OK" && results && results.length > 0) {
-          const location = results[0].geometry.location;
-          resolve({ lat: location.lat(), lng: location.lng() });
-        } else {
-          console.error("Geocoding failed:", status, "for address:", addressString);
-          resolve(null);
+      geocoder.geocode(
+        { address: addressString, region: "AE" },
+        (results, status) => {
+          if (status === "OK" && results && results.length > 0) {
+            const location = results[0].geometry.location;
+            resolve({ lat: location.lat(), lng: location.lng() });
+          } else {
+            console.error(
+              "Geocoding failed:",
+              status,
+              "for address:",
+              addressString
+            );
+            resolve(null);
+          }
         }
-      });
+      );
     });
   };
 
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const response = await API.get("/report/reportsForHeatMap", { skipAuth: true });
+      const response = await API.get("/report/reportsForHeatMap", {
+        skipAuth: true,
+      });
       setIncidents(response.data);
 
       const counts = {};
@@ -109,14 +130,20 @@ const IncidentHeatMap = () => {
     if (!witnessInfo.trim() || !selectedIncident) return;
     try {
       setSubmittingWitness(true);
-      await API.post(`/report/witness/${selectedIncident._id}`, {
-        info: witnessInfo.trim(),
-        contactEmail: witnessEmail.trim() || null,
-      }, { skipAuth: true });
+      await API.post(
+        `/report/witness/${selectedIncident._id}`,
+        {
+          info: witnessInfo.trim(),
+          contactEmail: witnessEmail.trim() || null,
+        },
+        { skipAuth: true }
+      );
       setWitnessDialogOpen(false);
       setWitnessInfo("");
       setWitnessEmail("");
-      toast.success("Thank you! Your witness information has been submitted anonymously.");
+      toast.success(
+        "Thank you! Your witness information has been submitted anonymously."
+      );
     } catch (error) {
       console.error("Error submitting witness info:", error);
       toast.error("Failed to submit witness information. Please try again.");
@@ -137,7 +164,13 @@ const IncidentHeatMap = () => {
         const addressString = buildAddressString(incident);
         const coordinates = await geocodeAddress(addressString, geocoder);
         if (coordinates) {
-          geocoded.push({ ...incident, ...coordinates, addressString, color: incidentColors[incident.incidentType] || incidentColors["Other"] });
+          geocoded.push({
+            ...incident,
+            ...coordinates,
+            addressString,
+            color:
+              incidentColors[incident.incidentType] || incidentColors["Other"],
+          });
         }
       }
       setGeocodedIncidents(geocoded);
@@ -145,18 +178,28 @@ const IncidentHeatMap = () => {
     geocodeAllIncidents();
   }, [mapsApi, incidents]);
 
-  useEffect(() => { fetchIncidents(); }, []);
+  useEffect(() => {
+    fetchIncidents();
+  }, []);
 
-  const handleMarkerClick = (incident) => { setSelectedIncident(incident); setIncidentDialogOpen(true); };
+  const handleMarkerClick = (incident) => {
+    setSelectedIncident(incident);
+    setIncidentDialogOpen(true);
+  };
   const handleFilterChange = (newFilters) => {
     setActiveFilters(newFilters);
-    if (selectedIncident && !newFilters.includes(selectedIncident.incidentType)) {
+    if (
+      selectedIncident &&
+      !newFilters.includes(selectedIncident.incidentType)
+    ) {
       setSelectedIncident(null);
       setIncidentDialogOpen(false);
     }
   };
 
-  const filteredIncidents = geocodedIncidents.filter((incident) => activeFilters.includes(incident.incidentType));
+  const filteredIncidents = geocodedIncidents.filter((incident) =>
+    activeFilters.includes(incident.incidentType)
+  );
 
   if (loading) return <LoadingState />;
   if (error) return <ErrorState error={error} />;
@@ -196,7 +239,9 @@ const IncidentHeatMap = () => {
 
               <div className="relative w-full h-[600px] lg:h-[700px]">
                 <GoogleMapReact
-                  bootstrapURLKeys={{ key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY }}
+                  bootstrapURLKeys={{
+                    key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+                  }}
                   defaultCenter={mapDefaultProps.center}
                   defaultZoom={mapDefaultProps.zoom}
                   options={mapOptions}
