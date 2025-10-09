@@ -17,7 +17,7 @@ const MediaAccessManagement = ({ mediaRequests = [] }) => {
   };
 
   const formatDate = (dateString) =>
-    new Date(dateString).toLocaleDateString("en-AU", { year: "numeric", month: "short", day: "numeric" });
+    new Date(dateString).toLocaleDateString("en-AE", { year: "numeric", month: "short", day: "numeric" });
 
   return (
     <div className="rounded-lg shadow overflow-hidden" style={{ background: "#fff", border: "1px solid #ececec" }}>

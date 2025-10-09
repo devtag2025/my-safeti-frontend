@@ -1,8 +1,8 @@
 import React from "react";
 
 const IncidentMarker = ({ incident, color, onClick }) => {
-  const date = new Date(incident.date).toLocaleDateString("en-AU");
-  const time = new Date(incident.date).toLocaleTimeString("en-AU", {
+  const date = new Date(incident.date).toLocaleDateString("en-AE");
+  const time = new Date(incident.date).toLocaleTimeString("en-AE", {
     hour: "2-digit",
     minute: "2-digit",
   });

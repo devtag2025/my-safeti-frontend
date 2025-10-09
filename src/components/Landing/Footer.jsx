@@ -8,7 +8,7 @@ const Footer = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <p className="text-gray-500 text-sm text-center hover:text-[#6e0001] transition-colors duration-300">
-          © 2025 My Safeti.com.au. All rights reserved.
+          © 2025 My Safeti.com.ae. All rights reserved.
         </p>
       </div>
 

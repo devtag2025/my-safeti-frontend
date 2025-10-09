@@ -43,7 +43,7 @@ const TermsAndConditions = () => {
                 content: (
                   <ul className="space-y-2 text-[#111827]/80">
                     <li>
-                      <span className="font-semibold">"My Safeti" / "We" / "Us" / "Our"</span> – My Safeti AU Pty Ltd (ABN: [Insert ABN])
+                      <span className="font-semibold">"My Safeti" / "We" / "Us" / "Our"</span> – My Safeti AE Pty Ltd (ABN: [Insert ABN])
                     </li>
                     <li>
                       <span className="font-semibold">"User" / "You" / "Your"</span> – any individual who accesses, registers, or uses the Platform

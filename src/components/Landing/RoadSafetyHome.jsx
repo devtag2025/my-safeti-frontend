@@ -12,7 +12,7 @@ const RoadSafetyPanel = ({ deathStats }) => {
           className="relative hidden lg:flex w-full lg:w-1/2 bg-cover"
           style={{
             backgroundImage:
-              "url('https://www.tac.vic.gov.au/__data/assets/git_bridge/0019/313327/static/files/tac-stats.png')",
+              "url('https://www.tac.vic.gov.ae/__data/assets/git_bridge/0019/313327/static/files/tac-stats.png')",
             clipPath: "polygon(0 0, 100% 0, 65% 100%, 0 100%)",
           }}
         >
@@ -48,7 +48,7 @@ const RoadSafetyPanel = ({ deathStats }) => {
           className="relative flex lg:hidden w-full lg:w-1/2 bg-cover"
           style={{
             backgroundImage:
-              "url('https://www.tac.vic.gov.au/__data/assets/git_bridge/0019/313327/static/files/tac-stats.png')",
+              "url('https://www.tac.vic.gov.ae/__data/assets/git_bridge/0019/313327/static/files/tac-stats.png')",
           }}
         >
           <div
@@ -104,7 +104,7 @@ const RoadSafetyPanel = ({ deathStats }) => {
                 inevitable on our roads.
               </p>
               <a
-                href="https://www.tac.vic.gov.au/"
+                href="https://www.tac.vic.gov.ae/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center text-[#6e0001] hover:text-[#8a0000] font-bold text-sm uppercase tracking-wide pt-2 transition-all duration-300 group"

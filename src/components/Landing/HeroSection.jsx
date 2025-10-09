@@ -29,11 +29,11 @@ const HeroSection = () => {
               className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4 md:mb-6"
               style={{ color: CRIMSON }}
             >
-              Report unsafe driving — make Australian roads safer
+              Report unsafe driving — make UAEn roads safer
             </h1>
 
             <p className="text-base md:text-lg text-slate-700 mb-6 max-w-2xl">
-              My Safeti empowers everyday Australians to report at-risk driving
+              My Safeti empowers everyday UAEns to report at-risk driving
               behaviours and contribute to safer roads for everyone. Share what
               you see — help keep our communities safe.
             </p>
